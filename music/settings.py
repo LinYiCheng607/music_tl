@@ -142,7 +142,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 # STATIC_ROOT设置上线后使用的静态资源
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
