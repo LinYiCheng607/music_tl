@@ -14,10 +14,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include, re_path  # 从 django.urls 导入 re_path
-from index import views
+from django.urls import path, include
 from django.conf import settings
-from django.views import static
+from django.conf.urls.static import static
+
+from index import views
 
 handler404 = views.page_not_found
 handler500 = views.page_error
@@ -30,8 +31,12 @@ urlpatterns = [
     path('ranking/', include('ranking.urls')),
     path('search/', include('search.urls')),
     path('user/', include('user.urls')),
-    re_path(r'^static/(?P<path>.*)\$', static.serve, {'document_root': settings.STATIC_ROOT}, name='static')  # 使用 re_path 替换 url
 ]
+
+# 开发环境自动服务静态文件
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+
 
 # urlpatterns = [
 #     url(r'^static/(?P<path>.*)$', static.serve, {'document_root': settings.STATIC_ROOT}, name='static')
