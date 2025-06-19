@@ -3,7 +3,7 @@
 import os
 import sys
 
-#test
+
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'music.settings')
     try:
@@ -19,4 +19,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-#test3
+
