@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '-pab6$d(oz$5#mi3z_xvxok9ogh=1!p3*7%=2%_@tbvyho@***'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -98,8 +98,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'music_db',
         'USER': 'root',
-        'PASSWORD': '1111',
-        'HOST': '127.0.0.1',
+        'PASSWORD': '2111601205',
+        'HOST': 'localhost',
         'PORT': '3306',
     }
 }
@@ -142,7 +142,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 # STATIC_ROOT设置上线后使用的静态资源
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, '/static')]
-
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
+# 消除模型自动主键警告
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'user.MyUser'
