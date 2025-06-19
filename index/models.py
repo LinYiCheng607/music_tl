@@ -26,9 +26,9 @@ class Song(models.Model):
     song_languages = models.CharField('语种', max_length=20)
     song_type = models.CharField('类型', max_length=20)
     song_release = models.CharField('发行时间', max_length=20)
-    song_img = models.CharField('歌曲图片', max_length=20)
-    song_lyrics = models.CharField('歌词', max_length=50, default='暂无歌词')
-    song_file = models.CharField('歌曲文件', max_length=50)
+    song_img = models.FileField('歌曲图片', max_length=20)
+    song_lyrics = models.FileField('歌词', max_length=50, default='暂无歌词')
+    song_file = models.FileField('歌曲文件', max_length=50)
     label = models.ForeignKey(Label, on_delete=models.CASCADE)
 
     def __str__(self):
