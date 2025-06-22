@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  出错了 - 音乐推荐系统
+{% endblock %}
+
+{% block css %}
+<style>
+  .error-container {
+    padding: 40px 0;
+    text-align: center;
+  }
+  .error-message {
+    font-size: 18px;
+    color: #ff5252;
+    margin-bottom: 30px;
+  }
+  .recommend-title {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  .recommend-list {
+    margin-top: 20px;
+  }
+  .recommend-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  .recommend-item:hover {
+    background-color: #f9f9f9;
+  }
+  .back-home {
+    margin-top: 30px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="error-container">
+    <div class="error-message">
+      <i class="fa fa-exclamation-circle"></i> {{ error_message }}
+    </div>
+    
+    <div class="back-home">
+      <a href="{% url 'index' %}" class="btn btn-primary">
+        <i class="fa fa-home"></i> 返回首页
+      </a>
+    </div>
+    
+    {% if recommend_songs %}
+    <div class="recommend-section">
+      <h3 class="recommend-title">您可能喜欢这些歌曲：</h3>
+      <div class="recommend-list">
+        {% for song in recommend_songs %}
+        <div class="recommend-item">
+          <a href="{% url 'play' song.song_id %}">
+            {{ song.song_name }} - {{ song.song_singer }}
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %} 

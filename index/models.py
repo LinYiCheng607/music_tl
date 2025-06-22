@@ -19,16 +19,18 @@ class Label(models.Model):
 # 歌曲信息表
 class Song(models.Model):
     song_id = models.AutoField('序号', primary_key=True)
-    song_name = models.CharField('歌名', max_length=50)
-    song_singer = models.CharField('歌手', max_length=50)
+    song_name = models.CharField('歌名', max_length=200)
+    song_singer = models.CharField('歌手', max_length=100)
     song_time = models.CharField('时长', max_length=10)
-    song_album = models.CharField('专辑', max_length=50)
+    song_album = models.CharField('专辑', max_length=200)
     song_languages = models.CharField('语种', max_length=20)
     song_type = models.CharField('类型', max_length=20)
     song_release = models.CharField('发行时间', max_length=20)
-    song_img = models.FileField('歌曲图片', max_length=20)
-    song_lyrics = models.FileField('歌词', max_length=50, default='暂无歌词')
-    song_file = models.FileField('歌曲文件', max_length=50)
+    song_img = models.FileField('歌曲图片', upload_to='songImg', max_length=255)
+    song_img_url = models.URLField('图片链接', max_length=500, blank=True, null=True)
+    song_lyrics = models.FileField('歌词', upload_to='songLyric', max_length=255, default='暂无歌词')
+    lyrics_text = models.TextField('歌词内容', blank=True, null=True)
+    song_file = models.FileField('歌曲文件', upload_to='songFile', max_length=255)
     label = models.ForeignKey(Label, on_delete=models.CASCADE)
 
     def __str__(self):

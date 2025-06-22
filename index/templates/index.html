@@ -34,15 +34,14 @@
         </ul>
         <div class="category-nav">
             <div class="category-nav-header">
-                <strong><a href="javascript:;" title="">音乐分类</a></strong>
+                <strong><a href="javascript:;" title="">歌曲分类</a></strong>
             </div>
             <div class="category-nav-body">
                 <div id="J_CategoryItems" class="category-items">
-                {% for label in label_list  %}
-                    <div class="item" data-index="1"><h3>
-                        <a href="javascript:;">{{ label.label_name }}</a></h3>
-                    </div>
-                {% endfor  %}
+                    <div class="item" data-index="1"><h3><a href="javascript:;">华语</a></h3></div>
+                    <div class="item" data-index="2"><h3><a href="javascript:;">欧美</a></h3></div>
+                    <div class="item" data-index="3"><h3><a href="javascript:;">日本</a></h3></div>
+                    <div class="item" data-index="4"><h3><a href="javascript:;">韩国</a></h3></div>
                 </div>
             </div>
         </div>
@@ -53,10 +52,10 @@
 				<div id="bannerLeftBtn" class="banner_btn"></div>
 				<ul class="focus-list f_w">
                     <li class="f_s"><a target="play" href="{% url 'play' 12 %}" class="layz_load" >
-                        <img data-src="{% static '/image/datu-1.jpg' %}"  width="750" height="275"></a>
+                        <img data-src="{% static '/image/datu-1.jpg' %}" width="750" height="275"></a>
                     </li>
 					<li class="f_s"><a target="play" href="{% url 'play' 2 %}" class="layz_load" >
-                        <img data-src="{% static '/image/datu-2.jpg' %}"  width="750" height="275"></a>
+                        <img data-src="{% static '/image/datu-2.jpg' %}" width="750" height="275"></a>
                     </li>
 				</ul>
 				<div id="bannerRightBtn" class="banner_btn"></div>
@@ -88,7 +87,8 @@
                         <li>
                     {% endif  %}
                     <a class="pic layz_load pic_po" target="play" href="{% url 'play' list.song_id %}" >
-                        <img data-src="{% static "songImg/" %}{{ list.song_img }}"  ></a>
+                        <img data-src="{{ list.song_img_url }}" >
+                    </a>
                     <div class="name">
                         <h3><a target="play" href="{% url 'play' list.song_id %}" >{{ list.song_name }}</a></h3>
                         <div class="singer"><span>{{ list.song_singer }}</span></div>
@@ -116,7 +116,8 @@
                     {% for songs in list  %}
                     <li>
                         <a target="play" href="{% url 'play' songs.song.song_id %}" class="pic layz_load pic_po" >
-                            <img data-src="{% static "songImg/" %}{{ songs.song.song_img }}" ></a>
+                            <img data-src="{{ songs.song.song_img_url }}" >
+                        </a>
                         <h3><a target="play" href="{% url 'play' songs.song.song_id %}" >{{ songs.song.song_name }}</a></h3>
                         <div class="singer"><span>{{ songs.song.song_singer }}</span></div>
                         {% if all_ranking|first  == list %}

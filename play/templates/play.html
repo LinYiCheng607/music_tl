@@ -43,7 +43,13 @@
                 <div class="product-pics">
                     <div class="music_box">
                         <div id="jquery_jplayer_1" class="jp-jplayer" data-url={% static "songFile/" %}{{ song_info.song_file }}></div>
-                        <div class="jp_img layz_load pic_po" title="点击播放"><img data-src={% static "songImg/" %}{{ song_info.song_img }}></div>
+                        <div class="jp_img layz_load pic_po" title="点击播放">
+                            {% if song_info.song_img_url %}
+                                <img data-src="{{ song_info.song_img_url }}">
+                            {% else %}
+                                <img data-src={% static "songImg/" %}{{ song_info.song_img }}>
+                            {% endif %}
+                        </div>
                         <div id="jp_container_1" class="jp-audio">
                             <div class="jp-gui jp-interface">
                                 <div class="jp-time-holder clearfix">
@@ -153,7 +159,11 @@
                                     <li>
                                         {% if item.song.song_id != song_info.song_id %}
                                         <a class="pic layz_load pic_po" href="{% url 'play' item.song.song_id %}" target="play" >
-                                            <img data-src="{% static "songImg/" %}{{ item.song.song_img }}">
+                                            {% if item.song.song_img_url %}
+                                                <img data-src="{{ item.song.song_img_url }}">
+                                            {% else %}
+                                                <img data-src="{% static "songImg/" %}{{ item.song.song_img }}">
+                                            {% endif %}
                                         </a>
                                         <h4><a href="{% url 'play' item.song.song_id %}" target="play" >{{ item.song.song_name}}</a></h4>
                                         <a href="javascript:;" class="J_MoreParts accessories-more">{{ item.song.song_singer }}</a>

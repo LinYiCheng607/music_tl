@@ -39,23 +39,36 @@
   		<!-- 子类分类排行导航 -->
   		<div class="side-nav">
 			<div class="nav-head">
-				<a href="{% url 'ranking' %}">所有歌曲分类</a>
+				<a href="{% url 'ranking' %}">歌曲分类</a>
 			</div>
             <ul id="sideNav" class="cate-item">
-            {% for item in All_list  %}
-                <li class="computer">
-                <div class="main-cate">
-                    <a href="{% url 'ranking' %}?type={{ item.song_type }}" class="main-title">{{ item.song_type }}</a>
-                </div>
+                <li class="computer {% if song_type == '华语' %}active{% endif %}">
+                    <div class="main-cate">
+                        <a href="{% url 'ranking' %}?type=华语" class="main-title">华语</a>
+                    </div>
                 </li>
-            {% endfor  %}
+                <li class="computer {% if song_type == '欧美' %}active{% endif %}">
+                    <div class="main-cate">
+                        <a href="{% url 'ranking' %}?type=欧美" class="main-title">欧美</a>
+                    </div>
+                </li>
+                <li class="computer {% if song_type == '日本' %}active{% endif %}">
+                    <div class="main-cate">
+                        <a href="{% url 'ranking' %}?type=日本" class="main-title">日本</a>
+                    </div>
+                </li>
+                <li class="computer {% if song_type == '韩国' %}active{% endif %}">
+                    <div class="main-cate">
+                        <a href="{% url 'ranking' %}?type=韩国" class="main-title">韩国</a>
+                    </div>
+                </li>
             </ul>
         </div>
   	</div><!-- 左侧列表 end -->
 
 	<div class="main">
 		<div class="main-head-box clearfix">
-			<div class="main-head"><h1>歌曲排行榜</h1></div>
+			<div class="main-head"><h1>{{ song_type }}歌曲排行榜</h1></div>
 		</div>
 		<table class="rank-list-table">
 			<tr>
@@ -74,7 +87,13 @@
                     <td><span class="n2">{{forloop.counter}}</span></td>
                     {%endif %}
                     <td>
-                    <a href="{% url 'play' item.song.song_id %}"  class="pic" target="play"><img src="{% static "songImg/" %}{{ item.song.song_img }}"  width="80" height="80"></a>
+                    <a href="{% url 'play' item.song.song_id %}"  class="pic" target="play">
+                        {% if item.song.song_img_url %}
+                            <img src="{{ item.song.song_img_url }}" width="80" height="80">
+                        {% else %}
+                            <img src="{% static "songImg/" %}{{ item.song.song_img }}" width="80" height="80">
+                        {% endif %}
+                    </a>
                     </td>
                     <td class="name-cell">
                     <h3><a href="{% url 'play' item.song.song_id %}" target="play" >{{item.song.song_name}}</a></h3>
