@@ -4,21 +4,32 @@ import random
 import os
 from django.http import HttpResponse
 from django.conf import settings
+from django.db.models import Q
 # Create your views here.
 
 
 def indexview(request):
-    # 热搜歌曲
-    search_song = Dynamic.objects.select_related('song').order_by('-dynamic_search').all()[:12]
+    # 热搜歌曲 - 只显示有图片URL的歌曲
+    search_song = Dynamic.objects.select_related('song').filter(
+        ~Q(song__song_img_url='') & ~Q(song__song_img_url=None)
+    ).order_by('-dynamic_search').all()[:12]
     # 音乐分类
     label_list = Label.objects.all()
-    # 热门歌曲
-    play_hot_song = Dynamic.objects.select_related('song').order_by('-dynamic_plays').all()[10:20]
-    # 新歌推荐
-    daily_recommendation = Song.objects.order_by('-song_release').all()[:3]
-    # 热门搜索、热门下载
+    # 热门歌曲 - 只显示有图片URL的歌曲
+    play_hot_song = Dynamic.objects.select_related('song').filter(
+        ~Q(song__song_img_url='') & ~Q(song__song_img_url=None)
+    ).order_by('-dynamic_plays').all()[:20]
+    # 防止没有足够的歌曲，取前10个
+    play_hot_song = play_hot_song[0:min(10, len(play_hot_song))]
+    # 新歌推荐 - 只显示有图片URL的歌曲
+    daily_recommendation = Song.objects.filter(
+        ~Q(song_img_url='') & ~Q(song_img_url=None)
+    ).order_by('-song_release').all()[:3]
+    # 热门搜索、热门下载 - 只显示有图片URL的歌曲
     search_ranking = search_song[:12]
-    down_ranking = Dynamic.objects.select_related('song').order_by('-dynamic_down').all()[:12]
+    down_ranking = Dynamic.objects.select_related('song').filter(
+        ~Q(song__song_img_url='') & ~Q(song__song_img_url=None)
+    ).order_by('-dynamic_down').all()[:12]
     all_ranking = [search_ranking, down_ranking]
     return render(request, 'index.html', locals())
 
