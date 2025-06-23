@@ -99,7 +99,11 @@ DATABASES = {
         'NAME': 'music_db',
         'USER': 'root',
         'PASSWORD': '1111',
+<<<<<<< HEAD
         'HOST': '127.0.0.1',
+=======
+        'HOST': '10.22.182.40',
+>>>>>>> 424f95ecf220f8c47caa41dc36207b28cb8a1237
         'PORT': '3306',
     }
 }
@@ -149,3 +153,7 @@ STATICFILES_DIRS = [
 # 消除模型自动主键警告
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'user.MyUser'
+
+# 爬取数据保存路径
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
