@@ -42,12 +42,12 @@
             <div class="product-detail-box clearfix">
                 <div class="product-pics">
                     <div class="music_box">
-                        <div id="jquery_jplayer_1" class="jp-jplayer" data-url={% static "songFile/" %}{{ song_info.song_file }}></div>
+                        <div id="jquery_jplayer_1" class="jp-jplayer" data-url="{% static "songFile/" %}{{ song_file_name }}"></div>
                         <div class="jp_img layz_load pic_po" title="点击播放">
                             {% if song_info.song_img_url %}
                                 <img data-src="{{ song_info.song_img_url }}">
                             {% else %}
-                                <img data-src={% static "songImg/" %}{{ song_info.song_img }}>
+                                <img data-src="{% static "songImg/" %}{{ song_info.song_img }}">
                             {% endif %}
                         </div>
                         <div id="jp_container_1" class="jp-audio">

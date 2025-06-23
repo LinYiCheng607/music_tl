@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from index.models import *
 from django.http import StreamingHttpResponse
 import os
+import random
 
 # Create your views here.
 
@@ -23,6 +24,35 @@ def playview(request, song_id):
             'error_message': error_message,
             'recommend_songs': recommend_songs
         })
+    
+    # 获取所有可用的歌曲文件
+    song_file_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static', 'songFile')
+    available_song_files = []
+    if os.path.exists(song_file_dir):
+        available_song_files = [f for f in os.listdir(song_file_dir) if os.path.isfile(os.path.join(song_file_dir, f)) and f.endswith(('.mp3', '.m4a', '.ogg'))]
+    
+    # 处理歌曲文件路径
+    song_file_name = None
+    # 首先尝试使用song_id匹配文件（如果有）
+    song_id_files = [f for f in available_song_files if f.startswith(f"{song_id}.")]
+    if song_id_files:
+        song_file_name = song_id_files[0]
+    else:
+        # 然后尝试使用歌曲名称匹配文件（如果有）
+        song_name_files = [f for f in available_song_files if song_info.song_name in f]
+        if song_name_files:
+            song_file_name = song_name_files[0]
+        else:
+            # 如果找不到匹配的文件，检查数据库中的song_file是否有效
+            if hasattr(song_info.song_file, 'name') and song_info.song_file.name:
+                song_file_name = song_info.song_file.name
+                song_file_path = os.path.join(song_file_dir, song_file_name)
+                if not os.path.exists(song_file_path):
+                    # 如果数据库中的文件不存在，随机选择一个可用的文件
+                    song_file_name = random.choice(available_song_files) if available_song_files else "爱你.m4a"
+            else:
+                # 随机选择一个可用的文件
+                song_file_name = random.choice(available_song_files) if available_song_files else "爱你.m4a"
     
     # 播放列表
     play_list = request.session.get('play_list', [])
@@ -73,7 +103,9 @@ def playview(request, song_id):
         dynamic_info = Dynamic(dynamic_plays=1, dynamic_search=0, dynamic_down=0, song_id=song_id)
         dynamic_info.save()
     
-    return render(request, 'play.html', locals())
+    return render(request, 'play.html', {'search_song': search_song, 'song_info': song_info, 
+                                         'play_list': play_list, 'song_lyrics': song_lyrics, 
+                                         'song_relevant': song_relevant, 'song_file_name': song_file_name})
 
 
 def downloadview(request, song_id):
@@ -95,16 +127,40 @@ def downloadview(request, song_id):
         dynamic_info = Dynamic(dynamic_plays=0, dynamic_search=0, dynamic_down=1, song_id=song_id)
         dynamic_info.save()
     
-    # 使用默认的歌曲文件路径
-    file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                           'static', 'songFile', 'default.mp3')
+    # 获取所有可用的歌曲文件
+    song_file_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static', 'songFile')
+    available_song_files = []
+    if os.path.exists(song_file_dir):
+        available_song_files = [f for f in os.listdir(song_file_dir) if os.path.isfile(os.path.join(song_file_dir, f)) and f.endswith(('.mp3', '.m4a', '.ogg'))]
     
-    # 如果歌曲文件存在，则使用实际文件
-    if hasattr(song_info.song_file, 'name') and song_info.song_file.name:
-        real_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                                    'static', 'songFile', song_info.song_file.name)
-        if os.path.exists(real_file_path):
-            file_path = real_file_path
+    # 处理歌曲文件路径
+    song_file_name = None
+    file_path = None
+    
+    # 首先尝试使用song_id匹配文件（如果有）
+    song_id_files = [f for f in available_song_files if f.startswith(f"{song_id}.")]
+    if song_id_files:
+        song_file_name = song_id_files[0]
+        file_path = os.path.join(song_file_dir, song_file_name)
+    else:
+        # 然后尝试使用歌曲名称匹配文件（如果有）
+        song_name_files = [f for f in available_song_files if song_info.song_name in f]
+        if song_name_files:
+            song_file_name = song_name_files[0]
+            file_path = os.path.join(song_file_dir, song_file_name)
+        else:
+            # 如果找不到匹配的文件，检查数据库中的song_file是否有效
+            if hasattr(song_info.song_file, 'name') and song_info.song_file.name:
+                song_file_name = song_info.song_file.name
+                file_path = os.path.join(song_file_dir, song_file_name)
+                if not os.path.exists(file_path):
+                    # 如果数据库中的文件不存在，随机选择一个可用的文件
+                    song_file_name = random.choice(available_song_files) if available_song_files else "爱你.m4a"
+                    file_path = os.path.join(song_file_dir, song_file_name)
+            else:
+                # 随机选择一个可用的文件
+                song_file_name = random.choice(available_song_files) if available_song_files else "爱你.m4a"
+                file_path = os.path.join(song_file_dir, song_file_name)
 
     def file_iterator(file_path, chunk_size=512):
         with open(file_path, 'rb') as f:
@@ -116,7 +172,8 @@ def downloadview(request, song_id):
                     break
     
     # 将文件内容写入StreamingHttpResponse对象，并以字节流的方式返回给用户，实现文件下载
-    filename = str(song_id) + '.mp3'
+    file_extension = song_file_name.split('.')[-1] if '.' in song_file_name else 'm4a'
+    filename = f"{song_id}.{file_extension}"
     response = StreamingHttpResponse(file_iterator(file_path))
     response['Content-Type'] = 'application/octet-stream'
     response['Content-Disposition'] = 'attachment;filename="%s"' % filename
