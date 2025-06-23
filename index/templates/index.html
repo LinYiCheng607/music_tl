@@ -30,98 +30,85 @@
 
     /* 热门搜索/下载区样式 */
     /* 容器居中 */
-.section {
-    width: 80%; /* 设定一个合适的宽度，可以调整 */
-    margin: 0 auto; /* 自动左右边距居中 */
-}
+    .section {
+        width: 80%;
+        margin: 0 auto;
+    }
 
-/* 标签居中 */
-.tab-trigger {
-    display: flex;
-    justify-content: center; /* 水平居中 */
-    gap: 10px; /* 标签间距 */
-}
+    /* 标签居中 */
+    .tab-trigger {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
 
-/* 列表居中 */
-.tab-container-cell {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-}
+    /* 列表居中 */
+    .tab-container-cell {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
 
-/* 分页按钮居中 */
-.pagination-container {
-    display: flex;
-    justify-content: center; /* 水平居中 */
-    margin-top: 20px;
-}
+    /* 热门搜索和热门下载的列表统一样式 */
+    .product-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
 
-/* 每个分页按钮 */
-.pagination button {
-    margin: 0 5px; /* 按钮间距 */
-    padding: 5px 10px;
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    cursor: pointer;
-}
+    .product-list li {
+        width: calc(25% - 20px);
+        margin: 10px 0;
+        list-style: none;
+    }
 
-.pagination button.active {
-    background-color: #007bff;
-    color: white;
-}
-/* 热门搜索和热门下载的列表统一样式 */
-.product-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin: 0;
-    padding: 0;
-}
+    .product-list .pic img {
+        width: 100%;
+        height: auto;
+    }
 
-.product-list li {
-    width: 23%;
-    margin: 10px 0;
-    list-style: none;
-}
+    .product-list h3 {
+        font-size: 14px;
+        margin: 10px 0;
+        text-align: center;
+    }
 
-.product-list .pic img {
-    width: 100%;
-    height: auto;
-}
+    .product-list .singer, .product-list .times {
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+    }
 
-.product-list h3 {
-    font-size: 14px;
-    margin: 10px 0;
-    text-align: center;
-}
+    /* 分页按钮样式 */
+    .pagination button {
+        margin: 0 5px;
+        padding: 5px 10px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        cursor: pointer;
+    }
 
-.product-list .singer, .product-list .times {
-    text-align: center;
-    font-size: 12px;
-    color: #666;
-}
+    .pagination button.active {
+        background-color: #007bff;
+        color: white;
+    }
 
-/* 分页按钮样式 */
-.pagination button {
-    margin: 0 5px;
-    padding: 5px 10px;
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    cursor: pointer;
-}
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
 
-.pagination button.active {
-    background-color: #007bff;
-    color: white;
-}
-
-.pagination-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-}
-
+    /* 新增样式以确保内容正确显示 */
+    .product-list li {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+    }
 </style>
 </head>
 
@@ -234,78 +221,77 @@
 
     <!-- 热门搜索/下载区 -->
     <div class="section">
-    <ul id="J_Tab" class="tab-trigger">
-        <li data-cur="0" class="current t_c">热门搜索</li>
-        <li data-cur="1" class="t_c">热门下载</li>
-    </ul>
-    <div class="tab-container">
-        <div id="J_Tab_Con" class="tab-container-cell">
-            <!-- 热门搜索内容 -->
-            <ul class="product-list clearfix t_s" id="hot-search-list">
-                {% for dynamic in hot_search_pages %}
-                    <li>
-                        <a target="play" href="{% url 'play' dynamic.song.song_id %}" class="pic layz_load pic_po">
-                            {% if dynamic.song.song_img_url %}
-                                <img src="{{ dynamic.song.song_img_url }}">
-                            {% else %}
-                                <img src="{{ dynamic.song.song_img.url }}">
-                            {% endif %}
-                        </a>
-                        <h3><a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a></h3>
-                        <div class="singer"><span>{{ dynamic.song.song_singer }}</span></div>
-                        <div class="times">搜索次数：<span>{{ dynamic.dynamic_search }}</span></div>
-                    </li>
+        <ul id="J_Tab" class="tab-trigger">
+            <li data-cur="0" class="current t_c">热门搜索</li>
+            <li data-cur="1" class="t_c">热门下载</li>
+        </ul>
+        <div class="tab-container">
+            <div id="J_Tab_Con" class="tab-container-cell">
+                <!-- 热门搜索内容 -->
+                <ul class="product-list clearfix t_s">
+                    {% for dynamic in hot_search_pages %}
+                        <li>
+                            <a target="play" href="{% url 'play' dynamic.song.song_id %}" class="pic layz_load pic_po">
+                                {% if dynamic.song.song_img_url %}
+                                    <img src="{{ dynamic.song.song_img_url }}">
+                                {% else %}
+                                    <img src="{{ dynamic.song.song_img.url }}">
+                                {% endif %}
+                            </a>
+                            <h3><a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a></h3>
+                            <div class="singer"><span>{{ dynamic.song.song_singer }}</span></div>
+                            <div class="times">搜索次数：<span>{{ dynamic.dynamic_search }}</span></div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                
+                <!-- 热门下载内容 -->
+                <ul class="product-list clearfix t_s" style="display:none;">
+                    {% for dynamic in hot_download_pages %}
+                        <li>
+                            <a target="play" href="{% url 'play' dynamic.song.song_id %}" class="pic layz_load pic_po">
+                                {% if dynamic.song.song_img_url %}
+                                    <img src="{{ dynamic.song.song_img_url }}">
+                                {% else %}
+                                    <img src="{{ dynamic.song.song_img.url }}">
+                                {% endif %}
+                            </a>
+                            <h3><a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a></h3>
+                            <div class="singer"><span>{{ dynamic.song.song_singer }}</span></div>
+                            <div class="times">下载次数：<span>{{ dynamic.dynamic_down }}</span></div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- 分页按钮 -->
+        <div class="pagination-container">
+            <!-- 热门搜索分页 -->
+            {% if hot_search_pages.paginator.num_pages > 1 %}
+            <div class="pagination" id="hot-search-pagination">
+                {% for i in hot_search_pages.paginator.page_range %}
+                    <button onclick="changePage(0, {{ i }})" 
+                            {% if i == hot_search_pages.number %}class="active"{% endif %}>
+                        {{ i }}
+                    </button>
                 {% endfor %}
-            </ul>
+            </div>
+            {% endif %}
             
-            <!-- 热门下载内容 -->
-            <ul class="product-list clearfix t_s" id="hot-download-list" style="display:none;">
-                {% for dynamic in hot_download_pages %}
-                    <li>
-                        <a target="play" href="{% url 'play' dynamic.song.song_id %}" class="pic layz_load pic_po">
-                            {% if dynamic.song.song_img_url %}
-                                <img src="{{ dynamic.song.song_img_url }}">
-                            {% else %}
-                                <img src="{{ dynamic.song.song_img.url }}">
-                            {% endif %}
-                        </a>
-                        <h3><a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a></h3>
-                        <div class="singer"><span>{{ dynamic.song.song_singer }}</span></div>
-                        <div class="times">下载次数：<span>{{ dynamic.dynamic_down }}</span></div>
-                    </li>
+            <!-- 热门下载分页 -->
+            {% if hot_download_pages.paginator.num_pages > 1 %}
+            <div class="pagination" id="hot-download-pagination" style="display:none;">
+                {% for i in hot_download_pages.paginator.page_range %}
+                    <button onclick="changePage(1, {{ i }})" 
+                            {% if i == hot_download_pages.number %}class="active"{% endif %}>
+                        {{ i }}
+                    </button>
                 {% endfor %}
-            </ul>
+            </div>
+            {% endif %}
         </div>
     </div>
-
-    <!-- 分页按钮 -->
-    <div class="pagination-container">
-        <!-- 热门搜索分页 -->
-        {% if hot_search_pages.paginator.num_pages > 1 %}
-        <div class="pagination" id="hot-search-pagination">
-            {% for i in hot_search_pages.paginator.page_range %}
-                <button onclick="changePage(0, {{ i }})" 
-                        {% if i == hot_search_pages.number %}class="active"{% endif %}>
-                    {{ i }}
-                </button>
-            {% endfor %}
-        </div>
-        {% endif %}
-        
-        <!-- 热门下载分页 -->
-        {% if hot_download_pages.paginator.num_pages > 1 %}
-        <div class="pagination" id="hot-download-pagination" style="display:none;">
-            {% for i in hot_download_pages.paginator.page_range %}
-                <button onclick="changePage(1, {{ i }})" 
-                        {% if i == hot_download_pages.number %}class="active"{% endif %}>
-                    {{ i }}
-                </button>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </div>
-</div>
-
 
     <script data-main="{% static "js/index.js" %}" src="{% static "js/require.js" %}"></script>
     <script>

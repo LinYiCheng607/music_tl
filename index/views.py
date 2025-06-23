@@ -10,42 +10,43 @@ from django.db.models import Q
 # Create your views here.
 
 def indexview(request):
-    # 热搜歌曲 - 只显示有图片URL的歌曲
+    # 热搜歌曲 - 只显示有图片URL的歌曲，显示前120条
     search_song = Dynamic.objects.select_related('song').filter(
         ~Q(song__song_img_url='') & ~Q(song__song_img_url=None)
-    ).order_by('-dynamic_search').all()[:12]
-    
+    ).order_by('-dynamic_search').all()[:120]
+
     # 音乐分类
     label_list = Label.objects.all()
-    
-    # 热门歌曲 - 只显示有图片URL的歌曲
+
+    # 热门歌曲 - 只显示有图片URL的歌曲，显示前10条
     play_hot_song = Dynamic.objects.select_related('song').filter(
         ~Q(song__song_img_url='') & ~Q(song__song_img_url=None)
-    ).order_by('-dynamic_plays').all()[:20]
-    play_hot_song = play_hot_song[0:min(10, len(play_hot_song))]
-    
-    # 新歌推荐 - 只显示有图片URL的歌曲
+    ).order_by('-dynamic_plays').all()[:10]
+
+    # 新歌推荐 - 只显示有图片URL的歌曲，显示前3条
     daily_recommendation = Song.objects.filter(
         ~Q(song_img_url='') & ~Q(song_img_url=None)
     ).order_by('-song_release').all()[:3]
-    
-    # 热门搜索、热门下载 - 只显示有图片URL的歌曲
-    search_ranking = search_song[:12]
+
+    # 热门搜索 - 只显示有图片URL的歌曲，显示前120条
+    search_ranking = search_song[:120]
+
+    # 热门下载 - 只显示有图片URL的歌曲，显示前120条
     down_ranking = Dynamic.objects.select_related('song').filter(
         ~Q(song__song_img_url='') & ~Q(song__song_img_url=None)
-    ).order_by('-dynamic_down').all()[:12]
-    
+    ).order_by('-dynamic_down').all()[:120]
+
     # 分页逻辑
     # 热门搜索分页
-    paginator_search = Paginator(search_ranking, 8)  # 每页显示12个
+    paginator_search = Paginator(search_ranking, 12)  # 每页显示12个
     page_number_search = request.GET.get('page')
     hot_search_pages = paginator_search.get_page(page_number_search)
-    
+
     # 热门下载分页
-    paginator_down = Paginator(down_ranking, 8)
+    paginator_down = Paginator(down_ranking, 12)  # 每页显示12个
     page_number_down = request.GET.get('page2')
     hot_download_pages = paginator_down.get_page(page_number_down)
-    
+
     # 将分页对象传递给模板
     return render(request, 'index.html', {
         'search_song': search_song,
@@ -55,6 +56,8 @@ def indexview(request):
         'hot_search_pages': hot_search_pages,
         'hot_download_pages': hot_download_pages,
     })
+
+
 
 def random_image(request):
     """随机返回一张已下载的图片"""
