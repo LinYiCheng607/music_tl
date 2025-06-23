@@ -1,5 +1,5 @@
 require.config({
-　paths: {
+  paths: {
     "jquery": "jquery.min",
     "com": "common.min"
   }

@@ -33,11 +33,7 @@ urlpatterns = [
     path('user/', include('user.urls')),
 ]
 
-# 开发环境自动服务静态文件
+# 开发环境自动服务静态文件和媒体文件
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
-
-
-# urlpatterns = [
-#     url(r'^static/(?P<path>.*)$', static.serve, {'document_root': settings.STATIC_ROOT}, name='static')
-# ]
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
