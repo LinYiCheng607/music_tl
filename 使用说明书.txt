@@ -1,0 +1,97 @@
+# 音乐推荐系统使用说明书
+
+## 一、系统环境准备
+
+### 1. 安装必要的软件
+- Python 3.x
+- MySQL 5.7或更高版本
+- 安装依赖包：
+  ```
+  pip install django==2.2.x mysqlclient
+  ```
+
+### 2. 数据库配置
+- 在MySQL中创建名为`music_db`的数据库
+- 使用用户名`root`和密码`1111`（如需更改，请修改`music/settings.py`中的数据库配置）
+  ```sql
+  CREATE DATABASE music_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+  ```
+
+## 二、初始化项目
+
+### 1. 创建数据库表
+```
+python manage.py migrate
+```
+
+### 2. 创建超级管理员账户
+```
+python manage.py createsuperuser
+```
+按照提示输入用户名、邮箱和密码。
+
+### 3. 创建必要的媒体目录
+```
+python manage.py create_media_dirs
+```
+
+### 4. 创建歌曲分类标签
+```
+python manage.py create_label "流行"
+```
+执行后记录下创建的标签ID，导入歌曲时需要使用。
+
+## 三、导入数据
+
+### 1. 导入歌曲数据
+```
+python manage.py import_songs merged_songs.csv --label=1
+```
+
+### 2. 更新韩文歌曲歌词
+```
+python update_lyrics.py
+```
+
+### 3. 检查歌词是否导入成功
+```
+python check_missing_lyrics.py
+```
+
+## 四、运行系统
+
+### 1. 启动开发服务器
+```
+python manage.py runserver
+```
+
+### 2. 访问系统
+- 网站前台：http://127.0.0.1:8000/
+- 管理后台：http://127.0.0.1:8000/admin/（使用之前创建的超级管理员账户登录）
+
+## 五、可能出现的问题及解决方案
+
+### 1. 数据库连接错误
+检查MySQL是否启动，以及用户名和密码是否正确。如需修改数据库配置，请编辑`music/settings.py`文件中的DATABASES部分。
+
+### 2. 静态资源无法加载
+确保已经执行了`python manage.py collectstatic`命令收集静态资源。
+
+### 3. 歌曲无法播放
+检查media目录中是否存在对应的音频文件，如果没有，请将音频文件放入对应目录。
+
+### 4. 歌词显示异常
+使用`update_lyrics.py`脚本更新歌词，或在管理后台手动添加歌词。
+
+## 六、系统使用说明
+
+登录系统后，可以:
+- 浏览和搜索歌曲
+- 创建播放列表
+- 查看排行榜
+- 评论歌曲
+- 管理个人账户
+
+管理员可通过后台管理系统添加、修改和删除歌曲、用户和其他数据。
+
+祝您使用愉快！ 
