@@ -99,7 +99,7 @@ DATABASES = {
         'NAME': 'music_db',
         'USER': 'root',
         'PASSWORD': '1111',
-        'HOST': 'localhost',
+        'HOST': '10.22.182.40',
         'PORT': '3306',
     }
 }
