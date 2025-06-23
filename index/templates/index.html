@@ -8,7 +8,7 @@
 
 <body class="index">
 	<div class="header">
-		<a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo.png" %}"></a>
+		<a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo4.png" %}"></a>
 		<div class="search-box">
 	    <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
         {% csrf_token %}
@@ -52,10 +52,10 @@
 				<div id="bannerLeftBtn" class="banner_btn"></div>
 				<ul class="focus-list f_w">
                     <li class="f_s"><a target="play" href="{% url 'play' 6 %}" class="layz_load" >
-                        <img data-src="{% static '/image/datu-1.jpg' %}" width="750" height="275"></a>
+                        <img data-src="{% static "image/datu-1.jpg" %}" width="750" height="275"></a>
                     </li>
 					<li class="f_s"><a target="play" href="{% url 'play' 2 %}" class="layz_load" >
-                        <img data-src="{% static '/image/datu-2.jpg' %}" width="750" height="275"></a>
+                        <img data-src="{% static "image/datu-2.jpg" %}" width="750" height="275"></a>
                     </li>
 				</ul>
 				<div id="bannerRightBtn" class="banner_btn"></div>
@@ -87,7 +87,11 @@
                         <li>
                     {% endif  %}
                     <a class="pic layz_load pic_po" target="play" href="{% url 'play' list.song_id %}" >
-                        <img data-src="{{ list.song_img_url }}" >
+                        {% if list.song_img_url %}
+                            <img data-src="{{ list.song_img_url }}">
+                        {% else %}
+                            <img data-src="{{ list.song_img.url }}">
+                        {% endif %}
                     </a>
                     <div class="name">
                         <h3><a target="play" href="{% url 'play' list.song_id %}" >{{ list.song_name }}</a></h3>
@@ -116,7 +120,11 @@
                     {% for songs in list  %}
                     <li>
                         <a target="play" href="{% url 'play' songs.song.song_id %}" class="pic layz_load pic_po" >
-                            <img data-src="{{ songs.song.song_img_url }}" >
+                            {% if songs.song.song_img_url %}
+                                <img data-src="{{ songs.song.song_img_url }}">
+                            {% else %}
+                                <img data-src="{{ songs.song.song_img.url }}">
+                            {% endif %}
                         </a>
                         <h3><a target="play" href="{% url 'play' songs.song.song_id %}" >{{ songs.song.song_name }}</a></h3>
                         <div class="singer"><span>{{ songs.song.song_singer }}</span></div>
