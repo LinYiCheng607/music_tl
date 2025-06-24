@@ -5,7 +5,10 @@
 <link type="text/css" rel="stylesheet" href="{% static "css/common.css" %}">
 <link type="text/css" rel="stylesheet" href="{% static "css/index.css" %}">
 <style>
-<<<<<<< HEAD
+    body {
+        background-color: #FEF2CF; /* 设置页面背景颜色为浅灰色 */
+    }
+
     .pagination {
         display: flex;
         justify-content: center;
@@ -88,16 +91,11 @@
         display: flex;
         justify-content: center;
         margin-top: 20px;
-=======
-    body {
-        background-color: rgba(243, 229, 188, 0.93); /* 设置页面背景颜色为浅灰色 */
->>>>>>> a4de009f4a509e6982cc526ccf8198ea6d31a852
     }
 </style>
 </head>
 
 <body class="index">
-<<<<<<< HEAD
     <!-- 头部 -->
     <div class="header">
         <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo4.png" %}"></a>
@@ -114,38 +112,9 @@
                 {% for dynamic in search_song %}
                     <a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a>
                 {% endfor %}
-=======
-	<div class="header">
-		<a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo5.png" %}"></a>
-		<div class="search-box">
-	    <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
-        {% csrf_token %}
-	        <div class="search-keyword">
-	            <input name="kword" type="text" class="keyword" maxlength="120" placeholder="音乐节" />
-	        </div>
-	        <input id="subSerch" type="submit" class="search-button" value="搜 索" />
-	    </form>
-	    <div id="suggest" class="search-suggest"></div>
-  		<div class="search-hot-words">
-			{% for song in search_song  %}
-				<a target="play" href="{% url 'play' song.song.song_id %}" >{{ song.song.song_name }}</a>
-			{% endfor  %}
-  		</div>
-  	</div>
-	</div>
-	<div class="nav-box">
-    <div class="nav-box-inner">
-        <ul class="nav clearfix">
-            <li><a href="/">首页</a></li>
-            <li><a href="{% url 'ranking' %}" target="_blank">歌曲排行</a></li>
-            <li><a href="{% url 'home' 1 %}" target="_blank">用户中心</a></li>
-        </ul>
-        <div class="category-nav">
-            <div class="category-nav-header">
-                <strong><a href="javascript:;" title="">歌曲分类</a></strong>
->>>>>>> a4de009f4a509e6982cc526ccf8198ea6d31a852
             </div>
         </div>
+
     </div>
 
     <!-- 导航栏 -->
@@ -171,7 +140,6 @@
             </div>
         </div>
     </div>
-<<<<<<< HEAD
 
     <!-- 主要内容区 -->
     <div class="wrapper clearfix">
@@ -180,22 +148,10 @@
                 <div id="bannerLeftBtn" class="banner_btn"></div>
                 <ul class="focus-list f_w">
                     <li class="f_s"><a target="play" href="{% url 'play' 6 %}" class="layz_load" >
-                        <img data-src="{% static "image/datu-1.jpg" %}" width="750" height="275"></a>
+                        <img data-src="{% static "image/新大图1.jpg" %}" width="750" height="275"></a>
                     </li>
                     <li class="f_s"><a target="play" href="{% url 'play' 2 %}" class="layz_load" >
-                        <img data-src="{% static "image/datu-2.jpg" %}" width="750" height="275"></a>
-=======
-	<div class="wrapper clearfix">
-		<div class="main">
-			<div id="J_FocusSlider" class="focus">
-				<div id="bannerLeftBtn" class="banner_btn"></div>
-				<ul class="focus-list f_w">
-                    <li class="f_s"><a target="play" href="{% url 'play' 12 %}" class="layz_load" >
-                        <img data-src="{% static '/image/datu-1.jpg' %}" width="750" height="275"></a>
-                    </li>
-					<li class="f_s"><a target="play" href="{% url 'play' 2 %}" class="layz_load" >
-                        <img data-src="{% static '/image/datu-2.jpg' %}" width="750" height="275"></a>
->>>>>>> a4de009f4a509e6982cc526ccf8198ea6d31a852
+                        <img data-src="{% static "image/新大图2.jpg" %}" width="750" height="275"></a>
                     </li>
                 </ul>
                 <div id="bannerRightBtn" class="banner_btn"></div>
@@ -227,7 +183,6 @@
                         <li class="first">
                     {% else %}
                         <li>
-<<<<<<< HEAD
                     {% endif %}
                     <a class="pic layz_load pic_po" target="play" href="{% url 'play' song.song_id %}" >
                         {% if song.song_img_url %}
@@ -235,18 +190,12 @@
                         {% else %}
                             <img src="{{ song.song_img.url }}">
                         {% endif %}
-=======
-                    {% endif  %}
-                    <a class="pic layz_load pic_po" target="play" href="{% url 'play' list.song_id %}" >
-                        <img data-src="{{ list.song_img_url }}" >
->>>>>>> a4de009f4a509e6982cc526ccf8198ea6d31a852
                     </a>
                     <div class="name">
                         <h3><a target="play" href="{% url 'play' song.song_id %}">{{ song.song_name }}</a></h3>
                         <div class="singer"><span>{{ song.song_singer }}</span></div>
                         <div class="times">发行时间：<span>{{ song.song_release }}</span></div>
                     </div>
-<<<<<<< HEAD
                     <a target="play" href="{% url 'play' song.song_id %}" class="today-buy-button" >去听听></a>
                 {% endfor %}
                 </ul>
@@ -277,40 +226,6 @@
                             <div class="singer"><span>{{ dynamic.song.song_singer }}</span></div>
                             <div class="times">搜索次数：<span>{{ dynamic.dynamic_search }}</span></div>
                         </li>
-=======
-                    <a target="play" href="{% url 'play' list.song_id %}" class="today-buy-button" >去听听></a>
-                {% endfor  %}
-				</ul>
-			</div>
-		</div>
-	</div><!--end today-->
-	<div class="section">
-		<ul id="J_Tab" class="tab-trigger">
-	  	<li data-cur="0" class="current t_c">热门搜索</li>
-        <li data-cur="1" class="t_c">热门下载</li>
-		</ul>
-		<div class="tab-container">
-	    <div id="J_Tab_Con" class="tab-container-cell">
-            {% for list in all_ranking  %}
-                {% if forloop.first %}
-                    <ul class="product-list clearfix t_s current">
-                {% else  %}
-                    <ul class="product-list clearfix t_s" style="display:none;">
-                {% endif  %}
-                    {% for songs in list  %}
-                    <li>
-                        <a target="play" href="{% url 'play' songs.song.song_id %}" class="pic layz_load pic_po" >
-                            <img data-src="{{ songs.song.song_img_url }}" >
-                        </a>
-                        <h3><a target="play" href="{% url 'play' songs.song.song_id %}" >{{ songs.song.song_name }}</a></h3>
-                        <div class="singer"><span>{{ songs.song.song_singer }}</span></div>
-                        {% if all_ranking|first  == list %}
-                        <div class="times">搜索次数：<span>{{ songs.dynamic_search }}</span></div>
-                        {% else %}
-                        <div class="times">下载次数：<span>{{ songs.dynamic_down }}</span></div>
-                        {% endif %}
-                    </li>
->>>>>>> a4de009f4a509e6982cc526ccf8198ea6d31a852
                     {% endfor %}
                 </ul>
                 <!-- 热门下载内容 -->
@@ -338,7 +253,7 @@
             {% if hot_search_pages.paginator.num_pages > 1 %}
             <div class="pagination" id="hot-search-pagination">
                 {% for i in hot_search_pages.paginator.page_range %}
-                    <button onclick="changePage(0, {{ i }})" 
+                    <button onclick="changePage(0, {{ i }})"
                             {% if i == hot_search_pages.number %}class="active"{% endif %}>
                         {{ i }}
                     </button>
@@ -348,7 +263,7 @@
             {% if hot_download_pages.paginator.num_pages > 1 %}
             <div class="pagination" id="hot-download-pagination" style="display:none;">
                 {% for i in hot_download_pages.paginator.page_range %}
-                    <button onclick="changePage(1, {{ i }})" 
+                    <button onclick="changePage(1, {{ i }})"
                             {% if i == hot_download_pages.number %}class="active"{% endif %}>
                         {{ i }}
                     </button>
@@ -356,7 +271,6 @@
             </div>
             {% endif %}
         </div>
-<<<<<<< HEAD
     </div>
 
     <script data-main="{% static "js/index.js" %}" src="{% static "js/require.js" %}"></script>
@@ -400,9 +314,3 @@
         }
     </script>
 {% endblock %}
-=======
-    </div><!--end section-->
-	</div>
-	<script data-main="{% static "js/index.js" %}" src="{% static "js/require.js" %}"></script>
-{% endblock  %}
->>>>>>> a4de009f4a509e6982cc526ccf8198ea6d31a852
