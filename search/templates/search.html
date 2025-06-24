@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="header">
-        <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo.png" %}"></a>
+        <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo4.png" %}"></a>
         <div class="search-box">
             <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
                 {% csrf_token %}
@@ -60,24 +60,24 @@
             {%endfor %}
         </ul>
         <div class="page-box">
-            <div class="pagebar" id="pageBar">
-                {% if contacts.has_previous %}
-                <a href="{% url 'search' contacts.previous_page_number %}" class="prev" target="_self"><i></i>上一页</a>
-                {% endif %}
+    <div class="pagebar" id="pageBar">
+        {% if contacts.has_previous %}
+        <a href="{% url 'search' contacts.previous_page_number %}" class="prev" target="_self"><i></i>上一页</a>
+        {% endif %}
 
-                {% for page in contacts.paginator.page_range %}
-                    {% if contacts.number == page %}
-                        <span class="sel">{{ page }}</span>
-                    {% else %}
-                        <a href="{% url 'search' page %}" target="_self">{{ page }}</a>
-                    {% endif %}
-                {% endfor %}
+        {% for page in page_range %}
+            {% if contacts.number == page %}
+                <span class="sel">{{ page }}</span>
+            {% else %}
+                <a href="{% url 'search' page %}" target="_self">{{ page }}</a>
+            {% endif %}
+        {% endfor %}
 
-                {% if contacts.has_next %}
-                <a href="{% url 'search' contacts.next_page_number %}" class="next" target="_self">下一页<i></i></a>
-                {% endif %}
-            </div>
-        </div>
+        {% if contacts.has_next %}
+        <a href="{% url 'search' contacts.next_page_number %}" class="next" target="_self">下一页<i></i></a>
+        {% endif %}
+    </div>
+</div>
     </div><!--end mod_songlist-->
     </div><!--end wrapper-->
     <!--footer-->

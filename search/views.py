@@ -16,7 +16,7 @@ def searchview(request, page):
         else:
             song_info = Song.objects.values('song_id', 'song_name', 'song_singer', 'song_time').\
                 order_by('-song_release').all()
-        paginator = Paginator(song_info, 5)
+        paginator = Paginator(song_info, 20)
         try:
             contacts = paginator.page(page)
         except PageNotAnInteger:
