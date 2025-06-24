@@ -1,9 +1,12 @@
 .main{float:left;width:620px}.aside{float:right;width:240px;margin:42px 0 0;border-left:1px solid #eaeaea}a{color:#333;text-decoration:none}a:hover{color:#aaa;text-decoration:none}.pic img{vertical-align:top}.cubane_hilight{color:#aaa;text-decoration:none}.wrapper{width:1200px;padding:0;margin:20px auto 0}.global-sitenav{min-width:1180px;padding-left:15px}.footer{min-width:950px;width:auto}.footer .footerw{padding:0 15px}.search-tab-nav{height:38px;min-width:1200px;margin:20px 0 0;border-top:1px solid #f0f0f0;border-bottom:1px solid #f7f7f7;line-height:38px;background:#f7f7f7}.search-tab-nav a{float:left;margin:0 17px -1px 0;padding:1px 10px 2px;color:#666;font:400 14px/36px Arial}.search-tab-nav .current{position:relative;padding-bottom:0;border-bottom:2px solid #30C37C;color:#333;font-weight:700}.search-tab-nav a:hover{color:#333;text-decoration:none}.search-wrapper{width:1200px;padding:20px 0 0 15px;line-height:36px;margin:0 auto}.wap-con{width:1200px;margin:0 auto}.search-wrapper .logo-box{float:left;margin:6px 20px 0 0;line-height:24px}.search-wrapper .logo-box img{vertical-align:top}.search-wrapper .search-box{float:left;width:500px;margin:0 15px 0 0;padding:0}.search-wrapper .search_hot{height:30px;overflow:hidden}.search-wrapper .search-input{position:relative;float:left;width:398px;height:34px;padding:0 10px;border:1px solid #bebebe;border-right:0 none;background:#fff;z-index:9}.search-wrapper .search-input-focus{border-color:#0079bf}.search-wrapper .search-key{float:left;height:16px;width:270px;padding:8px 0;border:0 none;outline:0 none;font:400 14px/16px Arial}.search-wrapper .search-btn{float:left;width:80px;height:36px;border:0 none;outline:0 none;background:#30C37E;color:#fff;font:400 16px/36px 'Microsoft YaHei','\5FAE\8F6F\96C5\9ED1';text-align:center;cursor:pointer}.search-wrapper .search-btn:hover{background:#0079bf}.search-wrapper .search-link{float:left}.search-wrapper .search-link a{float:left;color:#999;white-space:nowrap}.search-wrapper .search-link a:hover{color:#aaa}.search-wrapper .search-link .space{float:left;padding:0 8px 0 6px;color:#ccc;font-family:simsun;white-space:nowrap;text-align:center}.search-wrapper .search_hot span{font-weight:700}.search-wrapper .search_hot a{margin-right:15px}.search-wrapper .search_hot a:last-child{margin-right:0}.fixed-search-wrapper{position:fixed;background:#fff;top:0;left:0;width:100%;z-index:1000;padding:10px 0;box-shadow:0 0 5px #888;border-bottom:1px solid #f0f0f0}.fixed-search-wrapper .logo-box{margin-left:15px}.homepage-search-wrapper{position:absolute;top:50%;left:50%;width:770px;height:182px;margin:-16% 0 0 -335px;padding-top:0}.homepage-search-wrapper .logo-box{display:block;float:none;margin:0 0 0 205px}.homepage-search-wrapper .search-tab-nav{height:32px;min-width:1046px;margin-top:60px;padding-left:0;border:0 none;line-height:32px}.homepage-search-wrapper .search-tab-nav a{margin-right:14px;padding:1px 8px 2px 12px;line-height:32px}.homepage-search-wrapper .search-tab-nav .current{border:0 none}.homepage-search-wrapper .search-tab-nav a:hover{text-decoration:none}.homepage-search-wrapper .search-input{height:36px}.homepage-search-wrapper .search-btn{width:100px;height:40px;line-height:40px}.homepage-search-wrapper .search-key{padding:10px 0}.homepage-search-wrapper .search-link{line-height:40px}.homepage-search-wrapper 
 .search-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    width: 500px !important;       /* 你想要的宽度, 可调整 */
+    max-width: 90vw !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
 }
 /* 搜索区域横向紧贴 */
 #searchForm {
@@ -14,41 +17,42 @@
 }
 
 .search-keyword-group {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0; /* 确保无间距 */
-    font-size: 0; /* 防止内联元素间空白 */
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    font-size: 0 !important;
+    width: 100% !important;
 }
 
 .keyword {
-    border-radius: 10px 0 0 10px;
-    border: none;
-    outline: none;
-    height: 40px;
-    width: 300px;
-    background: #fff7cf;
-    color: #ff9900;
-    font-size: 22px;
-    padding: 0 16px;
-    margin: 0;
-    box-sizing: border-box;
-    /* 关键：去除右侧间距 */
+    width: 400px !important;          /* 你想要的搜索框宽度 */
+    height: 40px !important;
+    border-radius: 10px 0 0 10px !important;
+    border: none !important;
+    outline: none !important;
+    padding: 0 16px !important;
+    font-size: 22px !important;
+    background: #fff7cf !important;
+    color: #ff9900 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
 }
 
 .search-button {
-    border-radius: 0 10px 10px 0;
-    border: none;
-    outline: none;
-    height: 40px;
+    height: 40px !important;
+    border-radius: 0 10px 10px 0 !important;
+    border: none !important;
+    outline: none !important;
     background-color: #ff9900 !important;
     color: #fff !important;
-    font-size: 20px;
-    padding: 0 28px;
-    margin: 0; /* 关键：去除margin */
-    box-shadow: none;
-    cursor: pointer;
-    transition: background 0.2s;
+    font-size: 20px !important;
+    padding: 0 28px !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
+    /* 保证紧邻 */
 }
 
 .search-button:hover {
