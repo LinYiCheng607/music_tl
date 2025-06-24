@@ -40,12 +40,12 @@ button{cursor:pointer}
 .index .header .logo{margin-right:126px;}
 .search-box{position:relative;z-index:50;float:right;width:302px;padding:0 78px 0 0;margin:10px 0 0}
 .index .search-box{width:502px;float:left}
-.search-box .search-keyword{position:relative;padding:6px 10px;height:20px;overflow:hidden;zoom:1;border:2px solid #FFDF35 !important;background:#FFF9E0 !important;}
+.search-box .search-keyword{position:relative;padding:6px 10px;height:28px;overflow:hidden;zoom:1;border:2px solid #FFDF35 !important;background:#ffe066 !important;s}
 .search-box .keyword{float:left;width:278px;height:20px;border:0 none;outline:0 none;font:14px/20px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;color:#a66a00 !important;}
 .index .search-box .keyword{width:478px}
-.search-box .search-button{position:absolute;right:0;top:0;width:80px;height:36px;border:0 none;background-color:#FFDF35 !important;color:#fff;font:16px/34px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;overflow:hidden;cursor:pointer;outline:0 none;border-radius:10px;box-shadow:0 2px 8px #FFDF35;}
+.search-box .search-button{position:absolute;right:0;top:0;width:80px;height:50px;border:0 none;background-color:#FFDF35 !important;color:#fff;font:16px/34px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;overflow:hidden;cursor:pointer;outline:0 none;border-radius:10px;box-shadow:0 2px 8px #FFDF35;}
 .search-box .search-button:hover{background:#fbc02d !important;}
-.search-box .search-hot-words{margin:5px 0 0;height:20px;line-height:20px;overflow:hidden}
+.search-box .search-hot-words{margin:5px 57px 0;height:20px;line-height:20px;overflow:hidden}
 .search-box .search-hot-words span{float:left;color:#ffbc42 !important;}
 .search-box .search-hot-words a{float:left;margin:0 15px 0 0;color:#f59e42 !important;}
 .search-box .search-hot-words a:hover{color:#ff9800 !important;}
