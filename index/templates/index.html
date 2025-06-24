@@ -5,7 +5,6 @@
 <link type="text/css" rel="stylesheet" href="{% static "css/common.css" %}">
 <link type="text/css" rel="stylesheet" href="{% static "css/index.css" %}">
 <style>
-    /* 分页样式 */
     .pagination {
         display: flex;
         justify-content: center;
@@ -27,87 +26,67 @@
     .hidden-page {
         display: none;
     }
-
-    /* 热门搜索/下载区样式 */
-    /* 容器居中 */
     .section {
         width: 80%;
         margin: 0 auto;
     }
-
-    /* 标签居中 */
     .tab-trigger {
         display: flex;
         justify-content: center;
         gap: 10px;
     }
-
-    /* 列表居中 */
     .tab-container-cell {
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
+        width: 100%;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
     }
-
-    /* 热门搜索和热门下载的列表统一样式 */
     .product-list {
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-between;
+        justify-content: flex-start;
         margin: 0;
         padding: 0;
         width: 100%;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
     }
-
     .product-list li {
-        width: calc(25% - 20px);
+        width: calc(16.66% - 20px); /* 6 per row */
         margin: 10px 0;
+        margin-right: 20px;
         list-style: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
     }
-
+    /* 移除每行最后一个的右margin */
+    .product-list li:nth-child(6n) {
+        margin-right: 0;
+    }
     .product-list .pic img {
         width: 100%;
         height: auto;
     }
-
     .product-list h3 {
         font-size: 14px;
         margin: 10px 0;
         text-align: center;
     }
-
     .product-list .singer, .product-list .times {
         text-align: center;
         font-size: 12px;
         color: #666;
     }
-
-    /* 分页按钮样式 */
-    .pagination button {
-        margin: 0 5px;
-        padding: 5px 10px;
-        background-color: #f0f0f0;
-        border: 1px solid #ddd;
-        cursor: pointer;
-    }
-
-    .pagination button.active {
-        background-color: #007bff;
-        color: white;
-    }
-
     .pagination-container {
         display: flex;
         justify-content: center;
         margin-top: 20px;
-    }
-
-    /* 新增样式以确保内容正确显示 */
-    .product-list li {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-bottom: 20px;
     }
 </style>
 </head>
@@ -244,7 +223,6 @@
                         </li>
                     {% endfor %}
                 </ul>
-                
                 <!-- 热门下载内容 -->
                 <ul class="product-list clearfix t_s" style="display:none;">
                     {% for dynamic in hot_download_pages %}
@@ -267,7 +245,6 @@
 
         <!-- 分页按钮 -->
         <div class="pagination-container">
-            <!-- 热门搜索分页 -->
             {% if hot_search_pages.paginator.num_pages > 1 %}
             <div class="pagination" id="hot-search-pagination">
                 {% for i in hot_search_pages.paginator.page_range %}
@@ -278,8 +255,6 @@
                 {% endfor %}
             </div>
             {% endif %}
-            
-            <!-- 热门下载分页 -->
             {% if hot_download_pages.paginator.num_pages > 1 %}
             <div class="pagination" id="hot-download-pagination" style="display:none;">
                 {% for i in hot_download_pages.paginator.page_range %}
@@ -295,30 +270,24 @@
 
     <script data-main="{% static "js/index.js" %}" src="{% static "js/require.js" %}"></script>
     <script>
-        // 切换标签页
         function showTab(tabIndex) {
             const tabs = document.querySelectorAll('.tab-trigger li');
             const contents = document.querySelectorAll('.product-list');
             const paginations = document.querySelectorAll('.pagination');
-            
             tabs.forEach((tab, index) => {
                 tab.classList.toggle('current', index === tabIndex);
             });
-            
             contents.forEach((content, index) => {
                 content.style.display = index === tabIndex ? 'flex' : 'none';
             });
-            
-            // 显示或隐藏对应的分页按钮组
             paginations.forEach((pagination, index) => {
-                if (index === 0) {  // 第一个分页是热门搜索
+                if (index === 0) {
                     pagination.style.display = tabIndex === 0 ? 'flex' : 'none';
-                } else if (index === 1) {  // 第二个分页是热门下载
+                } else if (index === 1) {
                     pagination.style.display = tabIndex === 1 ? 'flex' : 'none';
                 }
             });
         }
-        
         document.addEventListener('DOMContentLoaded', function() {
             const tabTriggers = document.querySelectorAll('.tab-trigger li');
             tabTriggers.forEach((tab, index) => {
@@ -327,11 +296,7 @@
                 });
             });
         });
-        
-        // 切换分页
         function changePage(tabIndex, pageNumber) {
-            // 这里可以根据需要处理分页逻辑，例如重新加载页面或通过AJAX更新内容
-            // 示例：通过URL参数传递页码并重新加载页面
             let urlParams = new URLSearchParams(window.location.search);
             if (tabIndex === 0) {
                 urlParams.set('page', pageNumber);
