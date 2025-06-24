@@ -35,183 +35,105 @@ button{cursor:pointer}
 @keyframes rotate_scale{0%{-webkit-transform:rotate(0) scale(1);transform:rotate(0) scale(1)}50%{-webkit-transform:rotate(180deg) scale(.6);transform:rotate(180deg) scale(.6)}100%{-webkit-transform:rotate(360deg) scale(1);transform:rotate(360deg) scale(1)}}
 @-webkit-keyframes scale{0%{-webkit-transform:scale(1);transform:scale(1);opacity:1}45%{-webkit-transform:scale(.1);transform:scale(.1);opacity:.7}80%{-webkit-transform:scale(1);transform:scale(1);opacity:1}}
 @font-face{font-family:iconfont;src:url(../font/iconfont.eot);src:url(../font/iconfont.eot#iefix) format('embedded-opentype'),url(../font/iconfont.woff) format('woff'),url(../font/iconfont.ttf) format('truetype'),url(../font/iconfont.svg#iconfont) format('svg')}
-.header{width:1200px;height:80px;padding:0;margin:10px auto 0;}
-.header .logo{float:left;width:214px;height:54px;margin:10px 0 0 0;overflow:hidden;}
-.index .header .logo{margin-right:126px;}
-.search-box{position:relative;z-index:50;float:right;width:302px;padding:0 78px 0 0;margin:10px 0 0}
-.index .search-box{width:502px;float:left}
-.search-box .search-keyword{position:relative;padding:6px 10px;height:20px;overflow:hidden;zoom:1;border:2px solid #FFDF35 !important;background:#FFF9E0 !important;}
-.search-box .keyword{float:left;width:278px;height:20px;border:0 none;outline:0 none;font:14px/20px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;color:#a66a00 !important;}
-.index .search-box .keyword{width:478px}
-.search-box .search-button{position:absolute;right:0;top:0;width:80px;height:36px;border:0 none;background-color:#FFDF35 !important;color:#fff;font:16px/34px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;overflow:hidden;cursor:pointer;outline:0 none;border-radius:10px;box-shadow:0 2px 8px #FFDF35;}
-.search-box .search-button:hover{background:#fbc02d !important;}
-.search-box .search-hot-words{margin:5px 0 0;height:20px;line-height:20px;overflow:hidden}
-.search-box .search-hot-words span{float:left;color:#ffbc42 !important;}
-.search-box .search-hot-words a{float:left;margin:0 15px 0 0;color:#f59e42 !important;}
-.search-box .search-hot-words a:hover{color:#ff9800 !important;}
-.search-suggest{display:none;position:absolute;top:36px;left:0;border:1px solid #FFDF35 !important;border-top:0 none;width:499px;background:#FFF9E0 !important;z-index:20}
-.suggest-list li{height:24px;line-height:24px;overflow:hidden;padding-left:18px;color:#d17d00 !important;cursor:pointer}
-.suggest-list li span{float:none;margin-right:0;color:red}
-.suggest-list .sug-sel{background:#f6e9a3;}
-.suggest-list .sug-t{padding-left:5px;font-weight:700}
-.qrcode{float:right;position:relative;padding:8px 8px 0;border:1px solid #FFDF35 !important;line-height:22px;text-align:center;color:#a66a00 !important;width:70px;height:92px;margin-bottom:-20px;background-color:#FFF9E0 !important;z-index:10}
-.qrcode img{display:block}
-.qrcode-close{position:absolute;top:-1px;left:-17px;width:15px;height:15px;text-indent:-9999em;overflow:hidden;cursor:pointer;background-position:-79px -136px;background-color:#FFF9E0 !important;border:1px solid #FFDF35 !important;}
-.nav-box{margin-top:-50px;border-bottom:2px solid #FFDF35 !important;}
-.index .nav-box{margin-top:25px}
-.nav-box-inner{width:1200px;margin:0 auto}
-.nav-box .nav{padding:0 0 12px 360px;height:32px;line-height:32px}
-.index .nav-box .nav{padding:0 0 2px 230px}
-.nav li{float:left;height:32px;margin-right:12px}
-.nav-box .nav li a{position:relative;float:left;padding:0 10px;font:16px/2 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;color:#d17d00 !important;white-space:nowrap;}
-.nav-box .nav li a:hover{color:#ff9800 !important;}
-.nav-box .nav .zol618entry{position:absolute;left:-4px;top:-32px;width:97px;height:38px}
-.nav-box .nav-box-inner .link-ad{float:right;width:100px;height:32px;margin:-34px 0 0;overflow:hidden;text-indent:-9999em}
-.page-box{position:relative;zoom:1}
-.pagebar{padding:0 0 40px;font-size:14px;font-family:'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;line-height:34px;text-align:center;}
-.pagebar span{margin:0 3px 0 2px}
-.pagebar_2{padding:0;height:38px;width:200px;overflow:hidden;margin:0 auto}
-.pagebar span.historySel,.pagebar span.sel{font-family:'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;}
-.pagebar .historySel,.pagebar .sel,.pagebar a{
-    display:inline-block;
-    border:1.5px solid #FFDF35 !important;
-    padding:0 7px;
-    height:34px;
-    min-width:20px;
-    white-space:nowrap;
-    margin:0 3px 0 2px;
-    vertical-align:top;
-    background:#FFF9E0 !important;
-    color:#f59e42 !important;
-    border-radius:8px;
-    font-family:'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;
-}
-.pagebar a{color:#f59e42 !important;}
-.pagebar .history,.pagebar .historyStart{color:#ccc}
-.pagebar .sel,.pagebar a:hover{
-    background:#fbc02d !important;
-    color:#fffde4 !important;
-    border-color:#fbc02d !important;
-}
-.pagebar .historySel,.pagebar .historyStart:hover,.pagebar a.history:hover{background:#ccc;color:#fff;border-color:#ccc}
-.pagebar a:hover{text-decoration:underline;}
-.pagebar .prev{padding:0 11px 0 25px;position:relative}
-.pagebar .next{padding:0 24px 0 12px;position:relative}
-.pagebar .next i,.pagebar .prev i{position:absolute;width:7px;height:12px;font:0/0 arial;top:11px}
-.pagebar .prev i{left:12px;background-position:0 -76px}
-.pagebar .next i{right:12px;background-position:-11px -76px}
-.pagebar .prev:hover i{left:12px;background-position:-22px -76px}
-.pagebar .next:hover i{right:12px;background-position:-33px -76px}
-.footer{
-    background:#FFDF35 !important;
-    padding:20px 0;
-    margin-top:40px;
-    font-family:'Comic Sans MS','Microsoft YaHei',Arial,sans-serif !important;
-    color:#c97a0a !important;
-}
-.footer .links{position:relative;zoom:1;border-bottom:1px solid #ffe066;padding:15px 0;font-size:12px;color:#b1b3b9;text-align:center}
-.footer .links a{color:#b1b3b9;padding:10px}
-.footer .copyright{width:1000px;margin:0 auto;}
-.footer .copyright p{line-height:30px;text-align:center;color:#c97a0a !important;font-size:18px;text-shadow:1px 1px 0 #fffbe6;}
-.footer .copyright p:first-child{font-size:24px;color:#ffb300;font-weight:bold;letter-spacing:2px;margin-bottom:4px;}
-.footer .copyright a.office-verification{margin-left:5px;padding:5px 10px;background-size:20px 20px}
-.footer .copyright a.office-verification img{width:20px;height:20px;vertical-align:top}
-.footer .copyright .footerIcon,.footer .copyright .footerIcon a{display:inline-block;zoom:1;vertical-align:middle}
-.footer .copyright .footerIcon{width:16px;height:16px;margin-left:5px;margin-top:-2px}
-.footer .copyright .footerIcon a{padding:0}
-.footer .copyright a{color:#f59e42 !important;}
-.global-sitenav a{text-decoration:none;color:#f59e42 !important;}
-.global-sitenav a:hover{text-decoration:underline;color:#ff9800 !important;}
-.global-sitenav{
-    position:relative;
-    z-index:1000;
-    height:34px;
-    margin-bottom:15px;
-    border-bottom:1px solid #ffe066 !important;
-    background:#FFF9E0 !important;
-    color:#a66a00 !important;
-    font:400 12px/34px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;
-}
-.global-sitenav .sitenav-inner{min-width:950px;width:1000px;margin:0 auto;zoom:1;padding:0 10px}
-.global-sitenav h3{margin:0;padding:0}
-.global-sitenav button,.global-sitenav input{margin:0;padding:0;vertical-align:middle;font-size:100%;font-family:inherit}
-.global-sitenav img{border:0 none}
-.global-sitenav .icon-hot i,.global-sitenav .icon-new i{position:absolute;margin:3px 0 0 2px;width:9px;height:11px;font:0/0 arial;background-position:-60px -175px;font:0/0 arial}
-.global-sitenav .icon-hot i{background-position:-60px -190px}
-.global-sitenav .red{color:#f33}
-.global-sitenav .sitenav-inner:after{content:" ";display:block;height:0;clear:both;visibility:hidden;font-size:0}
-.global-sitenav .sitenav-links a:hover,.global-sitenav a:hover{text-decoration:underline;}
-.global-sitenav .sitenav-trigger{display:block;position:relative;zoom:1;padding:0 10px;color:#f59e42 !important;cursor:pointer}
-.global-sitenav .sitenav-trigger i{position:absolute;top:15px;right:10px;width:7px;height:4px;overflow:hidden;background-position:-75px -195px}
-.global-sitenav .sitenav-dropdown-body{display:none;position:absolute;top:35px;left:0;z-index:5;background-color:#FFF9E0 !important;border:1px solid #FFDF35 !important;}
-.global-sitenav .h-sitenav-dropdown{position:relative;margin-top:-1px}
-.global-sitenav .h-sitenav-dropdown .sitenav-trigger{z-index:10;margin-bottom:-1px;padding:0 9px 1px;border:1px solid #ffe066 !important;border-bottom:0 none;background-color:#FFF9E0 !important;}
-.global-sitenav .h-sitenav-dropdown .sitenav-trigger i,.global-sitenav .h-sitenav-groupsite .sitenav-trigger i{background-position:-85px -195px}
-.global-sitenav .h-sitenav-dropdown .sitenav-dropdown-body{display:block}
-.global-sitenav .sitenav-links{float:left}
-.global-sitenav .sitenav-links a{color:#f59e42 !important;text-decoration:none}
-.global-sitenav .sitenav-links .zol-link{float:left;width:60px;margin:0 10px 0 0}
-.global-sitenav .sitenav-links .add-fav{float:left;margin-right:-60px}
-.global-sitenav .sitenav-links .sitenav-telephone{float:left;margin-right:-140px;color:#999}
-.global-sitenav .sitenav-links .sitenav-telephone em{color:#f33;font-style:normal}
-.global-sitenav .sitenav-links .sitenav-trigger{padding-right:10px}
-.global-sitenav .sitenav-links .client-enter{float:left;margin:0 10px 0 0;width:82px}
-.global-sitenav .product-librarylinks{float:left;position:relative;padding-left:10px}
-.global-sitenav .product-librarylinks a{float:left;margin:0 15px 0 0}
-.global-sitenav .sitenav-productlibrary-count{float:right}
-.global-sitenav .sitenav-productlibrary-count a{margin:0 0 0 15px;color:#f59e42 !important;}
-.global-sitenav .sitenav-productlibrary-count a:hover{color:#ff9800 !important;}
-.global-sitenav .sitenav-productlibrary-count em{color:#f33}
-.global-sitenav .product-librarylinks .icon-hot i,.global-sitenav .product-librarylinks .icon-new i{margin:5px 0 0 0;font:0/0 arial}
-.global-sitenav .sitenav-groupsite{position:relative;z-index:199;float:left;width:97px}
-.global-sitenav .sitenav-groupsite a{color:#f59e42 !important;text-decoration:none}
-.global-sitenav .sitenav-groupsite a:hover{color:#ff9800 !important;text-decoration:underline}
-.global-sitenav .sitenav-groupsite .sitenav-trigger{padding:0 22px 0 25px;background-position:-180px -168px}
-.global-sitenav .sitenav-groupsite .groupsite-sitemap-body{display:none;position:absolute;top:35px;left:-70px;width:998px;background:#FFF9E0 !important;border:1px solid #FFDF35 !important;-webkit-box-shadow:0 2px 5px -3px rgba(0,0,0,.4);box-shadow:0 2px 5px -3px rgba(0,0,0,.4)}
-.global-sitenav .h-sitenav-groupsite{margin-top:-1px;background:#FFF9E0 !important;}
-.global-sitenav .h-sitenav-groupsite .sitenav-trigger{z-index:10;margin-bottom:-1px;padding:0 21px 1px 24px;border:1px solid #ffe066 !important;border-bottom:0 none;background-color:#FFF9E0 !important;background-position:-181px -168px}
-.global-sitenav .h-sitenav-groupsite .groupsite-sitemap-body{display:block}
-.global-sitenav .sitemap-items{margin:0 0 0 20px;padding:8px 0 12px;list-style:none outside none}
-.global-sitenav .sitemap-items li{overflow:hidden;margin:0;padding:4px 0 0;list-style:none outside none;zoom:1;line-height:28px}
-.global-sitenav .sitemap-items a{float:left;margin:0 16px 0 0;color:#f59e42 !important;font:400 14px/28px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;}
-.global-sitenav .sitemap-items .icon-hot,.global-sitenav .sitemap-items .icon-new{margin-right:27px}
-.global-sitenav .sitemap-items .sitemap-sub-title{float:left;margin:0 16px 0 0;font:400 14px/28px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;color:#0b92e0}
-.global-sitenav .sitemap-items .more{float:right}
-.global-sitenav .sitemap-items .more b{font-family:simsun;font-weight:400}
-.global-sitenav .sitenav-login-bar{float:right;padding:0;width:113px}
-.global-sitenav .sitenav-login-bar a:hover{color:#ff9800 !important;text-decoration:underline}
-.global-sitenav .sitenav-login-bar .sitenav-login-links{float:right;height:24px;margin:5px 0 0;width:68px;overflow:hidden}
-.global-sitenav .sitenav-login-bar .sitenav-qq,.global-sitenav .sitenav-login-bar .sitenav-weibo{float:left;width:24px;height:24px;margin:0 0 0 10px;background-position:0 -175px;color:#666;text-indent:-9999em;opacity:.8;filter:alpha(opacity=80);font:0/0 arial}
-.global-sitenav .sitenav-login-bar .sitenav-qq{background-position:-30px -175px}
-.global-sitenav .sitenav-login-bar .sitenav-qq:hover,.global-sitenav .sitenav-login-bar .sitenav-weibo:hover{opacity:1;filter:alpha(opacity=100)}
-.global-sitenav .sitenav-login-bar .sitenav-login-box{position:relative;float:left;width:45px}
-.global-sitenav .sitenav-login-bar .sitenav-login-link{display:inline-block;width:25px;padding:0 10px;cursor:pointer}
-.global-sitenav .sitenav-login-bar .sitenav-login-form{display:none;position:absolute;top:34px;right:-69px;width:190px;padding:11px 34px 4px;border:1px solid #ffe066 !important;-webkit-box-shadow:0 0 8px #ffe066;box-shadow:0 0 8px #ffe066;background:#FFF9E0 !important;}
-.global-sitenav .sitenav-login-bar .sitenav-login-box-open .sitenav-login-form{display:block}
-.global-sitenav .sitenav-login-form h3{color:#a66a00 !important;font:400 12px/20px Arial}
-.global-sitenav .sitenav-login-form .sitenav-password,.global-sitenav .sitenav-login-form .sitenav-username{position:relative;display:block;width:172px;height:28px;margin:10px 0 0;padding:0 8px;border:1px solid #FFDF35 !important;}
-.global-sitenav .sitenav-login-form .sitenav-username{margin-top:6px}
-.global-sitenav .sitenav-password input,.global-sitenav .sitenav-username input{position:absolute;top:1px;left:8px;width:172px;padding:4px 0;outline:0 none;border:0 none;line-height:18px;}
-.global-sitenav .sitenav-password label,.global-sitenav .sitenav-username label{position:absolute;top:0;left:9px;z-index:10;color:#ffbc42 !important;font-size:12px;line-height:28px;font-family:'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;cursor:text;-webkite-user-select:none;user-select:none}
-.global-sitenav .sitenav-login-form .sitenav-focus{border-color:#0791f5}
-.global-sitenav .sitenav-login-form .sitenav-focus label{color:#ffe066;}
-.global-sitenav .sitenav-login-form .sitenav-error{border-color:#f33}
-.global-sitenav .sitenav-login-form .sitenav-registration{margin-left:0;color:#1f4f88}
-.global-sitenav .sitenav-loign-bar{overflow:hidden}
-.global-sitenav .sitenav-loign-bar a{float:right;color:#1f4f88}
-.global-sitenav .sitenav-loign-bar label{float:left;color:#666}
-.global-sitenav .sitenav-loign-bar label input{float:left;width:14px;height:14px;overflow:hidden;margin:10px 5px 0 0}
-.global-sitenav .sitenav-login-button{display:block;width:190px;height:30px;margin:10px 0 0;border:0 none;background:#FFDF35 !important;color:#fff;font:700 14px/30px Arial;cursor:pointer;border-radius:10px;box-shadow:0 2px 8px #FFDF35;}
-.sitenav-login-error-tip{position:absolute;left:34px;top:11px;width:190px;height:20px;font:12px/20px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;color:#f33;background:#fff;display:none}
-.global-sitenav .sitenav-personal-center{float:right;margin:0 5px 0 0;width:280px}
-.global-sitenav .sitenav-personal-center a{color:#f59e42 !important;text-decoration:none}
-.global-sitenav .sitenav-personal-center a:hover{color:#ff9800 !important;text-decoration:underline}
-.global-sitenav .sitenav-personal-center .sitenav-personal-login-out{float:right;margin:0 0 0 20px}
-.global-sitenav .sitenav-personal-center .sitenav-personal-msg{position:relative;float:right;width:16px;height:13px;margin:10px 0 0 20px;background-position:-75px -175px}
-.global-sitenav .sitenav-personal-msg i{position:absolute;right:-3px;top:-4px;font:0/0 arial;width:8px;height:8px;background-position:-95px -175px}
-.global-sitenav .sitenav-personal-center .sitenav-personal-welcome{float:right;color:#999}
 
-/* 美化滚动条 */
+/* 头部布局及搜索框居右 */
+.header {
+    width: 100%;
+    min-width: 1200px;
+    height: 80px;
+    padding: 0;
+    margin: 10px auto 0;
+    display: flex;
+    align-items: flex-start;
+    background: #FFDF35;
+    position: relative;
+}
+.header .logo {
+    float: none;
+    margin: 13px 0 0 80px;
+    width: 214px;
+    height: 54px;
+    display: block;
+}
+
+/* 搜索框整体居右结构 */
+.search-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-left: auto;
+    margin-right: 80px;
+    margin-top: 13px;
+    min-width: 360px;
+}
+.search-form {
+    display: flex;
+    align-items: center;
+    width: 360px;
+    background: none;
+}
+.search-input {
+    flex: 1;
+    height: 38px;
+    border: 2px solid #ffbe3c;
+    border-radius: 10px 0 0 10px;
+    background: #FFF9E0;
+    color: #f59e42;
+    font-size: 20px;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif;
+    padding-left: 16px;
+    outline: none;
+    transition: border 0.2s;
+}
+.search-input::placeholder {
+    color: #ffbc42;
+    font-style: italic;
+}
+.search-btn {
+    width: 70px;
+    height: 38px;
+    border: 2px solid #ffbe3c;
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+    background: #FFDF35;
+    color: #a66a00;
+    font-size: 20px;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.search-btn:hover {
+    background: #ffe066;
+    color: #d17d00;
+}
+.search-hot-words {
+    margin: 8px 0 0 0;
+    width: 360px;
+    text-align: left;
+}
+.search-hot-words a {
+    display: inline-block;
+    margin-right: 10px;
+    color: #f59e42;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif;
+    font-size: 16px;
+    text-shadow: 1px 1px 0 #fffbe6;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+}
+.search-hot-words a:hover {
+    color: #ff9800;
+    text-decoration: underline;
+}
+
+/* 隐藏旧的 .search-box 区域（如有新结构则不显示） */
+.search-box{display:none;}
+
+/* 其它原有样式保持不变 */
+.index .header .logo{margin-right:126px;}
+/* 适配其它页面元素的原有样式（略） */
+
+/* 滚动条美化 */
 ::-webkit-scrollbar-thumb {
     background: #FFDF35 !important;
     border-radius: 8px;
@@ -242,4 +164,3 @@ input[type="checkbox"] {
 ::-webkit-input-placeholder { color: #ffbc42 !important; font-style: italic; }
 ::-moz-placeholder { color: #ffbc42 !important; font-style: italic; }
 :-ms-input-placeholder { color: #ffbc42 !important; font-style: italic; }
-::placeholder { color: #ffbc42 !important; font-style: italic; }
