@@ -59,7 +59,7 @@ def homeview(request, page):
     # 分页功能
     song_info = request.session.get('play_list', [])
     print(song_info)
-    paginator = Paginator(song_info, 8)
+    paginator = Paginator(song_info, 10)
     try:
         contacts = paginator.page(page)
     except PageNotAnInteger:
