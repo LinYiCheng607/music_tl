@@ -48,9 +48,10 @@ button{cursor:pointer}
     background: #FFDF35;
     position: relative;
 }
+/* BigByte logo右移 */
 .header .logo {
     float: none;
-    margin: 13px 0 0 80px;
+    margin: 13px 0 0 40px;    /* 原80px→40px，右移一点 */
     width: 214px;
     height: 54px;
     display: block;
@@ -64,12 +65,12 @@ button{cursor:pointer}
     margin-left: auto;
     margin-right: 80px;
     margin-top: 13px;
-    min-width: 360px;
+    min-width: 460px; /* 加长最小宽度 */
 }
 .search-form {
     display: flex;
     align-items: center;
-    width: 360px;
+    width: 500px;   /* 搜索框整体宽度加长 */
     background: none;
 }
 .search-input {
@@ -84,32 +85,18 @@ button{cursor:pointer}
     padding-left: 16px;
     outline: none;
     transition: border 0.2s;
+    min-width: 0;
+    /* 让输入框自适应新宽度 */
 }
-.search-input::placeholder {
-    color: #ffbc42;
-    font-style: italic;
-}
-.search-btn {
-    width: 70px;
-    height: 38px;
-    border: 2px solid #ffbe3c;
-    border-left: none;
-    border-radius: 0 10px 10px 0;
-    background: #FFDF35;
-    color: #a66a00;
-    font-size: 20px;
-    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-}
-.search-btn:hover {
-    background: #ffe066;
-    color: #d17d00;
-}
+/* 搜索热词与搜索框左边对齐 */
 .search-hot-words {
     margin: 8px 0 0 0;
-    width: 360px;
+    width: 500px;                 /* 宽度与.search-form一致 */
     text-align: left;
+    padding-left: 0;
+    box-sizing: border-box;
+    /* 让热词与输入框左侧对齐 */
+    /* 关键：保证和.search-form输入框左侧齐平 */
 }
 .search-hot-words a {
     display: inline-block;
@@ -125,14 +112,84 @@ button{cursor:pointer}
     color: #ff9800;
     text-decoration: underline;
 }
-
+/* 增大搜索按钮 */
+.search-btn {
+    width: 100px;         /* 增加宽度 */
+    height: 48px;         /* 增加高度 */
+    font-size: 24px;      /* 放大字体 */
+    border-radius: 0 14px 14px 0; /* 加大圆角以匹配更大按钮 */
+}
+.search-form {
+    height: 48px;         /* 保证输入框和按钮对齐 */
+}
+.search-input {
+    height: 48px;
+    font-size: 22px;
+}
 /* 隐藏旧的 .search-box 区域（如有新结构则不显示） */
 .search-box{display:none;}
+
+/* 分页按钮居中显示 */
+.page-box {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    margin: 30px 0 0 0;
+}
+.pagebar {
+    display: inline-block;
+    padding: 0 0 40px 0;
+    font-size: 14px;
+    font-family: 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;
+    line-height: 34px;
+    text-align: center;
+}
 
 /* 其它原有样式保持不变 */
 .index .header .logo{margin-right:126px;}
 /* 适配其它页面元素的原有样式（略） */
+/* 导航栏nav整体居中显示并放大文字 */
+.nav-box-inner {
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
 
+.nav-box .nav {
+    padding: 0;
+    margin: 0 auto;
+    height: 50px;  /* 增高，便于大字号居中 */
+    line-height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 64px;     /* 菜单项间距更大 */
+}
+
+.nav-box .nav li {
+    float: none;
+    display: inline-block;
+    margin: 0;
+    padding: 0 20px;
+}
+
+.nav-box .nav a {
+    font-size: 26px;                  /* 放大字号 */
+    font-weight: bold;
+    color: #f59e42 !important;
+    font-family: 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif !important;
+    text-shadow: 1px 1px 0 #fffbe6;
+    transition: color 0.2s;
+    letter-spacing: 1px;
+    line-height: 50px;
+}
+
+.nav-box .nav a:hover {
+    color: #ff9800 !important;
+    text-decoration: underline;
+}
 /* 滚动条美化 */
 ::-webkit-scrollbar-thumb {
     background: #FFDF35 !important;
