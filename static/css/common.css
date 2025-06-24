@@ -102,12 +102,11 @@ button{cursor:pointer}
 .pagebar .next i{right:12px;background-position:-11px -76px}
 .pagebar .prev:hover i{left:12px;background-position:-22px -76px}
 .pagebar .next:hover i{right:12px;background-position:-33px -76px}
-.footer{
-    background:#FFDF35 !important;
-    padding:20px 0;
-    margin-top:40px;
-    font-family:'Comic Sans MS','Microsoft YaHei',Arial,sans-serif !important;
-    color:#c97a0a !important;
+footer {
+    padding: 10px 0;  /* 内边距减少50% */
+    margin-top: 20px;  /* 间距缩小33% */
+    font-size: 12px;   /* 字体缩小 */
+    line-height: 1.5;  /* 行高优化 */
 }
 .footer .links{position:relative;zoom:1;border-bottom:1px solid #ffe066;padding:15px 0;font-size:12px;color:#b1b3b9;text-align:center}
 .footer .links a{color:#b1b3b9;padding:10px}
