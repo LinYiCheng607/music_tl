@@ -18,7 +18,7 @@ a:hover {
 .mod_profile {
     height: 315px;
     padding-top: 65px;
-    background: url(../image/user_bg.jpg) 50% no-repeat;
+    /*background: url(../image/user_bg.jpg) 50% no-repeat;*/
     background-size: cover;
     text-align: center;
     color: #fff;
