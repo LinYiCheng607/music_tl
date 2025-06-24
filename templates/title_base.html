@@ -10,13 +10,46 @@
 {% load static %}
 <script src="{% static 'js/imageErrorHandler.js' %}"></script>
 
+<!-- 主体黄色主题和字体样式，覆盖全站 -->
+<style>
+body {
+    background-color: #FFDF35 !important;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+    color: #a66a00;
+}
+.footer {
+    background: #FFDF35 !important;
+    border-top: 2px solid #ffe066;
+    text-align: center;
+    padding: 30px 0 12px 0;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+}
+.footer .copyright p {
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    color: #c97a0a;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 #fffbe6;
+}
+.footer .copyright p:first-child {
+    font-size: 24px;
+    color: #ffb300;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+</style>
+
 {% block title %}{% endblock %}
+</head>
+<body>
+    {% block content %}{% endblock %}
 
-<div class="footer">
-    <div class="copyright">
-        <p>BigByte</p>
-        <p>网站数据来源于网咯、仅供参考使用</p>
+    <div class="footer">
+        <div class="copyright">
+            <p>BigByte</p>
+            <p>网站数据来源于网络，仅供参考使用</p>
+        </div>
     </div>
-</div>
-
+</body>
 </html>
