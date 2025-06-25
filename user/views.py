@@ -8,7 +8,9 @@ from index.models import *
 import json
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.contrib.auth.decorators import login_required
-
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Count
 # Create your views here.
 
 
@@ -70,14 +72,9 @@ def homeview(request, page):
 
 @login_required
 def song_analysis(request):
-    # 假设有SongLog模型记录用户听歌历史
-    # SongLog: user, song, listen_time, song_type
-    # 统计每天听歌数量
-    from django.utils import timezone
-    from datetime import timedelta
-
+    # 统计最近7天每天听歌数量
     today = timezone.now().date()
-    days = 7  # 最近7天
+    days = 7
     line_labels = []
     line_data = []
     for i in range(days):
@@ -86,18 +83,28 @@ def song_analysis(request):
         cnt = SongLog.objects.filter(user=request.user, listen_time__date=day).count()
         line_data.append(cnt)
 
-    # 按类型统计
-    from django.db.models import Count
-    pie_qs = SongLog.objects.filter(user=request.user).values('song__type').annotate(value=Count('id')).order_by('-value')
+    # 统计不同类型的听歌次数
+    # 注意：Song模型的类型字段叫 song_type
+    pie_qs = (
+        SongLog.objects
+        .filter(user=request.user)
+        .values('song__song_type')
+        .annotate(value=Count('id'))
+        .order_by('-value')
+    )
     pie_data = []
     for item in pie_qs:
-        pie_data.append({'name': item['song__type'] or '未知', 'value': item['value']})
+        # item['song__song_type'] 可能为None，需要兜底
+        pie_data.append({
+            'name': item['song__song_type'] or '未知',
+            'value': item['value']
+        })
 
     context = {
         'line_labels': json.dumps(line_labels, ensure_ascii=False),
         'line_data': json.dumps(line_data, ensure_ascii=False),
         'pie_data': json.dumps(pie_data, ensure_ascii=False),
-        # 其它需要的上下文变量
-        'search_song': [],  # 补全你的热门搜索逻辑
+        # 你可以补充热门搜索/推荐等
+        'search_song': [],
     }
     return render(request, 'song_analysis.html', context)

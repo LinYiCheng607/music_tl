@@ -4,7 +4,8 @@ from index.models import *
 from django.http import StreamingHttpResponse
 import os
 import random
-
+from user.models import SongLog
+from django.utils import timezone
 # Create your views here.
 
 
@@ -102,6 +103,20 @@ def playview(request, song_id):
     else:
         dynamic_info = Dynamic(dynamic_plays=1, dynamic_search=0, dynamic_down=0, song_id=song_id)
         dynamic_info.save()
+    if request.user.is_authenticated:
+        log, created = SongLog.objects.create(
+            user=request.user,
+            song=song_info,
+            defaults={
+                'listen_count': 1,
+                'total_listen_seconds': 0,
+            }
+        )
+        if not created:
+            log.listen_count += 1
+            # log.total_listen_seconds += ... # 如有单次播放时长可加
+            log.listen_time = timezone.now()
+            log.save()
     
     return render(request, 'play.html', {'search_song': search_song, 'song_info': song_info, 
                                          'play_list': play_list, 'song_lyrics': song_lyrics, 
