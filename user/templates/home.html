@@ -58,6 +58,7 @@
                             <li class="songlist__header_name">歌曲</li>
                             <li class="songlist__header_author">歌手</li>
                             <li class="songlist__header_time">时长</li>
+                            <li class="songlist__header_count">听过的次数</li>
                         </ul>
                         <ul class="songlist__list">
                             {% for item in contacts.object_list %}
@@ -70,6 +71,9 @@
                                         <a href="javascript:;" class="singer_name">{{ item.song_singer }}</a>
                                     </div>
                                     <div class="songlist__time">{{ item.song_time }}</div>
+                                    <div class="songlist__count">
+                                        {{ item.listen_count }}
+                                    </div>
                                 </div>
                             </li>
                             {% endfor %}

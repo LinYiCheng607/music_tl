@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Count
+from django.db.models import Sum
 # Create your views here.
 
 
@@ -53,14 +54,27 @@ def logoutview(request):
     return redirect('/')
 
 
-# 用户中心
 @login_required(login_url='/user/login.html')
 def homeview(request, page):
-    # 热搜歌曲
     search_song = Dynamic.objects.select_related('song').order_by('-dynamic_search').all()[:6]
-    # 分页功能
-    song_info = request.session.get('play_list', [])
-    print(song_info)
+    song_count_qs = (
+        SongLog.objects
+        .filter(user=request.user)
+        .values('song', 'song__song_id', 'song__song_name', 'song__song_singer', 'song__song_time')
+        .annotate(listen_count=Sum('listen_count'))
+        .order_by('-listen_count', '-song')
+    )
+    song_info = [
+        {
+            'song_id': item['song__song_id'],
+            'song_name': item['song__song_name'],
+            'song_singer': item['song__song_singer'],
+            'song_time': item['song__song_time'],
+            'listen_count': item['listen_count'] or 0,
+        }
+        for item in song_count_qs
+    ]
+    print(song_info)  # <---- 检查这里输出的内容
     paginator = Paginator(song_info, 10)
     try:
         contacts = paginator.page(page)
@@ -68,7 +82,10 @@ def homeview(request, page):
         contacts = paginator.page(1)
     except EmptyPage:
         contacts = paginator.page(paginator.num_pages)
-    return render(request, 'home.html', locals())
+    return render(request, 'home.html', {
+        'contacts': contacts,
+        'search_song': search_song,
+    })
 
 @login_required
 def song_analysis(request):

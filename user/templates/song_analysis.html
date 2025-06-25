@@ -67,11 +67,24 @@
         var lineData = {{ line_data|safe }};
         var pieData = {{ pie_data|safe }};
 
+        // 动态设置纵轴最大值，使折线图自适应
+        var maxCount = 5; // 默认最小刻度
+        if (Array.isArray(lineData) && lineData.length > 0) {
+            var realMax = Math.max.apply(null, lineData);
+            maxCount = realMax < 5 ? 5 : realMax + 1; // 至少5，实际最大+1
+        }
+
         // 折线图
         var lineChart = echarts.init(document.getElementById('line_chart'));
         var lineOption = {
             xAxis: { type: 'category', data: lineLabels, name: '日期' },
-            yAxis: { type: 'value', name: '听过的歌曲数量' },
+            yAxis: { 
+                type: 'value', 
+                name: '听过的歌曲数量',
+                min: 0,
+                max: maxCount,
+                interval: Math.ceil(maxCount / 5) // 让y轴分隔更均匀
+            },
             series: [{
                 data: lineData,
                 type: 'line',
