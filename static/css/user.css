@@ -115,6 +115,14 @@ a:hover {
 }
 .songlist__song_txt {margin-left:10px;}
 .songlist__song_txt, .songlist__time {color: #ffbc42 !important;}
+.songlist__count {
+    display: inline-block;
+    color: #a66a00 !important;   /* 或你喜欢的颜色 */
+    font-size: 16px !important;
+    min-width: 2em;
+    text-align: center;
+    vertical-align: middle;
+}
 .songlist__number {
     position: absolute;
     top: 0;
@@ -274,3 +282,45 @@ input[type="checkbox"] {
 .main .info_con dd{float:left;width:1070px;text-align:left;padding-left:10px;background:#fffbe6;margin-bottom:1px;}
 .main .info_con dd .modify{float:right;font-size:12px;color:#f59e42;margin-right:20px;}
 .main .info_con dd .modify:hover{color:#d17d00;}
+.main-nav-bar {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 3;
+}
+
+.profile_nav {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding-left: 60px;
+    padding-bottom: 10px;
+    position: relative;
+    /* background: transparent;  不需要底色 */
+}
+
+.profile_nav .mod_tab__item {
+    font-size: 30px; /* 原本是30px */
+    font-weight: 400;
+    color: #f59e42 !important;
+    text-shadow: 1px 1px 0 #fffbe6;
+    background: transparent !important;
+    margin-right: 38px;
+    /* 让字号变小一点 */
+    font-size: 24px !important;
+}
+
+.profile_nav .mod_tab__current {
+    border-bottom: 2px solid #FFDF35 !important;
+    color: #f59e42 !important;
+}
+
+@media (max-width: 800px) {
+    .profile_nav {
+        padding-left: 20px;
+    }
+    .profile_nav .mod_tab__item {
+        font-size: 18px !important;
+    }
+}

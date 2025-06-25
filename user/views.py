@@ -5,10 +5,13 @@ from django.contrib.auth import logout, login
 from django.contrib.auth.hashers import check_password
 from .form import MyUserCreationForm
 from index.models import *
-
+import json
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.contrib.auth.decorators import login_required
-
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Count
+from django.db.models import Sum
 # Create your views here.
 
 
@@ -51,14 +54,27 @@ def logoutview(request):
     return redirect('/')
 
 
-# 用户中心
 @login_required(login_url='/user/login.html')
 def homeview(request, page):
-    # 热搜歌曲
     search_song = Dynamic.objects.select_related('song').order_by('-dynamic_search').all()[:6]
-    # 分页功能
-    song_info = request.session.get('play_list', [])
-    print(song_info)
+    song_count_qs = (
+        SongLog.objects
+        .filter(user=request.user)
+        .values('song', 'song__song_id', 'song__song_name', 'song__song_singer', 'song__song_time')
+        .annotate(listen_count=Sum('listen_count'))
+        .order_by('-listen_count', '-song')
+    )
+    song_info = [
+        {
+            'song_id': item['song__song_id'],
+            'song_name': item['song__song_name'],
+            'song_singer': item['song__song_singer'],
+            'song_time': item['song__song_time'],
+            'listen_count': item['listen_count'] or 0,
+        }
+        for item in song_count_qs
+    ]
+    print(song_info)  # <---- 检查这里输出的内容
     paginator = Paginator(song_info, 10)
     try:
         contacts = paginator.page(page)
@@ -66,4 +82,46 @@ def homeview(request, page):
         contacts = paginator.page(1)
     except EmptyPage:
         contacts = paginator.page(paginator.num_pages)
-    return render(request, 'home.html', locals())
+    return render(request, 'home.html', {
+        'contacts': contacts,
+        'search_song': search_song,
+    })
+
+@login_required
+def song_analysis(request):
+    # 统计最近7天每天听歌数量
+    today = timezone.now().date()
+    days = 7
+    line_labels = []
+    line_data = []
+    for i in range(days):
+        day = today - timedelta(days=days - i - 1)
+        line_labels.append(day.strftime('%Y-%m-%d'))
+        cnt = SongLog.objects.filter(user=request.user, listen_time__date=day).count()
+        line_data.append(cnt)
+
+    # 统计不同类型的听歌次数
+    # 注意：Song模型的类型字段叫 song_type
+    pie_qs = (
+        SongLog.objects
+        .filter(user=request.user)
+        .values('song__song_type')
+        .annotate(value=Count('id'))
+        .order_by('-value')
+    )
+    pie_data = []
+    for item in pie_qs:
+        # item['song__song_type'] 可能为None，需要兜底
+        pie_data.append({
+            'name': item['song__song_type'] or '未知',
+            'value': item['value']
+        })
+
+    context = {
+        'line_labels': json.dumps(line_labels, ensure_ascii=False),
+        'line_data': json.dumps(line_data, ensure_ascii=False),
+        'pie_data': json.dumps(pie_data, ensure_ascii=False),
+        # 你可以补充热门搜索/推荐等
+        'search_song': [],
+    }
+    return render(request, 'song_analysis.html', context)
