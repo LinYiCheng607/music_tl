@@ -22,26 +22,53 @@
                 {% endfor  %}
             </div>
         </div>
-    </div><!--end header-->
-
-    <!-- nav-box 已去除首页、歌曲排行、用户中心字样 -->
-    <div class="nav-box">
-        <div class="nav-box-inner">
-            <ul class="nav clearfix">
-                <!-- 留空或可根据需要添加其它导航项 -->
-            </ul>
-        </div>
-    </div><!--end nav-box-->
+    </div>
 
     <div class="mod_profile js_user_data">
-        <div class="section_inner">
-            <div class="profile__cover_link">
-                <img src="{% static "image/users.jpg" %}" class="profile__cover">
+        <div class="section_inner user-profile-flex">
+            <div class="user-profile-left">
+                <div class="profile__cover_link">
+                    <img src="{% static "image/users.jpg" %}" class="profile__cover">
+                </div>
+                <span class="profile__name" id="nickname-display">{{ user.nickname|default:user.username }}</span>
+                <a href="{% url 'logout' %}" class="logout-link">退出登录</a>
             </div>
-            <h1 class="profile__tit">
-                <span class="profile__name">{{ user.username }}</span>
-            </h1>
-            <a href="{% url 'logout' %}" style="color:white;">退出登录</a>
+            <div class="user-profile-right">
+                <div class="user-info">
+                    <h2>个人信息</h2>
+                    <form id="user-info-form" method="post" action="{% url 'update_user_info' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="nickname">昵称：</label>
+                            <input type="text" id="nickname" name="nickname" value="{{ user.nickname|default:user.username }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">邮箱：</label>
+                            <input type="email" id="email" name="email" value="{{ user.email }}">
+                        </div>
+                        <button type="submit" class="save-btn">保存修改</button>
+                    </form>
+                    <script>
+                    document.getElementById('user-info-form').onsubmit = async function(e) {
+                        e.preventDefault();
+                        const form = e.target;
+                        const formData = new FormData(form);
+                        const response = await fetch(form.action, {
+                            method: "POST",
+                            headers: {"X-Requested-With": "XMLHttpRequest"},
+                            body: formData
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            document.getElementById('nickname-display').textContent = data.nickname;
+                            alert("修改成功！");
+                        } else {
+                            alert("保存失败");
+                        }
+                    };
+                    </script>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -78,9 +105,7 @@
                             </li>
                             {% endfor %}
                         </ul>
-                    </div><!--end mod_songlist-->
-
-                    <!--分页-->
+                    </div>
                     <div class="page-box">
                         <div class="pagebar" id="pageBar">
                             {% if contacts.has_previous %}
@@ -101,6 +126,6 @@
                 </div>
             </div>
         </div>
-    </div><!-- end main -->
+    </div>
 </body>
 {% endblock %}

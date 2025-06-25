@@ -12,6 +12,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Count
 from django.db.models import Sum
+from django.http import JsonResponse
 # Create your views here.
 
 
@@ -125,3 +126,21 @@ def song_analysis(request):
         'search_song': [],
     }
     return render(request, 'song_analysis.html', context)
+
+@login_required
+def update_user_info(request):
+    if request.method == "POST":
+        nickname = request.POST.get("nickname")
+        email = request.POST.get("email")
+        user = request.user
+        if hasattr(user, "nickname"):
+            user.nickname = nickname
+        user.email = email
+        user.save()
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({
+                "nickname": getattr(user, "nickname", user.username),
+                "email": user.email,
+            })
+        return redirect("home", 1)
+    return redirect("home", 1)
