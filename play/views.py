@@ -9,6 +9,13 @@ from django.utils import timezone
 # Create your views here.
 
 
+import os
+import random
+from django.shortcuts import render
+from index.models import Song, Dynamic
+from user.models import SongLog
+from django.utils import timezone
+
 def playview(request, song_id):
     # 热搜歌曲
     search_song = Dynamic.objects.select_related('song').order_by('-dynamic_search').all()[:6]
@@ -17,9 +24,7 @@ def playview(request, song_id):
     try:
         song_info = Song.objects.get(song_id=int(song_id))
     except Song.DoesNotExist:
-        # 歌曲不存在，重定向到首页或显示错误信息
         error_message = f"抱歉，ID为{song_id}的歌曲不存在。"
-        # 获取一些推荐歌曲，展示在错误页面中
         recommend_songs = Song.objects.all()[:10]
         return render(request, 'error.html', {
             'error_message': error_message,
@@ -27,32 +32,32 @@ def playview(request, song_id):
         })
     
     # 获取所有可用的歌曲文件
-    song_file_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'static', 'songFile')
+    song_file_dir = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        'static', 'songFile'
+    )
     available_song_files = []
     if os.path.exists(song_file_dir):
-        available_song_files = [f for f in os.listdir(song_file_dir) if os.path.isfile(os.path.join(song_file_dir, f)) and f.endswith(('.mp3', '.m4a', '.ogg'))]
+        available_song_files = [f for f in os.listdir(song_file_dir)
+                                if os.path.isfile(os.path.join(song_file_dir, f))
+                                and f.endswith(('.mp3', '.m4a', '.ogg'))]
     
     # 处理歌曲文件路径
     song_file_name = None
-    # 首先尝试使用song_id匹配文件（如果有）
     song_id_files = [f for f in available_song_files if f.startswith(f"{song_id}.")]
     if song_id_files:
         song_file_name = song_id_files[0]
     else:
-        # 然后尝试使用歌曲名称匹配文件（如果有）
         song_name_files = [f for f in available_song_files if song_info.song_name in f]
         if song_name_files:
             song_file_name = song_name_files[0]
         else:
-            # 如果找不到匹配的文件，检查数据库中的song_file是否有效
             if hasattr(song_info.song_file, 'name') and song_info.song_file.name:
                 song_file_name = song_info.song_file.name
                 song_file_path = os.path.join(song_file_dir, song_file_name)
                 if not os.path.exists(song_file_path):
-                    # 如果数据库中的文件不存在，随机选择一个可用的文件
                     song_file_name = random.choice(available_song_files) if available_song_files else "爱你.m4a"
             else:
-                # 随机选择一个可用的文件
                 song_file_name = random.choice(available_song_files) if available_song_files else "爱你.m4a"
     
     # 播放列表
@@ -63,37 +68,41 @@ def playview(request, song_id):
             if int(song_id) == i['song_id']:
                 song_exist = True
     if not song_exist:
-        play_list.append({'song_id': int(song_id), 'song_singer': song_info.song_singer,
-                          'song_name': song_info.song_name, 'song_time': song_info.song_time})
+        play_list.append({
+            'song_id': int(song_id),
+            'song_singer': song_info.song_singer,
+            'song_name': song_info.song_name,
+            'song_time': song_info.song_time
+        })
         request.session['play_list'] = play_list
     
     # 歌词处理
-    song_lyrics = "暂无歌词"  # 默认歌词
-    
-    # 优先使用lyrics_text字段中的歌词内容
+    song_lyrics = "暂无歌词"
     if song_info.lyrics_text:
         song_lyrics = song_info.lyrics_text
-    # 如果lyrics_text为空，尝试读取歌词文件
     elif song_info.song_lyrics and song_info.song_lyrics != '暂无歌词':
         try:
-            # 尝试读取歌词文件
-            lyrics_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                                     'static', 'songLyric', 'default.txt')
+            lyrics_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                'static', 'songLyric', 'default.txt'
+            )
             if hasattr(song_info.song_lyrics, 'name') and song_info.song_lyrics.name:
-                if os.path.exists(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                                          'static', 'songLyric', song_info.song_lyrics.name)):
-                    lyrics_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-                                          'static', 'songLyric', song_info.song_lyrics.name)
-            
+                custom_lyrics_path = os.path.join(
+                    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                    'static', 'songLyric', song_info.song_lyrics.name
+                )
+                if os.path.exists(custom_lyrics_path):
+                    lyrics_path = custom_lyrics_path
             with open(lyrics_path, 'r', encoding='utf-8') as f:
                 song_lyrics = f.read()
         except (OSError, IOError):
-            # 如果读取失败，设置为默认歌词
             song_lyrics = "暂无歌词"
     
     # 相关歌曲
     song_types = Song.objects.values('song_type').get(song_id=song_id)
-    song_relevant = Dynamic.objects.select_related('song').filter(song__song_type=song_types.get('song_type')).order_by('dynamic_plays').all()[:6]
+    song_relevant = Dynamic.objects.select_related('song').filter(
+        song__song_type=song_types.get('song_type')
+    ).order_by('dynamic_plays').all()[:6]
     
     # 添加播放次数
     dynamic_info = Dynamic.objects.filter(song_id=int(song_id)).first()
@@ -101,26 +110,28 @@ def playview(request, song_id):
         dynamic_info.dynamic_plays += 1
         dynamic_info.save()
     else:
-        dynamic_info = Dynamic(dynamic_plays=1, dynamic_search=0, dynamic_down=0, song_id=song_id)
+        dynamic_info = Dynamic(
+            dynamic_plays=1, dynamic_search=0, dynamic_down=0, song_id=song_id
+        )
         dynamic_info.save()
+
+    # 记录每次听歌历史
     if request.user.is_authenticated:
-        log, created = SongLog.objects.create(
+        SongLog.objects.create(
             user=request.user,
             song=song_info,
-            defaults={
-                'listen_count': 1,
-                'total_listen_seconds': 0,
-            }
+            listen_count=1,
+            total_listen_seconds=0
         )
-        if not created:
-            log.listen_count += 1
-            # log.total_listen_seconds += ... # 如有单次播放时长可加
-            log.listen_time = timezone.now()
-            log.save()
     
-    return render(request, 'play.html', {'search_song': search_song, 'song_info': song_info, 
-                                         'play_list': play_list, 'song_lyrics': song_lyrics, 
-                                         'song_relevant': song_relevant, 'song_file_name': song_file_name})
+    return render(request, 'play.html', {
+        'search_song': search_song,
+        'song_info': song_info,
+        'play_list': play_list,
+        'song_lyrics': song_lyrics,
+        'song_relevant': song_relevant,
+        'song_file_name': song_file_name
+    })
 
 
 def downloadview(request, song_id):
