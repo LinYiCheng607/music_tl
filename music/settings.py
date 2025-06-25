@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'ranking',
     'search',
     'user',
+    'aiassistant',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +71,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'play/templates'),
             os.path.join(BASE_DIR, 'comment/templates'),
             os.path.join(BASE_DIR, 'search/templates'),
+            os.path.join(BASE_DIR, 'aiassistant/templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
