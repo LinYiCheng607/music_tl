@@ -101,8 +101,7 @@ DATABASES = {
         'NAME': 'music_db',
         'USER': 'root',
         'PASSWORD': '1111',
-        'HOST': '10.22.146.119',
->>>>>>> Stashed changes
+        'HOST': '127.0.0.1',
         'PORT': '3306',
     }
 }
