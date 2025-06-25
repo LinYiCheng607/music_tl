@@ -1,5 +1,57 @@
 blockquote,body,button,dd,dl,dt,fieldset,form,h1,h2,h3,h4,h5,h6,hr,input,legend,li,ol,p,pre,td,textarea,th,ul{margin:0;padding:0}
 ol,ul{list-style:none}
+
+/* 调整主容器宽度 */
+.wrapper {
+    width: 100%; /* 占满整个视口宽度 */
+    max-width: 1400px; /* 最大宽度限制，避免过宽 */
+    /* margin: 0 auto; */
+    padding: 0; /* 移除左右内边距 */
+}
+
+/* 排行榜容器样式 */
+.main {
+    width: 100%; /* 占满 wrapper 宽度 */
+    margin: 0 auto; /* 上下无外边距，左右居中 */
+    padding: 20px; /* 适当减少内边距 */
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+/* 顶部导航栏优化（可选） */
+.category-nav {
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* 排行榜表格样式 */
+.rank-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+}
+
+.rank-list-table th,
+.rank-list-table td {
+    padding: 10px;
+    border: 1px solid #FFDF35;
+    text-align: center;
+}
+
+/* 调整排名数字的样式 */
+.rank-list-table .n1,
+.rank-list-table .n2 {
+    font-size: 18px; /* 增大排名数字大小 */
+    font-weight: bold;
+}
+
+/* 增大歌名和歌手的文字大小 */
+.rank-list-table .name-cell h3,
+.rank-list-table .name-cell .desc a {
+    font-size: 12px; /* 增大歌名和歌手文字大小 */
+}
+
 body{
     font:12px/1.5 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif !important;
     -webkit-text-size-adjust:none;
@@ -243,3 +295,406 @@ input[type="checkbox"] {
 ::-moz-placeholder { color: #ffbc42 !important; font-style: italic; }
 :-ms-input-placeholder { color: #ffbc42 !important; font-style: italic; }
 ::placeholder { color: #ffbc42 !important; font-style: italic; }
+
+/* 歌曲分类容器 */
+.category-nav {
+    display: flex;
+    padding: 12px 24px;
+    background: linear-gradient(145deg, #f8f3e6 0%, #f5e6c6 100%);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin: 20px auto;
+    max-width: 1200px;
+}
+
+.category-nav a {
+    position: relative;
+    padding: 8px 16px;
+    margin: 0 10px;
+    color: #666;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px;
+}
+
+.category-nav a:hover {
+    transform: translateY(-2px);
+    color: #d4a656;
+}
+
+.category-nav a.active {
+    color: #d4a656;
+    font-weight: 500;
+}
+
+.category-nav a.active::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    width: 60%;
+    height: 2px;
+    background: #d4a656;
+    transform: translateX(-50%);
+    animation: navUnderline 0.3s ease-out;
+}
+
+@keyframes navUnderline {
+    from { width: 0% }
+    to { width: 60% }
+}
+
+@media (max-width: 768px) {
+    .category-nav {
+        overflow-x: auto;
+        padding: 12px 16px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    .category-nav::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.main-head {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.main-head h1 {
+    font-size: 2.4rem;
+    color: #d4a656;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.cate-item {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.cate-item li {
+    display: inline-block;
+    margin: 0 10px;
+}
+.main-title {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: #f0f0f0;
+    transition: all 0.3s;
+}
+.main-title:hover {
+    background: #FFDF35;
+}
+.computer.active .main-title {
+    background: #FFDF35;
+    font-weight: bold;
+}
+.footer .links{position:relative;zoom:1;border-bottom:1px solid #ffe066;padding:15px 0;font-size:12px;color:#b1b3b9;text-align:center}
+.footer .links a{color:#b1b3b9;padding:10px}
+.footer .copyright{width:1000px;margin:0 auto;}
+.footer .copyright p{line-height:30px;text-align:center;color:#c97a0a !important;font-size:18px;text-shadow:1px 1px 0 #fffbe6;}
+.footer .copyright p:first-child{font-size:24px;color:#ffb300;font-weight:bold;letter-spacing:2px;margin-bottom:4px;}
+.footer .copyright a.office-verification{margin-left:5px;padding:5px 10px;background-size:20px 20px}
+.footer .copyright a.office-verification img{width:20px;height:20px;vertical-align:top}
+.footer .copyright .footerIcon,.footer .copyright .footerIcon a{display:inline-block;zoom:1;vertical-align:middle}
+.footer .copyright .footerIcon{width:16px;height:16px;margin-left:5px;margin-top:-2px}
+.footer .copyright .footerIcon a{padding:0}
+.footer .copyright a{color:#f59e42 !important;}
+.global-sitenav a{text-decoration:none;color:#f59e42 !important;}
+.global-sitenav a:hover{text-decoration:underline;color:#ff9800 !important;}
+.global-sitenav{
+    position:relative;
+    z-index:1000;
+    height:34px;
+    margin-bottom:15px;
+    border-bottom:1px solid #ffe066 !important;
+    background:#FFF9E0 !important;
+    color:#a66a00 !important;
+    font:400 12px/34px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;
+}
+.global-sitenav .sitenav-inner{min-width:950px;width:1000px;margin:0 auto;zoom:1;padding:0 10px}
+.global-sitenav h3{margin:0;padding:0}
+.global-sitenav button,.global-sitenav input{margin:0;padding:0;vertical-align:middle;font-size:100%;font-family:inherit}
+.global-sitenav img{border:0 none}
+.global-sitenav .icon-hot i,.global-sitenav .icon-new i{position:absolute;margin:3px 0 0 2px;width:9px;height:11px;font:0/0 arial;background-position:-60px -175px;font:0/0 arial}
+.global-sitenav .icon-hot i{background-position:-60px -190px}
+.global-sitenav .red{color:#f33}
+.global-sitenav .sitenav-inner:after{content:" ";display:block;height:0;clear:both;visibility:hidden;font-size:0}
+.global-sitenav .sitenav-links a:hover,.global-sitenav a:hover{text-decoration:underline;}
+.global-sitenav .sitenav-trigger{display:block;position:relative;zoom:1;padding:0 10px;color:#f59e42 !important;cursor:pointer}
+.global-sitenav .sitenav-trigger i{position:absolute;top:15px;right:10px;width:7px;height:4px;overflow:hidden;background-position:-75px -195px}
+.global-sitenav .sitenav-dropdown-body{display:none;position:absolute;top:35px;left:0;z-index:5;background-color:#FFF9E0 !important;border:1px solid #FFDF35 !important;}
+.global-sitenav .h-sitenav-dropdown{position:relative;margin-top:-1px}
+.global-sitenav .h-sitenav-dropdown .sitenav-trigger{z-index:10;margin-bottom:-1px;padding:0 9px 1px;border:1px solid #ffe066 !important;border-bottom:0 none;background-color:#FFF9E0 !important;}
+.global-sitenav .h-sitenav-dropdown .sitenav-trigger i,.global-sitenav .h-sitenav-groupsite .sitenav-trigger i{background-position:-85px -195px}
+.global-sitenav .h-sitenav-dropdown .sitenav-dropdown-body{display:block}
+.global-sitenav .sitenav-links{float:left}
+.global-sitenav .sitenav-links a{color:#f59e42 !important;text-decoration:none}
+.global-sitenav .sitenav-links .zol-link{float:left;width:60px;margin:0 10px 0 0}
+.global-sitenav .sitenav-links .add-fav{float:left;margin-right:-60px}
+.global-sitenav .sitenav-links .sitenav-telephone{float:left;margin-right:-140px;color:#999}
+.global-sitenav .sitenav-links .sitenav-telephone em{color:#f33;font-style:normal}
+.global-sitenav .sitenav-links .sitenav-trigger{padding-right:10px}
+.global-sitenav .sitenav-links .client-enter{float:left;margin:0 10px 0 0;width:82px}
+.global-sitenav .product-librarylinks{float:left;position:relative;padding-left:10px}
+.global-sitenav .product-librarylinks a{float:left;margin:0 15px 0 0}
+.global-sitenav .sitenav-productlibrary-count{float:right}
+.global-sitenav .sitenav-productlibrary-count a{margin:0 0 0 15px;color:#f59e42 !important;}
+.global-sitenav .sitenav-productlibrary-count a:hover{color:#ff9800 !important;}
+.global-sitenav .sitenav-productlibrary-count em{color:#f33}
+.global-sitenav .product-librarylinks .icon-hot i,.global-sitenav .product-librarylinks .icon-new i{margin:5px 0 0 0;font:0/0 arial}
+.global-sitenav .sitenav-groupsite{position:relative;z-index:199;float:left;width:97px}
+.global-sitenav .sitenav-groupsite a{color:#f59e42 !important;text-decoration:none}
+.global-sitenav .sitenav-groupsite a:hover{color:#ff9800 !important;text-decoration:underline}
+.global-sitenav .sitenav-groupsite .sitenav-trigger{padding:0 22px 0 25px;background-position:-180px -168px}
+.global-sitenav .sitenav-groupsite .groupsite-sitemap-body{display:none;position:absolute;top:35px;left:-70px;width:998px;background:#FFF9E0 !important;border:1px solid #FFDF35 !important;-webkit-box-shadow:0 2px 5px -3px rgba(0,0,0,.4);box-shadow:0 2px 5px -3px rgba(0,0,0,.4)}
+.global-sitenav .h-sitenav-groupsite{margin-top:-1px;background:#FFF9E0 !important;}
+.global-sitenav .h-sitenav-groupsite .sitenav-trigger{z-index:10;margin-bottom:-1px;padding:0 21px 1px 24px;border:1px solid #ffe066 !important;border-bottom:0 none;background-color:#FFF9E0 !important;background-position:-181px -168px}
+.global-sitenav .h-sitenav-groupsite .groupsite-sitemap-body{display:block}
+.global-sitenav .sitemap-items{margin:0 0 0 20px;padding:8px 0 12px;list-style:none outside none}
+.global-sitenav .sitemap-items li{overflow:hidden;margin:0;padding:4px 0 0;list-style:none outside none;zoom:1;line-height:28px}
+.global-sitenav .sitemap-items a{float:left;margin:0 16px 0 0;color:#f59e42 !important;font:400 14px/28px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;}
+.global-sitenav .sitemap-items .icon-hot,.global-sitenav .sitemap-items .icon-new{margin-right:27px}
+.global-sitenav .sitemap-items .sitemap-sub-title{float:left;margin:0 16px 0 0;font:400 14px/28px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;color:#0b92e0}
+.global-sitenav .sitemap-items .more{float:right}
+.global-sitenav .sitemap-items .more b{font-family:simsun;font-weight:400}
+.global-sitenav .sitenav-login-bar{float:right;padding:0;width:113px}
+.global-sitenav .sitenav-login-bar a:hover{color:#ff9800 !important;text-decoration:underline}
+.global-sitenav .sitenav-login-bar .sitenav-login-links{float:right;height:24px;margin:5px 0 0;width:68px;overflow:hidden}
+.global-sitenav .sitenav-login-bar .sitenav-qq,.global-sitenav .sitenav-login-bar .sitenav-weibo{float:left;width:24px;height:24px;margin:0 0 0 10px;background-position:0 -175px;color:#666;text-indent:-9999em;opacity:.8;filter:alpha(opacity=80);font:0/0 arial}
+.global-sitenav .sitenav-login-bar .sitenav-qq{background-position:-30px -175px}
+.global-sitenav .sitenav-login-bar .sitenav-qq:hover,.global-sitenav .sitenav-login-bar .sitenav-weibo:hover{opacity:1;filter:alpha(opacity=100)}
+.global-sitenav .sitenav-login-bar .sitenav-login-box{position:relative;float:left;width:45px}
+.global-sitenav .sitenav-login-bar .sitenav-login-link{display:inline-block;width:25px;padding:0 10px;cursor:pointer}
+.global-sitenav .sitenav-login-bar .sitenav-login-form{display:none;position:absolute;top:34px;right:-69px;width:190px;padding:11px 34px 4px;border:1px solid #ffe066 !important;-webkit-box-shadow:0 0 8px #ffe066;box-shadow:0 0 8px #ffe066;background:#FFF9E0 !important;}
+.global-sitenav .sitenav-login-bar .sitenav-login-box-open .sitenav-login-form{display:block}
+.global-sitenav .sitenav-login-form h3{color:#a66a00 !important;font:400 12px/20px Arial}
+.global-sitenav .sitenav-login-form .sitenav-password,.global-sitenav .sitenav-login-form .sitenav-username{position:relative;display:block;width:172px;height:28px;margin:10px 0 0;padding:0 8px;border:1px solid #FFDF35 !important;}
+.global-sitenav .sitenav-login-form .sitenav-username{margin-top:6px}
+.global-sitenav .sitenav-password input,.global-sitenav .sitenav-username input{position:absolute;top:1px;left:8px;width:172px;padding:4px 0;outline:0 none;border:0 none;line-height:18px;}
+.global-sitenav .sitenav-password label,.global-sitenav .sitenav-username label{position:absolute;top:0;left:9px;z-index:10;color:#ffbc42 !important;font-size:12px;line-height:28px;font-family:'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;cursor:text;-webkite-user-select:none;user-select:none}
+.global-sitenav .sitenav-login-form .sitenav-focus{border-color:#0791f5}
+.global-sitenav .sitenav-login-form .sitenav-focus label{color:#ffe066;}
+.global-sitenav .sitenav-login-form .sitenav-error{border-color:#f33}
+.global-sitenav .sitenav-login-form .sitenav-registration{margin-left:0;color:#1f4f88}
+.global-sitenav .sitenav-loign-bar{overflow:hidden}
+.global-sitenav .sitenav-loign-bar a{float:right;color:#1f4f88}
+.global-sitenav .sitenav-loign-bar label{float:left;color:#666}
+.global-sitenav .sitenav-loign-bar label input{float:left;width:14px;height:14px;overflow:hidden;margin:10px 5px 0 0}
+.global-sitenav .sitenav-login-button{display:block;width:190px;height:30px;margin:10px 0 0;border:0 none;background:#FFDF35 !important;color:#fff;font:700 14px/30px Arial;cursor:pointer;border-radius:10px;box-shadow:0 2px 8px #FFDF35;}
+.sitenav-login-error-tip{position:absolute;left:34px;top:11px;width:190px;height:20px;font:12px/20px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;color:#f33;background:#fff;display:none}
+.global-sitenav .sitenav-personal-center{float:right;margin:0 5px 0 0;width:280px}
+.global-sitenav .sitenav-personal-center a{color:#f59e42 !important;text-decoration:none}
+.global-sitenav .sitenav-personal-center a:hover{color:#ff9800 !important;text-decoration:underline}
+.global-sitenav .sitenav-personal-center .sitenav-personal-login-out{float:right;margin:0 0 0 20px}
+.global-sitenav .sitenav-personal-center .sitenav-personal-msg{position:relative;float:right;width:16px;height:13px;margin:10px 0 0 20px;background-position:-75px -175px}
+.global-sitenav .sitenav-personal-msg i{position:absolute;right:-3px;top:-4px;font:0/0 arial;width:8px;height:8px;background-position:-95px -175px}
+.global-sitenav .sitenav-personal-center .sitenav-personal-welcome{float:right;color:#999}
+
+/* 美化滚动条 */
+::-webkit-scrollbar-thumb {
+    background: #FFDF35 !important;
+    border-radius: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #FFF9E0 !important;
+}
+
+/* 输入框美化 */
+input,
+select,
+textarea {
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+    color: #a66a00 !important;
+    background-color: #FFF9E0 !important;
+    border-radius: 10px !important;
+    border: 2px solid #FFDF35 !important;
+}
+input[type="text"],
+input[type="password"],
+input[type="search"] {
+    padding: 6px 10px !important;
+    font-size: 16px !important;
+}
+input[type="checkbox"] {
+    accent-color: #FFDF35 !important;
+}
+::-webkit-input-placeholder { color: #ffbc42 !important; font-style: italic; }
+::-moz-placeholder { color: #ffbc42 !important; font-style: italic; }
+:-ms-input-placeholder { color: #ffbc42 !important; font-style: italic; }
+::placeholder { color: #ffbc42 !important; font-style: italic; }
+
+/* 歌曲分类容器 */
+.category-nav {
+    display: flex;
+    padding: 12px 24px;
+    background: linear-gradient(145deg, #f8f3e6 0%, #f5e6c6 100%);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin: 20px auto;
+    max-width: 1200px;
+}
+
+.category-nav a {
+    position: relative;
+    padding: 8px 16px;
+    margin: 0 10px;
+    color: #666;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px;
+}
+
+.category-nav a:hover {
+    transform: translateY(-2px);
+    color: #d4a656;
+}
+
+.category-nav a.active {
+    color: #d4a656;
+    font-weight: 500;
+}
+
+.category-nav a.active::after {
+    content: '';
+    position: relative;
+    left: -15px;
+    border: 1px solid #FFDF35;
+    padding: 10px;
+    height: 2px;
+    background: #d4a656;
+    transform: translateX(-50%);
+    animation: navUnderline 0.3s ease-out;
+}
+
+@keyframes navUnderline {
+    from { width: 0% }
+    to { width: 60% }
+}
+
+@media (max-width: 768px) {
+    .category-nav {
+        overflow-x: auto;
+        padding: 12px 16px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    .category-nav::-webkit-scrollbar {
+        display: none;
+    }
+}
+.cate-item {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.cate-item li {
+    display: inline-block;
+    margin: 0 10px;
+}
+.main-title {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: #f0f0f0;
+    transition: all 0.3s;
+}
+.main-title:hover {
+    background: #FFDF35;
+}
+.computer.active .main-title {
+    background: #FFDF35;
+    font-weight: bold;
+}
+.footer .links{position:relative;zoom:1;border-bottom:1px solid #ffe066;padding:15px 0;font-size:12px;color:#b1b3b9;text-align:center}
+.footer .links a{color:#b1b3b9;padding:10px}
+.footer .copyright{width:1000px;margin:0 auto;}
+.footer .copyright p{line-height:30px;text-align:center;color:#c97a0a !important;font-size:18px;text-shadow:1px 1px 0 #fffbe6;}
+.footer .copyright p:first-child{font-size:24px;color:#ffb300;font-weight:bold;letter-spacing:2px;margin-bottom:4px;}
+.footer .copyright a.office-verification{margin-left:5px;padding:5px 10px;background-size:20px 20px}
+.footer .copyright a.office-verification img{width:20px;height:20px;vertical-align:top}
+.footer .copyright .footerIcon,.footer .copyright .footerIcon a{display:inline-block;zoom:1;vertical-align:middle}
+.footer .copyright .footerIcon{width:16px;height:16px;margin-left:5px;margin-top:-2px}
+.footer .copyright .footerIcon a{padding:0}
+.footer .copyright a{color:#f59e42 !important;}
+.global-sitenav a{text-decoration:none;color:#f59e42 !important;}
+.global-sitenav a:hover{text-decoration:underline;color:#ff9800 !important;}
+.global-sitenav{
+    position:relative;
+    z-index:1000;
+    height:34px;
+    margin-bottom:15px;
+    border-bottom:1px solid #ffe066 !important;
+    background:#FFF9E0 !important;
+    color:#a66a00 !important;
+    font:400 12px/34px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;
+}
+.global-sitenav .sitenav-inner{min-width:950px;width:1000px;margin:0 auto;zoom:1;padding:0 10px}
+.global-sitenav h3{margin:0;padding:0}
+.global-sitenav button,.global-sitenav input{margin:0;padding:0;vertical-align:middle;font-size:100%;font-family:inherit}
+.global-sitenav img{border:0 none}
+.global-sitenav .icon-hot i,.global-sitenav .icon-new i{position:absolute;margin:3px 0 0 2px;width:9px;height:11px;font:0/0 arial;background-position:-60px -175px;font:0/0 arial}
+.global-sitenav .icon-hot i{background-position:-60px -190px}
+.global-sitenav .red{color:#f33}
+.global-sitenav .sitenav-inner:after{content:" ";display:block;height:0;clear:both;visibility:hidden;font-size:0}
+.global-sitenav .sitenav-links a:hover,.global-sitenav a:hover{text-decoration:underline;}
+.global-sitenav .sitenav-trigger{display:block;position:relative;zoom:1;padding:0 10px;color:#f59e42 !important;cursor:pointer}
+.global-sitenav .sitenav-trigger i{position:absolute;top:15px;right:10px;width:7px;height:4px;overflow:hidden;background-position:-75px -195px}
+.global-sitenav .sitenav-dropdown-body{display:none;position:absolute;top:35px;left:0;z-index:5;background-color:#FFF9E0 !important;border:1px solid #FFDF35 !important;}
+.global-sitenav .h-sitenav-dropdown{position:relative;margin-top:-1px}
+.global-sitenav .h-sitenav-dropdown .sitenav-trigger{z-index:10;margin-bottom:-1px;padding:0 9px 1px;border:1px solid #ffe066 !important;border-bottom:0 none;background-color:#FFF9E0 !important;}
+.global-sitenav .h-sitenav-dropdown .sitenav-trigger i,.global-sitenav .h-sitenav-groupsite .sitenav-trigger i{background-position:-85px -195px}
+.global-sitenav .h-sitenav-dropdown .sitenav-dropdown-body{display:block}
+.global-sitenav .sitenav-links{float:left}
+.global-sitenav .sitenav-links a{color:#f59e42 !important;text-decoration:none}
+.global-sitenav .sitenav-links .zol-link{float:left;width:60px;margin:0 10px 0 0}
+.global-sitenav .sitenav-links .add-fav{float:left;margin-right:-60px}
+.global-sitenav .sitenav-links .sitenav-telephone{float:left;margin-right:-140px;color:#999}
+.global-sitenav .sitenav-links .sitenav-telephone em{color:#f33;font-style:normal}
+.global-sitenav .sitenav-links .sitenav-trigger{padding-right:10px}
+.global-sitenav .sitenav-links .client-enter{float:left;margin:0 10px 0 0;width:82px}
+.global-sitenav .product-librarylinks{float:left;position:relative;padding-left:10px}
+.global-sitenav .product-librarylinks a{float:left;margin:0 15px 0 0}
+.global-sitenav .sitenav-productlibrary-count{float:right}
+.global-sitenav .sitenav-productlibrary-count a{margin:0 0 0 15px;color:#f59e42 !important;}
+.global-sitenav .sitenav-productlibrary-count a:hover{color:#ff9800 !important;}
+.global-sitenav .sitenav-productlibrary-count em{color:#f33}
+.global-sitenav .product-librarylinks .icon-hot i,.global-sitenav .product-librarylinks .icon-new i{margin:5px 0 0 0;font:0/0 arial}
+.global-sitenav .sitenav-groupsite{position:relative;z-index:199;float:left;width:97px}
+.global-sitenav .sitenav-groupsite a{color:#f59e42 !important;text-decoration:none}
+.global-sitenav .sitenav-groupsite a:hover{color:#ff9800 !important;text-decoration:underline}
+.global-sitenav .sitenav-groupsite .sitenav-trigger{padding:0 22px 0 25px;background-position:-180px -168px}
+.global-sitenav .sitenav-groupsite .groupsite-sitemap-body{display:none;position:absolute;top:35px;left:-70px;width:998px;background:#FFF9E0 !important;border:1px solid #FFDF35 !important;-webkit-box-shadow:0 2px 5px -3px rgba(0,0,0,.4);box-shadow:0 2px 5px -3px rgba(0,0,0,.4)}
+.global-sitenav .h-sitenav-groupsite{margin-top:-1px;background:#FFF9E0 !important;}
+.global-sitenav .h-sitenav-groupsite .sitenav-trigger{z-index:10;margin-bottom:-1px;padding:0 21px 1px 24px;border:1px solid #ffe066 !important;border-bottom:0 none;background-color:#FFF9E0 !important;background-position:-181px -168px}
+.global-sitenav .h-sitenav-groupsite .groupsite-sitemap-body{display:block}
+.global-sitenav .sitemap-items{margin:0 0 0 20px;padding:8px 0 12px;list-style:none outside none}
+.global-sitenav .sitemap-items li{overflow:hidden;margin:0;padding:4px 0 0;list-style:none outside none;zoom:1;line-height:28px}
+.global-sitenav .sitemap-items a{float:left;margin:0 16px 0 0;color:#f59e42 !important;font:400 14px/28px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;}
+.global-sitenav .sitemap-items .icon-hot,.global-sitenav .sitemap-items .icon-new{margin-right:27px}
+.global-sitenav .sitemap-items .sitemap-sub-title{float:left;margin:0 16px 0 0;font:400 14px/28px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;color:#0b92e0}
+.global-sitenav .sitemap-items .more{float:right}
+.global-sitenav .sitemap-items .more b{font-family:simsun;font-weight:400}
+.global-sitenav .sitenav-login-bar{float:right;padding:0;width:113px}
+.global-sitenav .sitenav-login-bar a:hover{color:#ff9800 !important;text-decoration:underline}
+.global-sitenav .sitenav-login-bar .sitenav-login-links{float:right;height:24px;margin:5px 0 0;width:68px;overflow:hidden}
+.global-sitenav .sitenav-login-bar .sitenav-qq,.global-sitenav .sitenav-login-bar .sitenav-weibo{float:left;width:24px;height:24px;margin:0 0 0 10px;background-position:0 -175px;color:#666;text-indent:-9999em;opacity:.8;filter:alpha(opacity=80);font:0/0 arial}
+.global-sitenav .sitenav-login-bar .sitenav-qq{background-position:-30px -175px}
+.global-sitenav .sitenav-login-bar .sitenav-qq:hover,.global-sitenav .sitenav-login-bar .sitenav-weibo:hover{opacity:1;filter:alpha(opacity=100)}
+.global-sitenav .sitenav-login-bar .sitenav-login-box{position:relative;float:left;width:45px}
+.global-sitenav .sitenav-login-bar .sitenav-login-link{display:inline-block;width:25px;padding:0 10px;cursor:pointer}
+.global-sitenav .sitenav-login-bar .sitenav-login-form{display:none;position:absolute;top:34px;right:-69px;width:190px;padding:11px 34px 4px;border:1px solid #ffe066 !important;-webkit-box-shadow:0 0 8px #ffe066;box-shadow:0 0 8px #ffe066;background:#FFF9E0 !important;}
+.global-sitenav .sitenav-login-bar .sitenav-login-box-open .sitenav-login-form{display:block}
+.global-sitenav .sitenav-login-form h3{color:#a66a00 !important;font:400 12px/20px Arial}
+.global-sitenav .sitenav-login-form .sitenav-password,.global-sitenav .sitenav-login-form .sitenav-username{position:relative;display:block;width:172px;height:28px;margin:10px 0 0;padding:0 8px;border:1px solid #FFDF35 !important;}
+.global-sitenav .sitenav-login-form .sitenav-username{margin-top:6px}
+.global-sitenav .sitenav-password input,.global-sitenav .sitenav-username input{position:absolute;top:1px;left:8px;width:172px;padding:4px 0;outline:0 none;border:0 none;line-height:18px;}
+.global-sitenav .sitenav-password label,.global-sitenav .sitenav-username label{position:absolute;top:0;left:9px;z-index:10;color:#ffbc42 !important;font-size:12px;line-height:28px;font-family:'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;cursor:text;-webkite-user-select:none;user-select:none}
+.global-sitenav .sitenav-login-form .sitenav-focus{border-color:#0791f5}
+.global-sitenav .sitenav-login-form .sitenav-focus label{color:#ffe066;}
+.global-sitenav .sitenav-login-form .sitenav-error{border-color:#f33}
+.global-sitenav .sitenav-login-form .sitenav-registration{margin-left:0;color:#1f4f88}
+.global-sitenav .sitenav-loign-bar{overflow:hidden}
+.global-sitenav .sitenav-loign-bar a{float
