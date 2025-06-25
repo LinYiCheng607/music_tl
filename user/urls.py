@@ -5,4 +5,5 @@ urlpatterns = [
     path('home/<int:page>.html', views.homeview, name='home'),
     path('login.html', views.loginview, name='login'),
     path('logout.html', views.logoutview, name='logout'),
+    path('analysis/', views.song_analysis, name='song_analysis'),
 ]

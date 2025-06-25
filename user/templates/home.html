@@ -47,7 +47,8 @@
 
     <div class="main main--profile">
         <div class="mod_tab profile_nav" role="nav" id="nav">
-            <span class="mod_tab__item mod_tab__current" id="hear_tab">我听过的歌</span>
+            <a href="{% url 'home' 1 %}" class="mod_tab__item {% if request.resolver_match.url_name == 'home' %}mod_tab__current{% endif %}" id="hear_tab">我听过的歌</a>
+            <a href="{% url 'song_analysis' %}" class="mod_tab__item {% if request.resolver_match.url_name == 'song_analysis' %}mod_tab__current{% endif %}" id="analysis_tab">我的歌曲分析</a>
         </div>
         <div class="js_box" style="display: block;">
             <div class="profile_cont">

@@ -5,7 +5,7 @@ from django.contrib.auth import logout, login
 from django.contrib.auth.hashers import check_password
 from .form import MyUserCreationForm
 from index.models import *
-
+import json
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.contrib.auth.decorators import login_required
 
@@ -67,3 +67,37 @@ def homeview(request, page):
     except EmptyPage:
         contacts = paginator.page(paginator.num_pages)
     return render(request, 'home.html', locals())
+
+@login_required
+def song_analysis(request):
+    # 假设有SongLog模型记录用户听歌历史
+    # SongLog: user, song, listen_time, song_type
+    # 统计每天听歌数量
+    from django.utils import timezone
+    from datetime import timedelta
+
+    today = timezone.now().date()
+    days = 7  # 最近7天
+    line_labels = []
+    line_data = []
+    for i in range(days):
+        day = today - timedelta(days=days - i - 1)
+        line_labels.append(day.strftime('%Y-%m-%d'))
+        cnt = SongLog.objects.filter(user=request.user, listen_time__date=day).count()
+        line_data.append(cnt)
+
+    # 按类型统计
+    from django.db.models import Count
+    pie_qs = SongLog.objects.filter(user=request.user).values('song__type').annotate(value=Count('id')).order_by('-value')
+    pie_data = []
+    for item in pie_qs:
+        pie_data.append({'name': item['song__type'] or '未知', 'value': item['value']})
+
+    context = {
+        'line_labels': json.dumps(line_labels, ensure_ascii=False),
+        'line_data': json.dumps(line_data, ensure_ascii=False),
+        'pie_data': json.dumps(pie_data, ensure_ascii=False),
+        # 其它需要的上下文变量
+        'search_song': [],  # 补全你的热门搜索逻辑
+    }
+    return render(request, 'song_analysis.html', context)
