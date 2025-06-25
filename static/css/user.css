@@ -16,9 +16,11 @@ a:hover {
 }
 
 .mod_profile {
+    max-width: 1200px;   /* 与 .main 一致 */
+    margin: 0 auto;      /* 居中对齐 */
     height: 315px;
     padding-top: 65px;
-    /*background: url(../image/user_bg.jpg) 50% no-repeat;*/
+    background: url(../image/user_bg2.png) 50% no-repeat;
     background-size: cover;
     text-align: center;
     color: #fff;
@@ -159,20 +161,30 @@ a:hover {
 }
 .section_inner {max-width:1200px;margin:0 auto;position:relative}
 .mod_tab, .mod_tab__item {height:56px;line-height:56px}
-.mod_tab {position:relative;zoom:1;border-bottom:2px solid #FFDF35 !important;margin-bottom:30px}
-.mod_tab__item {
+.mod_tab {
+    position:relative;
+    zoom:1;
+    border-bottom:2px solid #FFDF35 !important;
+    margin-bottom:30px;
+}
+
+.mod_tab__item,
+.mod_tab__current {
     position:relative;
     float:left;
-    font-size:16px;
     overflow:hidden;
     margin-right:55px;
-    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
-    color: #d17d00 !important;
-}
-.mod_tab__current {
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 64px;
     color: #f59e42 !important;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+    text-shadow: 1px 1px 0 #fffbe6;
+    background: transparent !important;
+}
+
+.mod_tab__current {
     border-bottom: 2px solid #FFDF35 !important;
-    background: #FFF7CF !important;
 }
 .profile_nav{position:absolute;top:-56px;left:0;margin-bottom:0;width:80%}
 .profile_nav .mod_tab__item{color:#fff;margin-right:40px}

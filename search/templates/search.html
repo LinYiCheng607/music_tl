@@ -4,24 +4,23 @@
 <link type="image/x-icon" rel="shortcut icon" href="{% static "favicon.ico" %}">
 <link type="text/css" rel="stylesheet" href="{% static "css/common.css" %}">
 <link type="text/css" rel="stylesheet" href="{% static "css/search.css" %}">
-
 </head>
 <body>
     <div class="header">
-        <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo.png" %}"></a>
+        <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo4.png" %}"></a>
         <div class="search-box">
             <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
                 {% csrf_token %}
                 <div class="search-keyword">
-                    <input id="kword" name="kword" type="text" class="keyword" maxlength="120" placeholder="音乐节"  />
+                    <input name="kword" type="text" class="keyword" maxlength="120" placeholder="音乐节" />
                 </div>
                 <input id="subSerch" type="submit" class="search-button" value="搜 索" />
             </form>
             <div id="suggest" class="search-suggest"></div>
             <div class="search-hot-words">
-                {% for song in search_song  %}
-                    <a target="play" href="{% url 'play' song.song.song_id %}" >{{ song.song.song_name }}</a>
-                {% endfor  %}
+                {% for dynamic in search_song %}
+                    <a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a>
+                {% endfor %}
             </div>
         </div>
     </div><!--end header-->
@@ -60,26 +59,30 @@
             {%endfor %}
         </ul>
         <div class="page-box">
-            <div class="pagebar" id="pageBar">
+            <div class="pagebar" id="pageBar" style="text-align:center;">
                 {% if contacts.has_previous %}
-                <a href="{% url 'search' contacts.previous_page_number %}" class="prev" target="_self"><i></i>上一页</a>
+                    <a href="{% url 'search' contacts.previous_page_number %}" class="prev" target="_self">上一页</a>
                 {% endif %}
 
-                {% for page in contacts.paginator.page_range %}
+                {# 页码按钮，只显示10个 #}
+                {% for page in page_range %}
                     {% if contacts.number == page %}
-                        <span class="sel">{{ page }}</span>
+                        <span class="sel" style="font-weight:bold;color:#ff9900;">{{ page }}</span>
                     {% else %}
                         <a href="{% url 'search' page %}" target="_self">{{ page }}</a>
                     {% endif %}
                 {% endfor %}
 
                 {% if contacts.has_next %}
-                <a href="{% url 'search' contacts.next_page_number %}" class="next" target="_self">下一页<i></i></a>
+                    <a href="{% url 'search' contacts.next_page_number %}" class="next" target="_self">下一页</a>
                 {% endif %}
+
+                <div style="display:inline-block;margin-left:20px;color:#ff9900;">
+                    当前第 {{ current_page }} 页 / 共 {{ total_pages }} 页
+                </div>
             </div>
         </div>
     </div><!--end mod_songlist-->
     </div><!--end wrapper-->
     <!--footer-->
-
 {% endblock  %}

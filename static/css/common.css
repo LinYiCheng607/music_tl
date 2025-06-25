@@ -40,7 +40,7 @@ button{cursor:pointer}
 .index .header .logo{margin-right:126px;}
 .search-box{position:relative;z-index:50;float:right;width:302px;padding:0 78px 0 0;margin:10px 0 0}
 .index .search-box{width:502px;float:left}
-.search-box .search-keyword{position:relative;padding:6px 10px;height:28px;overflow:hidden;zoom:1;border:2px solid #FFDF35 !important;background:#ffe066 !important;s}
+.search-box .search-keyword{position:relative;padding:6px 10px;height:28px;overflow:hidden;zoom:1;border:2px solid #FFDF35 !important;background:#ffe066 !important;}
 .search-box .keyword{float:left;width:278px;height:20px;border:0 none;outline:0 none;font:14px/20px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;color:#a66a00 !important;}
 .index .search-box .keyword{width:478px}
 .search-box .search-button{position:absolute;right:0;top:0;width:80px;height:50px;border:0 none;background-color:#FFDF35 !important;color:#fff;font:16px/34px 'Comic Sans MS','Microsoft YaHei',Arial,sans-serif;overflow:hidden;cursor:pointer;outline:0 none;border-radius:10px;box-shadow:0 2px 8px #FFDF35;}
@@ -102,12 +102,11 @@ button{cursor:pointer}
 .pagebar .next i{right:12px;background-position:-11px -76px}
 .pagebar .prev:hover i{left:12px;background-position:-22px -76px}
 .pagebar .next:hover i{right:12px;background-position:-33px -76px}
-.footer{
-    background:#FFDF35 !important;
-    padding:20px 0;
-    margin-top:40px;
-    font-family:'Comic Sans MS','Microsoft YaHei',Arial,sans-serif !important;
-    color:#c97a0a !important;
+footer {
+    padding: 10px 0;  /* 内边距减少50% */
+    margin-top: 20px;  /* 间距缩小33% */
+    font-size: 12px;   /* 字体缩小 */
+    line-height: 1.5;  /* 行高优化 */
 }
 .footer .links{position:relative;zoom:1;border-bottom:1px solid #ffe066;padding:15px 0;font-size:12px;color:#b1b3b9;text-align:center}
 .footer .links a{color:#b1b3b9;padding:10px}
