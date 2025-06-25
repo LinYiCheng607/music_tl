@@ -94,7 +94,7 @@
 <body class="index">
     <!-- 头部 -->
     <div class="header">
-        <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo4.png" %}"></a>
+        <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo2.png" %}"></a>
         <div class="search-box">
             <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
                 {% csrf_token %}
@@ -116,24 +116,26 @@
     <div class="nav-box">
         <div class="nav-box-inner">
             <ul class="nav clearfix">
-                <li><a href="/">首页</a></li>
-                <li><a href="{% url 'ranking' %}" target="_blank">歌曲排行</a></li>
-                <li><a href="{% url 'home' 1 %}" target="_blank">用户中心</a></li>
+                <li><a href="/">主页</a></li>
+                <li><a href="{% url 'ranking' %}" target="_blank">歌曲排行榜</a></li>
+                <li><a href="#" target="_blank">数据可视化</a></li>
+                <li><a href="#" target="_blank">歌曲推荐</a></li>
                 <li><a href="{% url 'aiassistant:assistant_page' %}" target="_blank">AI音乐助手</a></li>
+                <li><a href="{% url 'home' 1 %}" target="_blank">用户</a></li>
             </ul>
-            <div class="category-nav">
-                <div class="category-nav-header">
-                    <strong><a href="javascript:;" title="">歌曲分类</a></strong>
-                </div>
-                <div class="category-nav-body">
-                    <div id="J_CategoryItems" class="category-items">
-                        <div class="item" data-index="1"><h3><a href="javascript:;">华语</a></h3></div>
-                        <div class="item" data-index="2"><h3><a href="javascript:;">欧美</a></h3></div>
-                        <div class="item" data-index="3"><h3><a href="javascript:;">日本</a></h3></div>
-                        <div class="item" data-index="4"><h3><a href="javascript:;">韩国</a></h3></div>
-                    </div>
-                </div>
-            </div>
+<!--            <div class="category-nav">-->
+<!--                <div class="category-nav-header">-->
+<!--                    <strong><a href="javascript:;" title="">歌曲分类</a></strong>-->
+<!--                </div>-->
+<!--                <div class="category-nav-body">-->
+<!--                    <div id="J_CategoryItems" class="category-items">-->
+<!--                        <div class="item" data-index="1"><h3><a href="javascript:;">华语</a></h3></div>-->
+<!--                        <div class="item" data-index="2"><h3><a href="javascript:;">欧美</a></h3></div>-->
+<!--                        <div class="item" data-index="3"><h3><a href="javascript:;">日本</a></h3></div>-->
+<!--                        <div class="item" data-index="4"><h3><a href="javascript:;">韩国</a></h3></div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
         </div>
     </div>
 
@@ -143,61 +145,64 @@
             <div id="J_FocusSlider" class="focus">
                 <div id="bannerLeftBtn" class="banner_btn"></div>
                 <ul class="focus-list f_w">
-                    <li class="f_s"><a target="play" href="{% url 'play' 6 %}">
-                        <img src="{% static "image/新大图1.jpg" %}" width="750" height="275"></a>
+                    <li class="f_s"><a target="play" href="{% url 'play' 6 %}" class="layz_load" >
+                        <img data-src="{% static "image/新大图1.jpg" %}" width="750" height="275"></a>
                     </li>
-                    <li class="f_s"><a target="play" href="{% url 'play' 2 %}">
-                        <img src="{% static "image/新大图2.jpg" %}" width="750" height="275"></a>
+                    <li class="f_s"><a target="play" href="{% url 'play' 2 %}" class="layz_load" >
+                        <img data-src="{% static "image/新大图2.jpg" %}" width="750" height="275"></a>
+                    </li>
+                    <li class="f_s"><a target="play" href="{% url 'play' 2 %}" class="layz_load" >
+                        <img data-src="{% static "image/新大图3.jpg" %}" width="750" height="275"></a>
                     </li>
                 </ul>
                 <div id="bannerRightBtn" class="banner_btn"></div>
             </div>
         </div>
-        <div class="aside">
-            <h2>热门歌曲</h2>
-            <ul>
-                {% for dynamic in play_hot_song %}
-                    <li><span>{{ forloop.counter }}</span>
-                        <a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
+<!--        <div class="aside">-->
+<!--            <h2>热门歌曲</h2>-->
+<!--            <ul>-->
+<!--                {% for dynamic in play_hot_song %}-->
+<!--                    <li><span>{{ forloop.counter }}</span>-->
+<!--                        <a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a>-->
+<!--                    </li>-->
+<!--                {% endfor %}-->
+<!--            </ul>-->
+<!--        </div>-->
     </div>
 
-    <!-- 新歌推荐区 -->
-    <div class="today clearfix">
-        <div class="today-header">
-            <i></i>
-            <h2>新歌推荐</h2>
-        </div>
-        <div class="today-list-box slide">
-            <div id="J_TodayRec" class="today-list">
-                <ul>
-                {% for song in daily_recommendation %}
-                    {% if forloop.first %}
-                        <li class="first">
-                    {% else %}
-                        <li>
-                    {% endif %}
-                    <a class="pic pic_po" target="play" href="{% url 'play' song.song_id %}" >
-                        {% if song.song_img_url %}
-                            <img src="{{ song.song_img_url }}">
-                        {% else %}
-                            <img src="{{ song.song_img.url }}">
-                        {% endif %}
-                    </a>
-                    <div class="name">
-                        <h3><a target="play" href="{% url 'play' song.song_id %}">{{ song.song_name }}</a></h3>
-                        <div class="singer"><span>{{ song.song_singer }}</span></div>
-                        <div class="times">发行时间：<span>{{ song.song_release }}</span></div>
-                    </div>
-                    <a target="play" href="{% url 'play' song.song_id %}" class="today-buy-button" >去听听></a>
-                {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
+<!--    &lt;!&ndash; 新歌推荐区 &ndash;&gt;-->
+<!--    <div class="today clearfix">-->
+<!--        <div class="today-header">-->
+<!--            <i></i>-->
+<!--            <h2>新歌推荐</h2>-->
+<!--        </div>-->
+<!--        <div class="today-list-box slide">-->
+<!--            <div id="J_TodayRec" class="today-list">-->
+<!--                <ul>-->
+<!--                {% for song in daily_recommendation %}-->
+<!--                    {% if forloop.first %}-->
+<!--                        <li class="first">-->
+<!--                    {% else %}-->
+<!--                        <li>-->
+<!--                    {% endif %}-->
+<!--                    <a class="pic pic_po" target="play" href="{% url 'play' song.song_id %}" >-->
+<!--                        {% if song.song_img_url %}-->
+<!--                            <img src="{{ song.song_img_url }}">-->
+<!--                        {% else %}-->
+<!--                            <img src="{{ song.song_img.url }}">-->
+<!--                        {% endif %}-->
+<!--                    </a>-->
+<!--                    <div class="name">-->
+<!--                        <h3><a target="play" href="{% url 'play' song.song_id %}">{{ song.song_name }}</a></h3>-->
+<!--                        <div class="singer"><span>{{ song.song_singer }}</span></div>-->
+<!--                        <div class="times">发行时间：<span>{{ song.song_release }}</span></div>-->
+<!--                    </div>-->
+<!--                    <a target="play" href="{% url 'play' song.song_id %}" class="today-buy-button" >去听听></a>-->
+<!--                {% endfor %}-->
+<!--                </ul>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 
     <!-- 热门搜索/下载区 -->
     <div class="section">
@@ -249,7 +254,7 @@
             {% if hot_search_pages.paginator.num_pages > 1 %}
             <div class="pagination" id="hot-search-pagination">
                 {% for i in hot_search_pages.paginator.page_range %}
-                    <button onclick="changePage(0, {{ i }})" 
+                    <button onclick="changePage(0, {{ i }})"
                             {% if i == hot_search_pages.number %}class="active"{% endif %}>
                         {{ i }}
                     </button>
@@ -259,7 +264,7 @@
             {% if hot_download_pages.paginator.num_pages > 1 %}
             <div class="pagination" id="hot-download-pagination" style="display:none;">
                 {% for i in hot_download_pages.paginator.page_range %}
-                    <button onclick="changePage(1, {{ i }})" 
+                    <button onclick="changePage(1, {{ i }})"
                             {% if i == hot_download_pages.number %}class="active"{% endif %}>
                         {{ i }}
                     </button>
