@@ -34,7 +34,7 @@
         </div>
     </div><!--end nav-box-->
     <div class="wrapper clearfix">
-        <!-- 移动左侧列表到此处，并修改为顶部列表 -->
+        <!-- 类别导航 -->
         <div class="category-nav">
             <ul class="cate-item">
                 <li class="computer {% if song_type == '华语' %}active{% endif %}">
@@ -66,11 +66,13 @@
                 </tr>
                 {% for item in song_info  %}
                     <tr>
-                        {% if forloop.counter < 4  %}
-                            <td><span class="n1">{{forloop.counter}}</span></td>
-                        {% else %}
-                            <td><span class="n2">{{forloop.counter}}</span></td>
-                        {% endif %}
+                        {% with rank_number=song_info.start_index|add:forloop.counter0 %}
+                            {% if rank_number < 4  %}
+                                <td><span class="n1">{{rank_number}}</span></td>
+                            {% else %}
+                                <td><span class="n2">{{rank_number}}</span></td>
+                            {% endif %}
+                        {% endwith %}
                         <td>
                             <a href="{% url 'play' item.song.song_id %}"  class="pic" target="play">
                                 {% if item.song.song_img_url %}
