@@ -9,20 +9,20 @@
     <div class="header">
         <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo4.png" %}"></a>
         <div class="search-box">
-    <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
-        {% csrf_token %}
-        <div class="search-keyword-group">
-            <input id="kword" name="kword" type="text" class="keyword" maxlength="120" placeholder="音乐节"  />
-            <input id="subSerch" type="submit" class="search-button" value="搜 索" />
+            <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
+                {% csrf_token %}
+                <div class="search-keyword">
+                    <input name="kword" type="text" class="keyword" maxlength="120" placeholder="音乐节" />
+                </div>
+                <input id="subSerch" type="submit" class="search-button" value="搜 索" />
+            </form>
+            <div id="suggest" class="search-suggest"></div>
+            <div class="search-hot-words">
+                {% for dynamic in search_song %}
+                    <a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a>
+                {% endfor %}
+            </div>
         </div>
-    </form>
-    <div id="suggest" class="search-suggest"></div>
-    <div class="search-hot-words">
-        {% for song in search_song  %}
-            <a target="play" href="{% url 'play' song.song.song_id %}" >{{ song.song.song_name }}</a>
-        {% endfor  %}
-    </div>
-</div>
     </div><!--end header-->
     <div class="nav-box">
 		<div class="nav-box-inner">
