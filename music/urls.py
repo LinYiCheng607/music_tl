@@ -31,6 +31,7 @@ urlpatterns = [
     path('ranking/', include('ranking.urls')),
     path('search/', include('search.urls')),
     path('user/', include('user.urls')),
+    path('aiassistant/', include('aiassistant.urls')),
 ]
 
 # 开发环境自动服务静态文件和媒体文件

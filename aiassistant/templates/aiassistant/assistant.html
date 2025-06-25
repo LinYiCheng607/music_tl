@@ -1,0 +1,346 @@
+{% extends "title_base.html" %}
+{% load static %}
+
+{% block title %}
+<link type="image/x-icon" rel="shortcut icon" href="{% static "favicon.ico" %}">
+<link type="text/css" rel="stylesheet" href="{% static "css/common.css" %}">
+<link type="text/css" rel="stylesheet" href="{% static "css/index.css" %}">
+<title>AI音乐助手 - BigByte</title>
+<style>
+    .chat-container {
+        width: 80%;
+        max-width: 900px;
+        margin: 30px auto;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+    
+    .chat-header {
+        text-align: center;
+        padding: 10px;
+        border-bottom: 2px solid #FFDF35;
+        margin-bottom: 20px;
+    }
+    
+    .chat-header h2 {
+        color: #a66a00;
+        font-size: 24px;
+    }
+    
+    .chat-messages {
+        height: 400px;
+        overflow-y: auto;
+        padding: 10px;
+        background-color: #fffbe6;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .message {
+        padding: 8px 15px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+    
+    .user-message {
+        background-color: #FFDF35;
+        margin-left: auto;
+        color: #333;
+    }
+    
+    .assistant-message {
+        background-color: #FFF8D6;
+        margin-right: auto;
+        color: #555;
+        border: 1px solid #ffcc66;
+    }
+    
+    .chat-input {
+        display: flex;
+    }
+    
+    #user-input {
+        flex: 1;
+        padding: 10px;
+        border: 2px solid #FFDF35;
+        border-radius: 8px;
+        margin-right: 10px;
+        font-size: 16px;
+    }
+    
+    #send-btn {
+        background-color: #FFDF35;
+        border: none;
+        color: #a66a00;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.2s;
+    }
+    
+    #send-btn:hover {
+        background-color: #FFD700;
+    }
+    
+    .typing-indicator {
+        display: none;
+        margin-bottom: 10px;
+    }
+    
+    .typing-indicator span {
+        height: 10px;
+        width: 10px;
+        background-color: #ffcc66;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 3px;
+        animation: bounce 1.2s infinite;
+    }
+    
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 头部 -->
+<div class="header">
+    <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo4.png" %}"></a>
+    <div class="search-box">
+        <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
+            {% csrf_token %}
+            <div class="search-keyword">
+                <input name="kword" type="text" class="keyword" maxlength="120" placeholder="音乐节" />
+            </div>
+            <input id="subSerch" type="submit" class="search-button" value="搜 索" />
+        </form>
+        <div id="suggest" class="search-suggest"></div>
+        <div class="search-hot-words">
+            {% for dynamic in search_song %}
+                <a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- 导航栏 -->
+<div class="nav-box">
+    <div class="nav-box-inner">
+        <ul class="nav clearfix">
+            <li><a href="/">首页</a></li>
+            <li><a href="{% url 'ranking' %}" target="_blank">歌曲排行</a></li>
+            <li><a href="{% url 'home' 1 %}" target="_blank">用户中心</a></li>
+            <li class="current"><a href="{% url 'aiassistant:assistant_page' %}">AI音乐助手</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <h2>AI音乐助手</h2>
+        <p>有关音乐的任何问题，都可以问我！</p>
+        {% if api_status %}
+        <div id="api-status" style="font-size: 12px; margin-top: 5px; {% if 'API连接正常' in api_status %}color: green;{% else %}color: red;{% endif %}">
+            状态: {{ api_status }}
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="chat-messages" id="chat-messages">
+        <div class="message assistant-message">
+            您好！我是音乐AI助手，很高兴为您服务。您可以问我关于音乐的任何问题，比如歌曲推荐、音乐历史、乐器知识等。请告诉我您想了解什么？
+        </div>
+        
+        <div class="typing-indicator" id="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    
+    <div class="chat-input">
+        <input type="text" id="user-input" placeholder="请输入您的问题..." />
+        <button id="send-btn">发送</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const typingIndicator = document.getElementById('typing-indicator');
+    
+    // 存储聊天ID以支持多轮对话
+    let currentChatId = null;
+    
+    // 发送消息函数
+    function sendMessage() {
+        const message = userInput.value.trim();
+        if (message === '') return;
+        
+        // 添加用户消息到聊天窗口
+        addMessage(message, 'user');
+        userInput.value = '';
+        
+        // 禁用输入框和发送按钮，防止重复发送
+        userInput.disabled = true;
+        sendBtn.disabled = true;
+        
+        // 显示输入中动画
+        typingIndicator.style.display = 'block';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // 设置超时处理
+        const timeoutId = setTimeout(() => {
+            // 3秒后如果还没有响应，显示等待消息
+            if(typingIndicator.style.display === 'block') {
+                const waitingMessage = document.createElement('div');
+                waitingMessage.classList.add('typing-status');
+                waitingMessage.textContent = '正在等待AI助手回应，请稍候...';
+                waitingMessage.style.textAlign = 'center';
+                waitingMessage.style.color = '#888';
+                waitingMessage.style.padding = '5px';
+                waitingMessage.style.margin = '10px 0';
+                waitingMessage.id = 'waitingMessage';
+                chatMessages.insertBefore(waitingMessage, typingIndicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }, 3000);
+        
+        // 准备请求数据，包含聊天ID（如果有）
+        const requestData = {
+            message: message
+        };
+        
+        // 如果存在对话ID，则添加到请求中以支持多轮对话
+        if (currentChatId) {
+            requestData.chat_id = currentChatId;
+        }
+        
+        // 调用后端API
+        fetch('{% url "aiassistant:chat" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // 清除超时定时器
+            clearTimeout(timeoutId);
+            
+            // 移除等待消息（如果存在）
+            const waitingMessage = document.getElementById('waitingMessage');
+            if(waitingMessage) {
+                waitingMessage.remove();
+            }
+            
+            // 隐藏输入中动画
+            typingIndicator.style.display = 'none';
+            
+            if (data.success) {
+                // 保存聊天ID以维持对话上下文（如果有）
+                if (data.chat_id) {
+                    currentChatId = data.chat_id;
+                    console.log("接收到聊天ID: " + currentChatId);
+                }
+                
+                // 添加AI助手的回复
+                addMessage(data.message, 'assistant');
+            } else {
+                // 显示错误信息，使用更友好的格式
+                const errorMsg = "抱歉，出现了一些问题：" + data.message;
+                const errorElement = document.createElement('div');
+                errorElement.classList.add('message', 'assistant-message', 'error-message');
+                errorElement.innerHTML = errorMsg + '<br><small>请联系系统管理员检查API配置</small>';
+                errorElement.style.backgroundColor = '#fff0f0';
+                errorElement.style.borderColor = '#ffcccc';
+                
+                // 插入到typing indicator之前
+                chatMessages.insertBefore(errorElement, typingIndicator);
+            }
+            
+            // 重新启用输入框和发送按钮
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+            userInput.focus();
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        })
+        .catch(error => {
+            // 清除超时定时器
+            clearTimeout(timeoutId);
+            
+            // 移除等待消息（如果存在）
+            const waitingMessage = document.getElementById('waitingMessage');
+            if(waitingMessage) {
+                waitingMessage.remove();
+            }
+            
+            // 隐藏输入中动画
+            typingIndicator.style.display = 'none';
+            
+            // 显示连接错误信息
+            const errorElement = document.createElement('div');
+            errorElement.classList.add('message', 'assistant-message', 'error-message');
+            errorElement.innerHTML = "抱歉，无法连接到AI助手服务。请稍后再试。<br><small>技术详情：" + error.message + "</small>";
+            errorElement.style.backgroundColor = '#fff0f0';
+            errorElement.style.borderColor = '#ffcccc';
+            
+            // 插入到typing indicator之前
+            chatMessages.insertBefore(errorElement, typingIndicator);
+            
+            // 重新启用输入框和发送按钮
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+            userInput.focus();
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            console.error('Error:', error);
+        });
+    }
+    
+    // 添加消息到聊天窗口
+    function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        messageDiv.classList.add(sender === 'user' ? 'user-message' : 'assistant-message');
+        messageDiv.textContent = text;
+        
+        // 插入到typing indicator之前
+        chatMessages.insertBefore(messageDiv, typingIndicator);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // 监听发送按钮点击事件
+    sendBtn.addEventListener('click', sendMessage);
+    
+    // 监听回车键
+    userInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+});
+</script>
+{% endblock %} 
