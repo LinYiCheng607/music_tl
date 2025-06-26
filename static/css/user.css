@@ -334,69 +334,6 @@ input[type="checkbox"] {
         font-size: 18px !important;
     }
 }
-.user-profile-flex {
-    display: flex;
-    align-items: flex-start;
-    gap: 60px;
-}
-.user-profile-right {
-    margin-left: 10px;      /* 保持你期望的左侧距离 */
-    margin-top: -50px;      /* 保持你期望的顶部对齐 */
-    width: calc(100% - 260px); /* 减去左侧头像宽度（约220px）和右侧预留空间（约40px，可调整） */
-    max-width: 900px;       /* 可根据实际情况调整最大宽度 */
-    margin-right: 40px;     /* 右侧留白，防止白框紧贴背景图片右边 */
-    box-sizing: border-box; /* 避免超出父容器 */
-    padding-bottom: 0;    /* 去掉多余的底部内边距 */
-    margin-bottom: 0;     /* 避免额外外边距 */
-}
-.user-profile-left {
-    min-width: 220px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.profile__cover_link {
-    margin-bottom: 10px;
-}
-
-.profile__cover {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 4px solid #ffdf35;
-    background: #fff9e0;
-    margin-bottom: 10px;
-}
-
-.profile__name {
-    font-size: 32px;
-    font-weight: bold;
-    color: #f59e42 !important;
-    margin-bottom: 18px;
-    display: block;
-    text-shadow: 1px 1px 0 #fffbe6;
-}
-
-.logout-link {
-    margin-bottom: 24px;
-    color: #fff;
-    background: #ffb3b3;
-    padding: 8px 30px;
-    border-radius: 18px;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 18px;
-    display: inline-block;
-    border: none;
-}
-
-.logout-link:hover {
-    background: #ff7b7b;
-    color: #fff;
-}
 
 .user-profile-flex {
     display: flex;
@@ -465,6 +402,14 @@ input[type="checkbox"] {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin-left: 10px;      /* 保持你期望的左侧距离 */
+    margin-top: -15px;      /* 保持你期望的顶部对齐 */
+    width: calc(100% - 260px); /* 减去左侧头像宽度（约220px）和右侧预留空间（约40px，可调整） */
+    max-width: 900px;       /* 可根据实际情况调整最大宽度 */
+    margin-right: 40px;     /* 右侧留白，防止白框紧贴背景图片右边 */
+    box-sizing: border-box; /* 避免超出父容器 */
+    padding-bottom: 0;    /* 去掉多余的底部内边距 */
+    margin-bottom: 0;     /* 避免额外外边距 */
 }
 
 .user-info h2 {
@@ -519,8 +464,8 @@ input[type="checkbox"] {
 
 /* 控制保存按钮与上方内容距离 */
 .save-btn {
-    margin-top: 8px;      /* 比如8px，原来如有20px可适当调小 */
-    margin-bottom: 0;     /* 避免多余底部间距 */
+    margin-top: -5px;      /* 比如8px，原来如有20px可适当调小 */
+    margin-bottom: 10px;     /* 避免多余底部间距 */
     background: #ffb300;
     color: #fff;
     padding: 10px 36px;
