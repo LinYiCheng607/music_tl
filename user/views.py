@@ -13,6 +13,8 @@ from datetime import timedelta
 from django.db.models import Count
 from django.db.models import Sum
 from django.http import JsonResponse
+from collections import Counter
+import pytz
 # Create your views here.
 
 
@@ -61,7 +63,15 @@ def homeview(request, page):
     song_count_qs = (
         SongLog.objects
         .filter(user=request.user)
-        .values('song', 'song__song_id', 'song__song_name', 'song__song_singer', 'song__song_time')
+        .values(
+            'song',
+            'song__song_id',
+            'song__song_name',
+            'song__song_singer',
+            'song__song_time',
+            'song__song_type',
+            'song__song_languages'
+        )
         .annotate(listen_count=Sum('listen_count'))
         .order_by('-listen_count', '-song')
     )
@@ -71,11 +81,12 @@ def homeview(request, page):
             'song_name': item['song__song_name'],
             'song_singer': item['song__song_singer'],
             'song_time': item['song__song_time'],
+            'song_type': item['song__song_type'],
+            'song_languages': item['song__song_languages'],
             'listen_count': item['listen_count'] or 0,
         }
         for item in song_count_qs
     ]
-    # print(song_info)  # <---- 检查这里输出的内容
     paginator = Paginator(song_info, 10)
     try:
         contacts = paginator.page(page)
@@ -88,9 +99,13 @@ def homeview(request, page):
         'search_song': search_song,
     })
 
+
+
 @login_required
 def song_analysis(request):
-    # 统计最近7天每天听歌数量
+    user = request.user
+
+    # 1. 最近7天每天听歌数量（折线图）
     today = timezone.now().date()
     days = 7
     line_labels = []
@@ -98,30 +113,87 @@ def song_analysis(request):
     for i in range(days):
         day = today - timedelta(days=days - i - 1)
         line_labels.append(day.strftime('%Y-%m-%d'))
-        cnt = SongLog.objects.filter(user=request.user, listen_time__date=day).count()
+        cnt = SongLog.objects.filter(user=user, listen_time__date=day).count()
         line_data.append(cnt)
 
-    # 统计不同类型的听歌次数
-    # 注意：Song模型的类型字段叫 song_type
+    # 2. 不同类型的听歌次数（饼图）
     pie_qs = (
         SongLog.objects
-        .filter(user=request.user)
+        .filter(user=user)
         .values('song__song_type')
         .annotate(value=Count('id'))
         .order_by('-value')
     )
     pie_data = []
     for item in pie_qs:
-        # item['song__song_type'] 可能为None，需要兜底
         pie_data.append({
             'name': item['song__song_type'] or '未知',
             'value': item['value']
         })
 
+    # 3. 每天听歌时段分布（柱状图）
+    logs = SongLog.objects.filter(user=user)
+    tz = pytz.timezone('Asia/Shanghai')
+    hour_counts = [0] * 12
+    hour_labels = [f"{2*i}-{2*i+2}点" for i in range(12)]
+    for log in logs:
+        local_time = log.listen_time.astimezone(tz)
+        h = local_time.hour
+        index = h // 2
+        hour_counts[index] += 1
+
+    # 4. 近4周活跃度（柱状图）
+    now = timezone.now()
+    weekly_labels = []
+    weekly_counts = []
+    for i in range(4):
+        start = now - timedelta(days=(i+1)*7)
+        end = now - timedelta(days=i*7)
+        count = logs.filter(listen_time__gte=start, listen_time__lt=end).count()
+        weekly_labels.insert(0, f'第{4-i}周')
+        weekly_counts.insert(0, count)
+
+    # 5. 最常听的歌手TOP5（条形图）
+    artist_counter = Counter()
+    for log in logs.select_related("song"):
+        artist = getattr(log.song, "song_singer", None)
+        if artist:
+            artist_counter[artist] += 1
+    top_artists = artist_counter.most_common(5)
+    artist_labels = [a[0] for a in top_artists]
+    artist_data = [a[1] for a in top_artists]
+
+    # 6. 最常听的专辑TOP5（条形图）
+    album_counter = Counter()
+    for log in logs.select_related("song"):
+        album = getattr(log.song, "song_album", None)
+        if album:
+            album_counter[album] += 1
+    top_albums = album_counter.most_common(5)
+    album_labels = [a[0] for a in top_albums]
+    album_data = [a[1] for a in top_albums]
+
+    # 7. 听歌习惯总结
+    fav_hour = hour_labels[hour_counts.index(max(hour_counts))] if any(hour_counts) else ""
+    fav_artist = artist_labels[0] if artist_labels else ""
+    trend = ("上升" if weekly_counts and weekly_counts[-1] > weekly_counts[0] else "下降") if weekly_counts else ""
+    summary_text = f"你最常在{fav_hour}听歌，最近四周你的听歌频率有所{trend}，最常听的歌手是{fav_artist}……"
+
     context = {
+        # 原有
         'line_labels': json.dumps(line_labels, ensure_ascii=False),
         'line_data': json.dumps(line_data, ensure_ascii=False),
         'pie_data': json.dumps(pie_data, ensure_ascii=False),
+        # 新增
+        'hourly_labels': json.dumps(hour_labels, ensure_ascii=False),
+        'hourly_data': json.dumps(hour_counts),
+        'weekly_labels': json.dumps(weekly_labels, ensure_ascii=False),
+        'weekly_data': json.dumps(weekly_counts),
+        'artist_labels': json.dumps(artist_labels, ensure_ascii=False),
+        'artist_data': json.dumps(artist_data),
+        'album_labels': json.dumps(album_labels, ensure_ascii=False),
+        'album_data': json.dumps(album_data),
+        'summary_text': summary_text,
         # 你可以补充热门搜索/推荐等
         'search_song': [],
     }
@@ -130,17 +202,20 @@ def song_analysis(request):
 @login_required
 def update_user_info(request):
     if request.method == "POST":
-        nickname = request.POST.get("nickname")
-        email = request.POST.get("email")
         user = request.user
-        if hasattr(user, "nickname"):
-            user.nickname = nickname
-        user.email = email
+        user.nickname = request.POST.get("nickname", user.nickname)
+        user.email = request.POST.get("email", user.email)
+        user.qq = request.POST.get("qq", user.qq)
+        user.mobile = request.POST.get("mobile", user.mobile)
+        user.bio = request.POST.get("bio", user.bio)
         user.save()
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({
-                "nickname": getattr(user, "nickname", user.username),
+                "nickname": user.nickname,
                 "email": user.email,
+                "qq": user.qq,
+                "mobile": user.mobile,
+                "bio": user.bio,
             })
         return redirect("home", 1)
     return redirect("home", 1)

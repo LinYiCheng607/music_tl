@@ -9,7 +9,7 @@
 {% block content %}
 <body class="member">
     <div class="header">
-        <a href="/" class="logo" title="首页"><img src="{% static "image/logo4.png" %}"></a>
+        <a href="/" class="logo" title="首页"><img src="{% static "image/logo2.png" %}"></a>
         <div class="search-bar-wrapper">
             <form class="search-form" id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
                 {% csrf_token %}
@@ -34,40 +34,41 @@
                 <a href="{% url 'logout' %}" class="logout-link">退出登录</a>
             </div>
             <div class="user-profile-right">
-                <div class="user-info">
-                    <h2>个人信息</h2>
-                    <form id="user-info-form" method="post" action="{% url 'update_user_info' %}">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="nickname">昵称：</label>
-                            <input type="text" id="nickname" name="nickname" value="{{ user.nickname|default:user.username }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">邮箱：</label>
-                            <input type="email" id="email" name="email" value="{{ user.email }}">
-                        </div>
-                        <button type="submit" class="save-btn">保存修改</button>
-                    </form>
-                    <script>
-                    document.getElementById('user-info-form').onsubmit = async function(e) {
-                        e.preventDefault();
-                        const form = e.target;
-                        const formData = new FormData(form);
-                        const response = await fetch(form.action, {
-                            method: "POST",
-                            headers: {"X-Requested-With": "XMLHttpRequest"},
-                            body: formData
-                        });
-                        if (response.ok) {
-                            const data = await response.json();
-                            document.getElementById('nickname-display').textContent = data.nickname;
-                            alert("修改成功！");
-                        } else {
-                            alert("保存失败");
-                        }
-                    };
-                    </script>
+            <div class="user-info">
+            <h2>个人信息</h2>
+            <form id="user-info-form" method="post" action="{% url 'update_user_info' %}">
+                {% csrf_token %}
+                <div class="user-info-rows">
+                <div class="user-info-row">
+                    <div class="form-group">
+                    <label for="nickname">昵称：</label>
+                    <input type="text" id="nickname" name="nickname" value="{{ user.nickname|default:user.username }}">
+                    </div>
+                    <div class="form-group">
+                    <label for="email">邮箱：</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}">
+                    </div>
                 </div>
+                <div class="user-info-row">
+                    <div class="form-group">
+                    <label for="qq">QQ号：</label>
+                    <input type="text" id="qq" name="qq" value="{{ user.qq }}">
+                    </div>
+                    <div class="form-group">
+                    <label for="mobile">手机号：</label>
+                    <input type="text" id="mobile" name="mobile" value="{{ user.mobile }}">
+                    </div>
+                </div>
+                <div class="user-info-row">
+                    <div class="form-group" style="width: 100%;">
+                    <label for="bio">个性签名：</label>
+                    <input type="text" id="bio" name="bio" value="{{ user.bio }}">
+                    </div>
+                </div>
+                </div>
+                <button type="submit" class="save-btn">保存修改</button>
+            </form>
+            </div>
             </div>
         </div>
     </div>
@@ -81,30 +82,32 @@
             <div class="profile_cont">
                 <div class="js_sub" style="display: block;">
                     <div class="mod_songlist">
-                        <ul class="songlist__header">
-                            <li class="songlist__header_name">歌曲</li>
-                            <li class="songlist__header_author">歌手</li>
-                            <li class="songlist__header_time">时长</li>
-                            <li class="songlist__header_count">听过的次数</li>
-                        </ul>
-                        <ul class="songlist__list">
-                            {% for item in contacts.object_list %}
-                            <li>
-                                <div class="songlist__item songlist__item--even">
-                                    <div class="songlist__songname">
-                                        <a href="{% url 'play' item.song_id %}" class="js_song songlist__songname_txt" >{{ item.song_name }}</a>
-                                    </div>
-                                    <div class="songlist__artist">
-                                        <a href="javascript:;" class="singer_name">{{ item.song_singer }}</a>
-                                    </div>
-                                    <div class="songlist__time">{{ item.song_time }}</div>
-                                    <div class="songlist__count">
-                                        {{ item.listen_count }}
-                                    </div>
-                                </div>
-                            </li>
-                            {% endfor %}
-                        </ul>
+                        <table class="songlist__table" style="width: 100%; text-align: left;">
+                            <thead>
+                                <tr>
+                                    <th>歌曲</th>
+                                    <th>类型</th>
+                                    <th>语种</th>
+                                    <th>歌手</th>
+                                    <th>听过的次数</th>
+                                    <th>时长</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in contacts.object_list %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'play' item.song_id %}" class="js_song songlist__songname_txt">{{ item.song_name }}</a>
+                                    </td>
+                                    <td>{{ item.song_type }}</td>
+                                    <td>{{ item.song_languages }}</td>
+                                    <td>{{ item.song_singer }}</td>
+                                    <td>{{ item.listen_count }}</td>
+                                    <td>{{ item.song_time }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                     <div class="page-box">
                         <div class="pagebar" id="pageBar">

@@ -1,5 +1,5 @@
 body {
-    background-color: #FFDF35 !important;
+    background: #FFF9E0 !important;
     font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
     color: #a66a00 !important;
 }
@@ -25,6 +25,8 @@ a:hover {
     text-align: center;
     color: #fff;
     font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+    padding-top: 40px;    /* 原值如有65px可以适当调低 */
+    padding-bottom: 50px; /* 加大底部内边距，留出空间 */
 }
 .mod_profile .section_inner {height:315px;}
 .profile__cover_link {position:relative;width:102px;height:102px;margin:0 auto;}
@@ -194,7 +196,15 @@ a:hover {
 .mod_tab__current {
     border-bottom: 2px solid #FFDF35 !important;
 }
-.profile_nav{position:absolute;top:-56px;left:0;margin-bottom:0;width:80%}
+.profile_nav {
+    position: static;         /* 不要 absolute */
+    top: auto;                /* 清除 top */
+    left: auto;               /* 清除 left */
+    margin-bottom: 0;
+    width: 100%;              /* 或 80%，依你布局定 */
+    padding-top: 28px;        /* 距离黄色框顶部的间距，可微调 */
+    box-sizing: border-box;
+}
 .profile_nav .mod_tab__item{color:#fff;margin-right:40px}
 .profile_nav .mod_tab__current,.profile_nav .mod_tab__item:hover{color:#f59e42 !important;text-decoration:none;}
 .songlist__delete{position:absolute;top:50%;right:58px;margin-top:-18px;width:36px;height:36px;border:1px solid #FFDF35;border-radius:50%;text-align:center;visibility:hidden;color:#FFDF35;}
@@ -324,60 +334,6 @@ input[type="checkbox"] {
         font-size: 18px !important;
     }
 }
-.user-profile-flex {
-    display: flex;
-    align-items: flex-start;
-    gap: 60px;
-}
-
-.user-profile-left {
-    min-width: 220px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.profile__cover_link {
-    margin-bottom: 10px;
-}
-
-.profile__cover {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 4px solid #ffdf35;
-    background: #fff9e0;
-    margin-bottom: 10px;
-}
-
-.profile__name {
-    font-size: 32px;
-    font-weight: bold;
-    color: #f59e42 !important;
-    margin-bottom: 18px;
-    display: block;
-    text-shadow: 1px 1px 0 #fffbe6;
-}
-
-.logout-link {
-    margin-bottom: 24px;
-    color: #fff;
-    background: #ffb3b3;
-    padding: 8px 30px;
-    border-radius: 18px;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 18px;
-    display: inline-block;
-    border: none;
-}
-
-.logout-link:hover {
-    background: #ff7b7b;
-    color: #fff;
-}
 
 .user-profile-flex {
     display: flex;
@@ -446,6 +402,14 @@ input[type="checkbox"] {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin-left: 10px;      /* 保持你期望的左侧距离 */
+    margin-top: -15px;      /* 保持你期望的顶部对齐 */
+    width: calc(100% - 260px); /* 减去左侧头像宽度（约220px）和右侧预留空间（约40px，可调整） */
+    max-width: 900px;       /* 可根据实际情况调整最大宽度 */
+    margin-right: 40px;     /* 右侧留白，防止白框紧贴背景图片右边 */
+    box-sizing: border-box; /* 避免超出父容器 */
+    padding-bottom: 0;    /* 去掉多余的底部内边距 */
+    margin-bottom: 0;     /* 避免额外外边距 */
 }
 
 .user-info h2 {
@@ -498,8 +462,10 @@ input[type="checkbox"] {
     border-color: #ffb300;
 }
 
+/* 控制保存按钮与上方内容距离 */
 .save-btn {
-    margin-top: 8px;
+    margin-top: -5px;      /* 比如8px，原来如有20px可适当调小 */
+    margin-bottom: 10px;     /* 避免多余底部间距 */
     background: #ffb300;
     color: #fff;
     padding: 10px 36px;
@@ -509,6 +475,9 @@ input[type="checkbox"] {
     cursor: pointer;
     transition: background 0.2s;
     font-weight: bold;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .save-btn:hover {
@@ -524,4 +493,71 @@ input[type="checkbox"] {
         min-width: 0;
         width: 100%;
     }
+}
+.main,
+.main--profile {
+    width: 80%;             /* 用百分比，和上方背景保持一致 */
+    max-width: 1200px;      /* 防止超大屏太宽 */
+    margin: 0 auto;
+    border-radius: 18px;
+    box-shadow: 0 4px 18px 0 #FFDF35;
+    background: #FFF7CF !important;
+    position: relative;
+    margin-top: 36px;    /* 保证主内容和上方信息框之间有空间 */
+}
+.user-info-grid {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+.user-info-col {
+  flex: 1;
+}
+.form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.form-group label {
+  min-width: 70px;
+  text-align: right;
+  margin-right: 12px;
+}
+.form-group input {
+  flex: 1;
+}
+.user-info-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* 缩小为10px，原18px或更大 */
+  margin-bottom: 18px; /* 也可以适当缩小 */
+}
+.user-info-row {
+  display: flex;
+  gap: 36px;
+}
+
+.user-info-row .form-group {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+}
+
+/* 保证label和input间距适中 */
+.user-info-row .form-group label {
+  min-width: 90px;
+  text-align: right;
+  margin-right: 10px;
+  font-size: 1.1em;
+}
+.user-info-row .form-group input {
+  flex: 1 1 0;
+  font-size: 1em;
+  padding: 6px 10px;
+}
+
+/* 个性签名独占一行 */
+.user-info-row:last-child .form-group {
+  flex: 1 1 0;
 }

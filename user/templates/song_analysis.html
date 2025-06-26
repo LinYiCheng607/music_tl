@@ -9,7 +9,7 @@
 {% block content %}
 <body class="member">
     <div class="header">
-        <a href="/" class="logo" title="首页"><img src="{% static "image/logo4.png" %}"></a>
+        <a href="/" class="logo" title="首页"><img src="{% static "image/logo2.png" %}"></a>
         <div class="search-bar-wrapper">
             <form class="search-form" id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
                 {% csrf_token %}
@@ -22,24 +22,54 @@
                 {% endfor  %}
             </div>
         </div>
-    </div><!--end header-->
+    </div>
 
-    <div class="nav-box">
-        <div class="nav-box-inner">
-            <ul class="nav clearfix">
-                <!-- 留空或可根据需要添加其它导航项 -->
-            </ul>
-        </div>
-    </div><!--end nav-box-->
-
-    <!-- 个人信息展示，与 home.html 同步 -->
     <div class="mod_profile js_user_data">
-        <div class="section_inner" style="display: flex; flex-direction: column; align-items: center;">
-            <div class="profile__cover_link">
-                <img src="{% static "image/users.jpg" %}" class="profile__cover">
+        <div class="section_inner user-profile-flex">
+            <div class="user-profile-left">
+                <div class="profile__cover_link">
+                    <img src="{% static "image/2.png" %}" class="profile__cover">
+                </div>
+                <span class="profile__name" id="nickname-display">{{ user.nickname|default:user.username }}</span>
+                <a href="{% url 'logout' %}" class="logout-link">退出登录</a>
             </div>
-            <span class="profile__name">{{ user.nickname|default:user.username }}</span>
-            <a href="{% url 'logout' %}" class="logout-link">退出登录</a>
+            <div class="user-profile-right">
+                <div class="user-info">
+                    <h2>个人信息</h2>
+                    <form id="user-info-form" method="post" action="{% url 'update_user_info' %}">
+                        {% csrf_token %}
+                        <div class="user-info-rows">
+                            <div class="user-info-row">
+                                <div class="form-group">
+                                    <label for="nickname">昵称：</label>
+                                    <input type="text" id="nickname" name="nickname" value="{{ user.nickname|default:user.username }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">邮箱：</label>
+                                    <input type="email" id="email" name="email" value="{{ user.email }}">
+                                </div>
+                            </div>
+                            <div class="user-info-row">
+                                <div class="form-group">
+                                    <label for="qq">QQ号：</label>
+                                    <input type="text" id="qq" name="qq" value="{{ user.qq }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="mobile">手机号：</label>
+                                    <input type="text" id="mobile" name="mobile" value="{{ user.mobile }}">
+                                </div>
+                            </div>
+                            <div class="user-info-row">
+                                <div class="form-group" style="width: 100%;">
+                                    <label for="bio">个性签名：</label>
+                                    <input type="text" id="bio" name="bio" value="{{ user.bio }}">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="save-btn">保存修改</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -50,45 +80,57 @@
         </div>
         <div class="js_box" style="display: block;">
             <div style="width: 80%; margin: 30px auto;">
+                <!-- 原有功能 -->
                 <h2>听歌时间-曲目数量折线图</h2>
                 <div id="line_chart" style="width: 100%; height: 400px;"></div>
                 <h2 style="margin-top:40px;">听过的歌曲类型分布饼图</h2>
                 <div id="pie_chart" style="width: 100%; height: 400px;"></div>
+
+                <!-- 新增分析功能 -->
+                <h2 style="margin-top:40px;">每天听歌时段分布</h2>
+                <div id="hourly_chart" style="width:100%; height:350px"></div>
+                <h2 style="margin-top:40px;">近四周听歌统计</h2>
+                <div id="weekly_chart" style="width:100%; height:350px"></div>
+                <h2 style="margin-top:40px;">最常听的歌手TOP5</h2>
+                <div id="artist_chart" style="width:100%; height:300px"></div>
+                <h2 style="margin-top:40px;">最常听的专辑TOP5</h2>
+                <div id="album_chart" style="width:100%; height:300px"></div>
+                <h2 style="margin-top:40px;">听歌习惯总结</h2>
+                <div style="background: #fffbe8; border-radius: 8px; padding: 18px 24px; margin-top: 12px; color:#6d4e2b; font-size: 16px;">
+                    {{ summary_text }}
+                </div>
             </div>
         </div>
     </div><!-- end main -->
 
-    <!-- 引入 ECharts -->
+    <!-- ECharts JS -->
     <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
     <script>
-        // 后端传递 line_labels, line_data, pie_data 给模板渲染
+        // 原有功能
         var lineLabels = {{ line_labels|safe }};
         var lineData = {{ line_data|safe }};
         var pieData = {{ pie_data|safe }};
-
-        // 动态设置纵轴最大值，使折线图自适应
-        var maxCount = 5; // 默认最小刻度
-        if (Array.isArray(lineData) && lineData.length > 0) {
-            var realMax = Math.max.apply(null, lineData);
-            maxCount = realMax < 5 ? 5 : realMax + 1; // 至少5，实际最大+1
-        }
+        // 新增功能
+        var hourlyLabels = {{ hourly_labels|safe }};
+        var hourlyData = {{ hourly_data|safe }};
+        var weeklyLabels = {{ weekly_labels|safe }};
+        var weeklyData = {{ weekly_data|safe }};
+        var artistLabels = {{ artist_labels|safe }};
+        var artistData = {{ artist_data|safe }};
+        var albumLabels = {{ album_labels|safe }};
+        var albumData = {{ album_data|safe }};
 
         // 折线图
+        var maxCount = 5;
+        if (Array.isArray(lineData) && lineData.length > 0) {
+            var realMax = Math.max.apply(null, lineData);
+            maxCount = realMax < 5 ? 5 : realMax + 1;
+        }
         var lineChart = echarts.init(document.getElementById('line_chart'));
         var lineOption = {
             xAxis: { type: 'category', data: lineLabels, name: '日期' },
-            yAxis: { 
-                type: 'value', 
-                name: '听过的歌曲数量',
-                min: 0,
-                max: maxCount,
-                interval: Math.ceil(maxCount / 5) // 让y轴分隔更均匀
-            },
-            series: [{
-                data: lineData,
-                type: 'line',
-                smooth: true
-            }]
+            yAxis: { type: 'value', name: '听过的歌曲数量', min: 0, max: maxCount, interval: Math.ceil(maxCount / 5) },
+            series: [{ data: lineData, type: 'line', smooth: true }]
         };
         lineChart.setOption(lineOption);
 
@@ -106,6 +148,38 @@
             }]
         };
         pieChart.setOption(pieOption);
+
+        // 新增：每天听歌时段分布
+        var hourlyChart = echarts.init(document.getElementById('hourly_chart'));
+        hourlyChart.setOption({
+            xAxis: { type: 'category', data: hourlyLabels, name: '时段' },
+            yAxis: { type: 'value', name: '听歌次数', min: 0 },
+            series: [{ data: hourlyData, type: 'bar', barWidth: '60%', itemStyle:{color:'#f9c449'} }]
+        });
+
+        // 新增：近4周听歌统计
+        var weeklyChart = echarts.init(document.getElementById('weekly_chart'));
+        weeklyChart.setOption({
+            xAxis: { type: 'category', data: weeklyLabels, name: '周' },
+            yAxis: { type: 'value', name: '听歌次数', min: 0 },
+            series: [{ data: weeklyData, type: 'bar', barWidth: '60%', itemStyle:{color:'#f7a440'} }]
+        });
+
+        // 新增：歌手排行
+        var artistChart = echarts.init(document.getElementById('artist_chart'));
+        artistChart.setOption({
+            xAxis: { type: 'value', name: '播放次数', min: 0 },
+            yAxis: { type: 'category', data: artistLabels, name: '歌手', inverse: true },
+            series: [{ data: artistData, type: 'bar', barWidth: '60%', itemStyle:{color:'#6dbee7'} }]
+        });
+
+        // 新增：专辑排行
+        var albumChart = echarts.init(document.getElementById('album_chart'));
+        albumChart.setOption({
+            xAxis: { type: 'value', name: '播放次数', min: 0 },
+            yAxis: { type: 'category', data: albumLabels, name: '专辑', inverse: true },
+            series: [{ data: albumData, type: 'bar', barWidth: '60%', itemStyle:{color:'#b4d99f'} }]
+        });
     </script>
 </body>
 {% endblock %}
