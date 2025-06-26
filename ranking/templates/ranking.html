@@ -25,108 +25,95 @@
         </div>
     </div><!--end header-->
     <div class="nav-box">
-		<div class="nav-box-inner">
-			<ul class="nav clearfix">
+        <div class="nav-box-inner">
+            <ul class="nav clearfix">
                 <li><a href="/">首页</a></li>
-				<li><a href="{% url 'ranking' %}">歌曲排行</a></li>
-	    	    <li><a href="{% url 'home' 1 %}" target="_blank">用户中心</a></li>
-			</ul>
-		</div>
-	</div><!--end nav-box-->
+                <li><a href="{% url 'ranking' %}">歌曲排行</a></li>
+                <li><a href="{% url 'home' 1 %}" target="_blank">用户中心</a></li>
+            </ul>
+        </div>
+    </div><!--end nav-box-->
     <div class="wrapper clearfix">
-    <!-- 左侧列表 -->
-    <div class="side">
-  		<!-- 子类分类排行导航 -->
-  		<div class="side-nav">
-			<div class="nav-head">
-				<a href="{% url 'ranking' %}">歌曲分类</a>
-			</div>
-            <ul id="sideNav" class="cate-item">
+        <!-- 类别导航 -->
+        <div class="category-nav">
+            <ul class="cate-item">
                 <li class="computer {% if song_type == '华语' %}active{% endif %}">
-                    <div class="main-cate">
-                        <a href="{% url 'ranking' %}?type=华语" class="main-title">华语</a>
-                    </div>
+                    <a href="{% url 'ranking' %}?type=华语" class="main-title">华语</a>
                 </li>
                 <li class="computer {% if song_type == '欧美' %}active{% endif %}">
-                    <div class="main-cate">
-                        <a href="{% url 'ranking' %}?type=欧美" class="main-title">欧美</a>
-                    </div>
+                    <a href="{% url 'ranking' %}?type=欧美" class="main-title">欧美</a>
                 </li>
                 <li class="computer {% if song_type == '日本' %}active{% endif %}">
-                    <div class="main-cate">
-                        <a href="{% url 'ranking' %}?type=日本" class="main-title">日本</a>
-                    </div>
+                    <a href="{% url 'ranking' %}?type=日本" class="main-title">日本</a>
                 </li>
                 <li class="computer {% if song_type == '韩国' %}active{% endif %}">
-                    <div class="main-cate">
-                        <a href="{% url 'ranking' %}?type=韩国" class="main-title">韩国</a>
-                    </div>
+                    <a href="{% url 'ranking' %}?type=韩国" class="main-title">韩国</a>
                 </li>
             </ul>
         </div>
-  	</div><!-- 左侧列表 end -->
-
-	<div class="main">
-		<div class="main-head-box clearfix">
-			<div class="main-head"><h1>{{ song_type }}歌曲排行榜</h1></div>
-		</div>
-		<table class="rank-list-table">
-			<tr>
-				<th class="cell-1">排名</th>
-				<th class="cell-2">图片</th>
-				<th class="cell-3">歌名</th>
-				<th class="cell-4">专辑</th>
-				<th class="cell-5">下载量</th>
-				<th class="cell-6">播放量</th>
-			</tr>
-            {% for item in song_info  %}
+        <div class="main">
+            <div class="main-head-box clearfix">
+                <div class="main-head"><h1>{{ song_type }}歌曲排行榜</h1></div>
+            </div>
+            <table class="rank-list-table">
                 <tr>
-                    {%if forloop.counter < 4  %}
-                    <td><span class="n1">{{forloop.counter}}</span></td>
-                    {%else %}
-                    <td><span class="n2">{{forloop.counter}}</span></td>
-                    {%endif %}
-                    <td>
-                    <a href="{% url 'play' item.song.song_id %}"  class="pic" target="play">
-                        {% if item.song.song_img_url %}
-                            <img src="{{ item.song.song_img_url }}" width="80" height="80">
-                        {% else %}
-                            <img src="{% static "songImg/" %}{{ item.song.song_img }}" width="80" height="80">
-                        {% endif %}
-                    </a>
-                    </td>
-                    <td class="name-cell">
-                    <h3><a href="{% url 'play' item.song.song_id %}" target="play" >{{item.song.song_name}}</a></h3>
-                    <div class="desc">
-                    <a href="javascript:;" target="_blank" class="type" >{{item.song.song_singer}}</a>
-                    </div>
-                    </td>
-                    <td>
-                    <div style="text-align:center;">{{item.song.song_album}}</div>
-                    </td>
-                    <td>
-                    <div style="text-align:center;">{{item.dynamic_down}}</div>
-                    </td>
-                    <td class="num-cell">{{item.dynamic_plays}}</td>
+                    <th class="cell-1">排名</th>
+                    <th class="cell-2">图片</th>
+                    <th class="cell-3">歌名</th>
+                    <th class="cell-4">专辑</th>
+                    <th class="cell-5">下载量</th>
+                    <th class="cell-6">播放量</th>
                 </tr>
-            {% endfor  %}
-        </table>
-	</div>
+                {% for item in song_info  %}
+                    <tr>
+                        {% with rank_number=song_info.start_index|add:forloop.counter0 %}
+                            {% if rank_number < 4  %}
+                                <td><span class="n1">{{rank_number}}</span></td>
+                            {% else %}
+                                <td><span class="n2">{{rank_number}}</span></td>
+                            {% endif %}
+                        {% endwith %}
+                        <td>
+                            <a href="{% url 'play' item.song.song_id %}"  class="pic" target="play">
+                                {% if item.song.song_img_url %}
+                                    <img src="{{ item.song.song_img_url }}" width="80" height="80">
+                                {% else %}
+                                    <img src="{% static "songImg/" %}{{ item.song.song_img }}" width="80" height="80">
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td class="name-cell">
+                            <h2.5><a href="{% url 'play' item.song.song_id %}" target="play" >{{item.song.song_name}}</a></h2.5>
+                            <div class="desc">
+                                <a href="javascript:;" target="_blank" class="type" >{{item.song.song_singer}}</a>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="text-align:center;">{{item.song.song_album}}</div>
+                        </td>
+                        <td>
+                            <div style="text-align:center;">{{item.dynamic_down}}</div>
+                        </td>
+                        <td class="num-cell">{{item.dynamic_plays}}</td>
+                    </tr>
+                {% endfor  %}
+            </table>
+            <div class="pagination-container">
+                <div class="pagination">
+                    {% if song_info.has_previous %}
+                        <a href="?type={{ song_type }}&page=1" class="first-page">首页</a>
+                        <a href="?type={{ song_type }}&page={{ song_info.previous_page_number }}" class="prev-page">上一页</a>
+                    {% endif %}
+
+                    <span class="current-page">第 {{ song_info.number }} 页（共 {{ song_info.paginator.num_pages }} 页）</span>
+
+                    {% if song_info.has_next %}
+                        <a href="?type={{ song_type }}&page={{ song_info.next_page_number }}" class="next-page">下一页</a>
+                        <a href="?type={{ song_type }}&page={{ song_info.paginator.num_pages }}" class="last-page">尾页</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
     <script data-main="{% static "js/ranking.js" %}" src="{% static "js/require.js" %}"></script>
-<div class="pagination-container">
-    <div class="pagination">
-        {% if song_info.has_previous %}
-            <a href="?type={{ song_type }}&page=1" class="first-page">首页</a>
-            <a href="?type={{ song_type }}&page={{ song_info.previous_page_number }}" class="prev-page">上一页</a>
-        {% endif %}
-        
-        <span class="current-page">第 {{ song_info.number }} 页（共 {{ song_info.paginator.num_pages }} 页）</span>
-        
-        {% if song_info.has_next %}
-            <a href="?type={{ song_type }}&page={{ song_info.next_page_number }}" class="next-page">下一页</a>
-            <a href="?type={{ song_type }}&page={{ song_info.paginator.num_pages }}" class="last-page">尾页</a>
-        {% endif %}
-    </div>
-</div>
 {% endblock  %}

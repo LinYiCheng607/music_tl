@@ -4,11 +4,15 @@ import requests
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import urllib.parse
 
 # AnythingLLM API 配置
 API_KEY = "RN0F121-T28MW7E-H64S94P-803ECRC"
 # 修改为实际部署的服务器地址，注意不要使用localhost
 API_BASE_URL = "http://localhost:3001/api"  # 请替换为实际API服务器地址
+
+# 定义默认工作区名称 - 修改为实际存在的工作区名称
+DEFAULT_WORKSPACE_NAME = "music_knowledge"  # 改回默认的工作区名称，因为"音乐分析与推荐系统"不存在
 
 def test_api_connection():
     """测试API连接"""
@@ -96,50 +100,16 @@ def chat_with_assistant(request):
                 })
                 
             # 使用AnythingLLM原生聊天API，而不是OpenAI兼容接口
-            workspace_name = "music_knowledge"  # 默认工作区名称，可以根据实际情况修改
+            # 直接使用默认工作区名称，不再尝试创建新工作区
+            workspace_name = DEFAULT_WORKSPACE_NAME  # 使用全局定义的默认工作区名称
             
-            # 如果没有工作区，先创建一个
-            try:
-                create_workspace_url = f"{API_BASE_URL}/v1/workspace/new"
-                create_headers = {
-                    'Authorization': f'Bearer {API_KEY}',
-                    'Content-Type': 'application/json',
-                    'accept': 'application/json'
-                }
-                
-                workspace_data = {   
-                    "name": workspace_name,
-                    "similarityThreshold": 0.7,    
-                    "openAiTemp": 0.7,  
-                    "openAiHistory": 20, 
-                    "openAiPrompt": "你是一个专业的音乐知识助手，可以回答用户关于音乐方面的问题。",    
-                    "queryRefusalResponse": "抱歉，我只能回答与音乐相关的问题。",    
-                    "chatMode": "chat",   
-                    "topN": 4
-                }
-                
-                print("尝试创建工作区...")
-                create_response = requests.post(
-                    create_workspace_url, 
-                    headers=create_headers, 
-                    json=workspace_data,
-                    timeout=10
-                )
-                
-                print(f"创建工作区响应: {create_response.status_code}")
-                if create_response.status_code == 200:
-                    print(f"工作区创建成功: {create_response.text}")
-                    workspace_result = create_response.json()
-                    if 'workspace' in workspace_result and 'slug' in workspace_result['workspace']:
-                        workspace_name = workspace_result['workspace']['slug']
-                else:
-                    print(f"工作区可能已存在，继续使用默认工作区: {workspace_name}")
-            except Exception as e:
-                print(f"创建工作区出错: {str(e)}")
-                
+            # URL编码工作区名称，防止中文或特殊字符导致的问题
+            encoded_workspace_name = urllib.parse.quote(workspace_name)
+            
             # 使用正确的聊天API端点
-            chat_url = f"{API_BASE_URL}/v1/workspace/{workspace_name}/chat"
+            chat_url = f"{API_BASE_URL}/v1/workspace/{encoded_workspace_name}/chat"
             print(f"发送聊天请求到: {chat_url}")
+            print(f"工作区名称: {workspace_name} (URL编码后: {encoded_workspace_name})")
             print(f"消息内容: {message}")
             
             # 使用与文档匹配的headers格式

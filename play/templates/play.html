@@ -1071,88 +1071,357 @@
                     }
                 }
                 
-                // 点击进度条调整进度
-                document.querySelector('.progress-container').addEventListener('click', function(e) {
-                    const boundingRect = this.getBoundingClientRect();
-                    const clickPosition = e.clientX - boundingRect.left;
-                    const progressPercent = (clickPosition / this.clientWidth) * 100;
+                // 初始化进度条功能
+                function initProgressBar() {
+                    // 监听jPlayer的timeupdate事件，确保进度条更新与播放器同步
+                    jQuery("#jquery_jplayer_1").bind(jQuery.jPlayer.event.timeupdate, function(event) {
+                        const percent = event.jPlayer.status.currentPercentRelative;
+                        if (!isDragging) {
+                            document.querySelector('.progress-bar').style.width = percent + '%';
+                        }
+                    });
                     
-                    // 获取总时间
-                    const duration = document.querySelector('.jp-duration').textContent;
-                    if (duration && duration !== '00:00') {
-                        const durationParts = duration.split(':');
-                        const totalSeconds = parseInt(durationParts[0]) * 60 + parseInt(durationParts[1]);
-                        
-                        // 计算新的播放位置（秒）
-                        const newPosition = (totalSeconds * progressPercent) / 100;
+                    // 监听jPlayer的播放/暂停事件
+                    jQuery("#jquery_jplayer_1").bind(jQuery.jPlayer.event.play, function(event) {
+                        const playIcon = document.querySelector('.play-icon');
+                        const pauseIcon = document.querySelector('.pause-icon');
+                        playIcon.style.display = 'none';
+                        pauseIcon.style.display = 'inline-block';
+                    });
+                    
+                    jQuery("#jquery_jplayer_1").bind(jQuery.jPlayer.event.pause, function(event) {
+                        const playIcon = document.querySelector('.play-icon');
+                        const pauseIcon = document.querySelector('.pause-icon');
+                        playIcon.style.display = 'inline-block';
+                        pauseIcon.style.display = 'none';
+                    });
+                    
+                    // 增强进度条功能
+                    enhanceProgressControl();
+                    
+                    // 增强下一首按钮功能
+                    enhanceNextButtonControl();
+                }
+                
+                // 增强进度条控制功能
+                function enhanceProgressControl() {
+                    // 替换原有的点击进度条事件处理
+                    const progressContainer = document.querySelector('.progress-container');
+                    progressContainer.removeEventListener('click', progressContainer.clickHandler);
+                    
+                    progressContainer.clickHandler = function(e) {
+                        const boundingRect = this.getBoundingClientRect();
+                        const clickPosition = e.clientX - boundingRect.left;
+                        const progressPercent = (clickPosition / this.clientWidth) * 100;
                         
                         // 更新进度条显示
                         document.querySelector('.progress-bar').style.width = progressPercent + '%';
                         
-                        // 使用jPlayer API直接设置播放位置
+                        // 使用多种方法尝试调整进度
                         if (typeof jQuery !== 'undefined' && jQuery("#jquery_jplayer_1").length) {
-                            jQuery("#jquery_jplayer_1").jPlayer("play", newPosition);
+                            try {
+                                const jPlayer = jQuery("#jquery_jplayer_1");
+                                const status = jPlayer.data("jPlayer").status;
+                                
+                                // 检查播放器是否已准备好
+                                if (status.srcSet) {
+                                    // 记住当前是否正在播放
+                                    const wasPlaying = !status.paused;
+                                    
+                                    // 方法1：使用playHead方法设置位置
+                                    jPlayer.jPlayer("playHead", progressPercent);
+                                    
+                                    // 方法2：如果方法1失败，尝试使用seek方法
+                                    setTimeout(function() {
+                                        if (Math.abs(jPlayer.data("jPlayer").status.currentPercentRelative - progressPercent) > 5) {
+                                            const duration = jPlayer.data("jPlayer").status.duration;
+                                            const seekTime = duration * (progressPercent / 100);
+                                            jPlayer.jPlayer("play", seekTime);
+                                        }
+                                        
+                                        // 如果之前在播放，确保继续播放
+                                        if (wasPlaying) {
+                                            setTimeout(function() {
+                                                jPlayer.jPlayer("play");
+                                            }, 100);
+                                        }
+                                    }, 100);
+                                }
+                            } catch (err) {
+                                console.log("进度调整失败:", err);
+                                // 尝试直接操作原始audio元素
+                                try {
+                                    const audioElement = document.querySelector("audio");
+                                    if (audioElement) {
+                                        const duration = audioElement.duration;
+                                        if (duration && !isNaN(duration)) {
+                                            audioElement.currentTime = duration * (progressPercent / 100);
+                                        }
+                                    }
+                                } catch (audioErr) {
+                                    console.log("直接操作audio元素失败:", audioErr);
+                                }
+                            }
                         }
-                    }
-                });
-                
-                // 拖动进度条调整进度
-                const progressContainer = document.querySelector('.progress-container');
-                const progressBar = document.querySelector('.progress-bar');
-                const progressThumb = document.querySelector('.progress-thumb');
-                
-                let isDragging = false;
-                
-                progressContainer.addEventListener('mousedown', function(e) {
-                    isDragging = true;
-                    updateProgressPosition(e);
-                });
-                
-                document.addEventListener('mousemove', function(e) {
-                    if (isDragging) {
-                        updateProgressPosition(e);
-                    }
-                });
-                
-                document.addEventListener('mouseup', function() {
-                    isDragging = false;
-                });
-                
-                function updateProgressPosition(e) {
-                    if (!isDragging) return;
+                    };
                     
-                    const boundingRect = progressContainer.getBoundingClientRect();
-                    let clickPosition = e.clientX - boundingRect.left;
+                    progressContainer.addEventListener('click', progressContainer.clickHandler);
                     
-                    // 确保在容器范围内
-                    if (clickPosition < 0) clickPosition = 0;
-                    if (clickPosition > boundingRect.width) clickPosition = boundingRect.width;
+                    // 替换拖动进度条的实现
+                    document.removeEventListener('mousemove', document.progressMoveHandler);
+                    document.removeEventListener('mouseup', document.progressUpHandler);
                     
-                    const progressPercent = (clickPosition / boundingRect.width) * 100;
-                    
-                    // 更新进度条显示
-                    progressBar.style.width = progressPercent + '%';
-                    
-                    // 获取总时间
-                    const duration = document.querySelector('.jp-duration').textContent;
-                    if (duration && duration !== '00:00') {
-                        const durationParts = duration.split(':');
-                        const totalSeconds = parseInt(durationParts[0]) * 60 + parseInt(durationParts[1]);
-                        
-                        // 计算新的播放位置（秒）
-                        const newPosition = (totalSeconds * progressPercent) / 100;
-                        
-                        // 使用jPlayer API直接设置播放位置
-                        if (typeof jQuery !== 'undefined' && jQuery("#jquery_jplayer_1").length) {
-                            jQuery("#jquery_jplayer_1").jPlayer("play", newPosition);
+                    document.progressMoveHandler = function(e) {
+                        if (isDragging) {
+                            const boundingRect = progressContainer.getBoundingClientRect();
+                            let clickPosition = e.clientX - boundingRect.left;
+                            
+                            // 确保在容器范围内
+                            if (clickPosition < 0) clickPosition = 0;
+                            if (clickPosition > boundingRect.width) clickPosition = boundingRect.width;
+                            
+                            const progressPercent = (clickPosition / boundingRect.width) * 100;
+                            
+                            // 更新进度条显示
+                            document.querySelector('.progress-bar').style.width = progressPercent + '%';
+                            
+                            // 获取总时间并更新显示的当前时间
+                            if (typeof jQuery !== 'undefined' && jQuery("#jquery_jplayer_1").length) {
+                                try {
+                                    const duration = jQuery("#jquery_jplayer_1").data("jPlayer").status.duration;
+                                    if (duration && !isNaN(duration)) {
+                                        const newPosition = duration * (progressPercent / 100);
+                                        const newMinutes = Math.floor(newPosition / 60).toString().padStart(2, '0');
+                                        const newSeconds = Math.floor(newPosition % 60).toString().padStart(2, '0');
+                                        
+                                        // 更新当前时间显示
+                                        document.querySelector('.current-time').textContent = `${newMinutes}:${newSeconds}`;
+                                    }
+                                } catch (err) {
+                                    console.log("获取时间信息失败:", err);
+                                }
+                            }
                         }
-                    }
+                    };
+                    
+                    document.progressUpHandler = function() {
+                        if (isDragging) {
+                            isDragging = false;
+                            
+                            // 获取当前进度条位置
+                            const progressPercent = parseFloat(document.querySelector('.progress-bar').style.width);
+                            
+                            // 使用多种方法尝试调整进度
+                            if (typeof jQuery !== 'undefined' && jQuery("#jquery_jplayer_1").length) {
+                                try {
+                                    const jPlayer = jQuery("#jquery_jplayer_1");
+                                    
+                                    // 方法1：使用playHead方法设置位置
+                                    jPlayer.jPlayer("playHead", progressPercent);
+                                    
+                                    // 方法2：如果方法1失败，尝试使用seek方法
+                                    setTimeout(function() {
+                                        if (Math.abs(jPlayer.data("jPlayer").status.currentPercentRelative - progressPercent) > 5) {
+                                            const duration = jPlayer.data("jPlayer").status.duration;
+                                            const seekTime = duration * (progressPercent / 100);
+                                            jPlayer.jPlayer("play", seekTime);
+                                        }
+                                        
+                                        // 如果之前是播放状态，恢复播放
+                                        if (!wasPaused) {
+                                            setTimeout(function() {
+                                                jPlayer.jPlayer("play");
+                                            }, 100);
+                                        }
+                                    }, 100);
+                                } catch (err) {
+                                    console.log("进度调整失败:", err);
+                                    // 尝试直接操作原始audio元素
+                                    try {
+                                        const audioElement = document.querySelector("audio");
+                                        if (audioElement) {
+                                            const duration = audioElement.duration;
+                                            if (duration && !isNaN(duration)) {
+                                                audioElement.currentTime = duration * (progressPercent / 100);
+                                                if (!wasPaused) {
+                                                    audioElement.play();
+                                                }
+                                            }
+                                        }
+                                    } catch (audioErr) {
+                                        console.log("直接操作audio元素失败:", audioErr);
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    
+                    document.addEventListener('mousemove', document.progressMoveHandler);
+                    document.addEventListener('mouseup', document.progressUpHandler);
+                }
+                
+                // 增强下一首按钮功能
+                function enhanceNextButtonControl() {
+                    // 替换原有的下一首按钮事件处理
+                    const nextButton = document.querySelector('.next-button');
+                    nextButton.removeEventListener('click', nextButton.clickHandler);
+                    
+                    nextButton.clickHandler = function() {
+                        let playList = document.querySelectorAll('.playlist li');
+                        let currentIndex = -1;
+                        
+                        // 找到当前播放歌曲的索引
+                        playList.forEach((item, index) => {
+                            if (item.classList.contains('current')) {
+                                currentIndex = index;
+                            }
+                        });
+                        
+                        if (currentIndex >= 0 && currentIndex < playList.length - 1) {
+                            // 有下一首歌曲
+                            let nextSong = playList[currentIndex + 1].querySelector('.name');
+                            if (nextSong) {
+                                // 使用多种方式尝试跳转到下一首
+                                try {
+                                    // 方法1：直接点击链接
+                                    nextSong.click();
+                                } catch (err) {
+                                    console.log("点击下一首失败:", err);
+                                    
+                                    // 方法2：直接修改location
+                                    try {
+                                        const nextUrl = nextSong.getAttribute('href');
+                                        if (nextUrl) {
+                                            window.location.href = nextUrl;
+                                        }
+                                    } catch (navErr) {
+                                        console.log("导航到下一首失败:", navErr);
+                                    }
+                                }
+                            }
+                        } else if (playList.length > 0) {
+                            // 如果是最后一首，根据播放模式决定行为
+                            const playMode = localStorage.getItem('playRule') || 'order';
+                            
+                            if (playMode === 'order' || playMode === 'random') {
+                                // 顺序播放或随机播放模式下，回到第一首
+                                let firstSong = playList[0].querySelector('.name');
+                                if (firstSong) {
+                                    try {
+                                        firstSong.click();
+                                    } catch (err) {
+                                        console.log("点击第一首失败:", err);
+                                        try {
+                                            const firstUrl = firstSong.getAttribute('href');
+                                            if (firstUrl) {
+                                                window.location.href = firstUrl;
+                                            }
+                                        } catch (navErr) {
+                                            console.log("导航到第一首失败:", navErr);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    
+                    nextButton.addEventListener('click', nextButton.clickHandler);
+                    
+                    // 同样增强上一首按钮
+                    const prevButton = document.querySelector('.prev-button');
+                    prevButton.removeEventListener('click', prevButton.clickHandler);
+                    
+                    prevButton.clickHandler = function() {
+                        let playList = document.querySelectorAll('.playlist li');
+                        let currentIndex = -1;
+                        
+                        // 找到当前播放歌曲的索引
+                        playList.forEach((item, index) => {
+                            if (item.classList.contains('current')) {
+                                currentIndex = index;
+                            }
+                        });
+                        
+                        if (currentIndex > 0) {
+                            // 有上一首歌曲
+                            let prevSong = playList[currentIndex - 1].querySelector('.name');
+                            if (prevSong) {
+                                try {
+                                    prevSong.click();
+                                } catch (err) {
+                                    console.log("点击上一首失败:", err);
+                                    try {
+                                        const prevUrl = prevSong.getAttribute('href');
+                                        if (prevUrl) {
+                                            window.location.href = prevUrl;
+                                        }
+                                    } catch (navErr) {
+                                        console.log("导航到上一首失败:", navErr);
+                                    }
+                                }
+                            }
+                        } else if (playList.length > 0) {
+                            // 如果是第一首，循环到最后一首
+                            let lastSong = playList[playList.length - 1].querySelector('.name');
+                            if (lastSong) {
+                                try {
+                                    lastSong.click();
+                                } catch (err) {
+                                    console.log("点击最后一首失败:", err);
+                                    try {
+                                        const lastUrl = lastSong.getAttribute('href');
+                                        if (lastUrl) {
+                                            window.location.href = lastUrl;
+                                        }
+                                    } catch (navErr) {
+                                        console.log("导航到最后一首失败:", navErr);
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    
+                    prevButton.addEventListener('click', prevButton.clickHandler);
                 }
                 
                 // 初始化
                 parseLyrics();
                 syncProgress();
                 initPlayState();
+                
+                // 确保播放器加载完成
+                checkPlayerReady();
+                
+                // 播放器状态检测
+                function checkPlayerReady() {
+                    let checkAttempts = 0;
+                    const maxAttempts = 20; // 最多尝试20次
+                    
+                    const checkInterval = setInterval(function() {
+                        if (typeof jQuery !== 'undefined' && 
+                            jQuery("#jquery_jplayer_1").length && 
+                            jQuery("#jquery_jplayer_1").data("jPlayer")) {
+                            
+                            // 播放器已加载，初始化进度条
+                            initProgressBar();
+                            clearInterval(checkInterval);
+                            console.log("播放器已准备就绪");
+                        } else {
+                            checkAttempts++;
+                            if (checkAttempts >= maxAttempts) {
+                                clearInterval(checkInterval);
+                                console.log("播放器加载超时");
+                            }
+                        }
+                    }, 500);
+                }
+                
+                // 定义全局变量
+                const progressContainer = document.querySelector('.progress-container');
+                const progressBar = document.querySelector('.progress-bar');
+                const progressThumb = document.querySelector('.progress-thumb');
+                let isDragging = false;
+                let wasPaused = true;
             }, 1000); // 延迟一秒等待原播放器加载
         });
     </script>
