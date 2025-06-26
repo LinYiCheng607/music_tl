@@ -130,17 +130,20 @@ def song_analysis(request):
 @login_required
 def update_user_info(request):
     if request.method == "POST":
-        nickname = request.POST.get("nickname")
-        email = request.POST.get("email")
         user = request.user
-        if hasattr(user, "nickname"):
-            user.nickname = nickname
-        user.email = email
+        user.nickname = request.POST.get("nickname", user.nickname)
+        user.email = request.POST.get("email", user.email)
+        user.qq = request.POST.get("qq", user.qq)
+        user.mobile = request.POST.get("mobile", user.mobile)
+        user.bio = request.POST.get("bio", user.bio)
         user.save()
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({
-                "nickname": getattr(user, "nickname", user.username),
+                "nickname": user.nickname,
                 "email": user.email,
+                "qq": user.qq,
+                "mobile": user.mobile,
+                "bio": user.bio,
             })
         return redirect("home", 1)
     return redirect("home", 1)

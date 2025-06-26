@@ -34,40 +34,41 @@
                 <a href="{% url 'logout' %}" class="logout-link">退出登录</a>
             </div>
             <div class="user-profile-right">
-                <div class="user-info">
-                    <h2>个人信息</h2>
-                    <form id="user-info-form" method="post" action="{% url 'update_user_info' %}">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="nickname">昵称：</label>
-                            <input type="text" id="nickname" name="nickname" value="{{ user.nickname|default:user.username }}">
-                        </div>
-                        <div class="form-group">
-                            <label for="email">邮箱：</label>
-                            <input type="email" id="email" name="email" value="{{ user.email }}">
-                        </div>
-                        <button type="submit" class="save-btn">保存修改</button>
-                    </form>
-                    <script>
-                    document.getElementById('user-info-form').onsubmit = async function(e) {
-                        e.preventDefault();
-                        const form = e.target;
-                        const formData = new FormData(form);
-                        const response = await fetch(form.action, {
-                            method: "POST",
-                            headers: {"X-Requested-With": "XMLHttpRequest"},
-                            body: formData
-                        });
-                        if (response.ok) {
-                            const data = await response.json();
-                            document.getElementById('nickname-display').textContent = data.nickname;
-                            alert("修改成功！");
-                        } else {
-                            alert("保存失败");
-                        }
-                    };
-                    </script>
+            <div class="user-info">
+            <h2>个人信息</h2>
+            <form id="user-info-form" method="post" action="{% url 'update_user_info' %}">
+                {% csrf_token %}
+                <div class="user-info-rows">
+                <div class="user-info-row">
+                    <div class="form-group">
+                    <label for="nickname">昵称：</label>
+                    <input type="text" id="nickname" name="nickname" value="{{ user.nickname|default:user.username }}">
+                    </div>
+                    <div class="form-group">
+                    <label for="email">邮箱：</label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}">
+                    </div>
                 </div>
+                <div class="user-info-row">
+                    <div class="form-group">
+                    <label for="qq">QQ号：</label>
+                    <input type="text" id="qq" name="qq" value="{{ user.qq }}">
+                    </div>
+                    <div class="form-group">
+                    <label for="mobile">手机号：</label>
+                    <input type="text" id="mobile" name="mobile" value="{{ user.mobile }}">
+                    </div>
+                </div>
+                <div class="user-info-row">
+                    <div class="form-group" style="width: 100%;">
+                    <label for="bio">个性签名：</label>
+                    <input type="text" id="bio" name="bio" value="{{ user.bio }}">
+                    </div>
+                </div>
+                </div>
+                <button type="submit" class="save-btn">保存修改</button>
+            </form>
+            </div>
             </div>
         </div>
     </div>
