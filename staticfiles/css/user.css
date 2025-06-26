@@ -1,23 +1,144 @@
-.mod_profile{height:315px;padding-top:65px;background:url(../image/user_bg.jpg) 50% no-repeat;background-size:cover;text-align:center;color:#fff}
-.mod_profile .section_inner{height:315px}
-.profile__cover_link{position:relative;width:102px;height:102px;margin:0 auto}
-.profile__cover{display:block;width:100%;height:100%;border:4px solid #fff;border-radius:99px;background:#fff}
-.profile__name{font-size:30px;font-weight:400;line-height:64px;margin-right:4px}
-.mod_songlist{padding:40px 0;font-size:14px;overflow:hidden}
-.songlist__list{overflow:hidden;clear:both}
-.songlist__header,.songlist__item{position:relative;padding-left:46px;padding-right:100px}
-.songlist__item{clear:both;font-size:0;overflow:hidden}
-.songlist__item--even{background-color:#fbfbfd}
-.songlist__album,.songlist__artist,.songlist__number,.songlist__other,.songlist__songname,.songlist__time{line-height:50px;height:50px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
-.songlist__header{height:50px;line-height:50px;background-color:#fbfbfd;color:#999}
-.songlist__header_name,.songlist__songname{float:left;width:47.685185%;position:relative;white-space:normal}
-.songlist__album,.songlist__artist,.songlist__header_album,.songlist__header_author{float:left;padding-left:20px;width:23.611111%}
-.songlist__header_time,.songlist__time{position:absolute;top:0;right:38px;width:50px}
-.songlist__header_other,.songlist__other{position:absolute;top:0;right:0;width:38px;overflow:inherit}
-.songlist__song_txt{margin-left:10px}
-.songlist__song_txt,.songlist__time{color:#999}
-.songlist__number{position:absolute;top:0;left:10px;color:#999;width:36px}
-.songlist__songname_txt{float:left;overflow:hidden;text-overflow:ellipsis;max-width:75%;margin-right:8px;white-space:nowrap}
+body {
+    background-color: #FFDF35 !important;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+    color: #a66a00 !important;
+}
+a {
+    color: #f59e42 !important;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+a:hover {
+    color: #ff9800 !important;
+    text-decoration: underline;
+}
+
+.mod_profile {
+    max-width: 1200px;   /* 与 .main 一致 */
+    margin: 0 auto;      /* 居中对齐 */
+    height: 315px;
+    padding-top: 65px;
+    background: url(../image/user_bg2.png) 50% no-repeat;
+    background-size: cover;
+    text-align: center;
+    color: #fff;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+}
+.mod_profile .section_inner {height:315px;}
+.profile__cover_link {position:relative;width:102px;height:102px;margin:0 auto;}
+.profile__cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 4px solid #ffdf35;
+    border-radius: 99px;
+    background: #fff9e0;
+}
+.profile__name {
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 64px;
+    margin-right: 4px;
+    color: #f59e42 !important;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+    text-shadow: 1px 1px 0 #fffbe6;
+}
+.profile__tit {
+    padding-top: 20px;
+}
+.mod_songlist {
+    padding: 40px 0;
+    font-size: 14px;
+    overflow: hidden;
+    background: #FFF9E0 !important;
+    border-radius: 18px;
+    box-shadow: 0 4px 18px 0 #FFDF35;
+}
+.songlist__header, .songlist__item {
+    position: relative;
+    padding-left: 46px;
+    padding-right: 100px;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+}
+.songlist__item {
+    clear: both;
+    font-size: 0;
+    overflow: hidden;
+}
+.songlist__item--even {
+    background-color: #fffbe6 !important;
+}
+.songlist__album, .songlist__artist, .songlist__number, .songlist__other, .songlist__songname, .songlist__time {
+    line-height: 50px;
+    height: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    color: #a66a00 !important;
+}
+.songlist__header {
+    height: 50px;
+    line-height: 50px;
+    background-color: #FFF7CF !important;
+    color: #d17d00 !important;
+    font-size: 16px;
+    letter-spacing: 2px;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+}
+.songlist__header_name, .songlist__songname {
+    float: left;
+    width: 47.685185%;
+    position: relative;
+    white-space: normal;
+}
+.songlist__album, .songlist__artist, .songlist__header_album, .songlist__header_author {
+    float: left;
+    padding-left: 20px;
+    width: 23.611111%;
+}
+.songlist__header_time, .songlist__time {
+    position: absolute;
+    top: 0;
+    right: 38px;
+    width: 50px;
+    color: #d17d00 !important;
+}
+.songlist__header_other, .songlist__other {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 38px;
+    overflow: inherit;
+}
+.songlist__song_txt {margin-left:10px;}
+.songlist__song_txt, .songlist__time {color: #ffbc42 !important;}
+.songlist__count {
+    display: inline-block;
+    color: #a66a00 !important;   /* 或你喜欢的颜色 */
+    font-size: 16px !important;
+    min-width: 2em;
+    text-align: center;
+    vertical-align: middle;
+}
+.songlist__number {
+    position: absolute;
+    top: 0;
+    left: 10px;
+    color: #d17d00 !important;
+    width: 36px;
+}
+.songlist__songname_txt {
+    float: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 75%;
+    margin-right: 8px;
+    white-space: nowrap;
+    color: #a66a00 !important;
+}
 .songlist__item .songlist__songname_txt:nth-child(1){max-width:85%;box-sizing:border-box}
 .songlist__item .songlist__icon:nth-child(1)+.songlist__songname_txt{max-width:72%;box-sizing:border-box}
 .songlist__item .songlist__icon:nth-child(2)+.songlist__songname_txt{max-width:62%;box-sizing:border-box}
@@ -32,120 +153,375 @@
 .songlist__checkbox{opacity:0;filter:alpha(opacity=0)}
 .mod_songlist_toolbar--edit{margin-bottom:60px;margin-top:-44px}
 .mod_songlist--edit .songlist__header,.mod_songlist--edit .songlist__item,.mod_songlist_toolbar--edit{padding-left:82px}
-.mod_songlist--edit .songlist__edit,.mod_songlist_toolbar--edit .songlist__edit{display:block;position:absolute;left:20px;top:50%;margin-top:-9px;width:14px;height:14px;line-height:14px;border:1px solid #ccc}
+.mod_songlist--edit .songlist__edit,.mod_songlist_toolbar--edit .songlist__edit{display:block;position:absolute;left:20px;top:50%;margin-top:-9px;width:14px;height:14px;line-height:14px;border:1px solid #FFDF35;}
 .mod_songlist--edit .songlist__edit input,.mod_songlist_toolbar--edit input{width:14px;height:14px}
-.mod_songlist--edit .songlist__edit--check,.mod_songlist_toolbar--edit .songlist__edit--check{border-color:#31c27c;background-image:url(img/icon_sprite.png?max_age=2592000&v=bc673d15303afd0ec21fcc0f922d2d0f);background-image:-webkit-image-set(url(img/icon_sprite.png?max_age=2592000&v=bc673d15303afd0ec21fcc0f922d2d0f) 1x,url(img/icon_sprite@2x.png?max_age=2592000&v=bc673d15303afd0ec21fcc0f922d2d0f&v=72112c43c39c53184d7ee81bfea6dc6d) 2x);background-position:-60px -100px}
+.mod_songlist--edit .songlist__edit--check,.mod_songlist_toolbar--edit .songlist__edit--check{border-color:#FFDF35;background-position:-60px -100px}
 .mod_songlist_toolbar--edit .mod_btn{margin-top:6px}
 .mod_songlist--edit .songlist__number{left:46px}
-.main{min-height:500px;}
-.main,.section_inner{max-width:1200px;margin:0 auto;position:relative}
-.profile__tit{padding-top:20px;}
-.mod_tab,.mod_tab__item{height:56px;line-height:56px}
-.mod_tab{position:relative;zoom:1;border-bottom:1px solid #f7f7f7;margin-bottom:30px}
-.mod_tab__item{position:relative;float:left;font-size:16px;overflow:hidden;margin-right:55px}
-.mod_tab__current{color:#31c27c}
+.main {
+    min-height: 500px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    background: #FFF7CF !important;
+    border-radius: 18px;
+    box-shadow: 0 4px 18px 0 #FFDF35;
+}
+.section_inner {max-width:1200px;margin:0 auto;position:relative}
+.mod_tab, .mod_tab__item {height:56px;line-height:56px}
+.mod_tab {
+    position:relative;
+    zoom:1;
+    border-bottom:2px solid #FFDF35 !important;
+    margin-bottom:30px;
+}
+
+.mod_tab__item,
+.mod_tab__current {
+    position:relative;
+    float:left;
+    overflow:hidden;
+    margin-right:55px;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 64px;
+    color: #f59e42 !important;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+    text-shadow: 1px 1px 0 #fffbe6;
+    background: transparent !important;
+}
+
+.mod_tab__current {
+    border-bottom: 2px solid #FFDF35 !important;
+}
 .profile_nav{position:absolute;top:-56px;left:0;margin-bottom:0;width:80%}
 .profile_nav .mod_tab__item{color:#fff;margin-right:40px}
-.profile_nav .mod_tab__current,.profile_nav .mod_tab__item:hover{color:#31c27c;text-decoration:none;}
-.songlist__delete{position:absolute;top:50%;right:58px;margin-top:-18px;width:36px;height:36px;border:1px solid #ccc;border-radius:50%;text-align:center;visibility:hidden;color:#ccc;}
+.profile_nav .mod_tab__current,.profile_nav .mod_tab__item:hover{color:#f59e42 !important;text-decoration:none;}
+.songlist__delete{position:absolute;top:50%;right:58px;margin-top:-18px;width:36px;height:36px;border:1px solid #FFDF35;border-radius:50%;text-align:center;visibility:hidden;color:#FFDF35;}
 .songlist__delete span::after{content:"\e66d";display:block;font-family:iconfont;font-size:20px;line-height:36px;}
-.songlist__delete:hover{border-color:#30C37E;color:#30C37E;text-decoration:none;}
+.songlist__delete:hover{border-color:#fbc02d;color:#fbc02d;text-decoration:none;}
 .songlist__item--current .songlist__delete,.songlist__item:hover .songlist__delete{visibility:visible;}
 .songlist__item--current .songlist__time,.songlist__item:hover .songlist__time{display:none}
 .playlist_toolbar{padding-top:30px;height:40px;}
-.mod_btn,.mod_btn_green{border-radius:2px;font-size:14px;margin-right:6px;padding:0 23px;height:38px;line-height:38px;display:inline-block;white-space:nowrap;box-sizing:border-box;overflow:hidden;cursor:pointer;}
-.mod_btn{border:1px solid #c9c9c9;color:#333;background:#fff;}
-.js_create_new i{float:left;margin-right:10px;}
-.js_create_new i::before{content:"\e62a";display:inline-block;font-family:iconfont;font-size:20px;}
-.mod_btn--hover,.mod_btn:hover{background-color:#ededed;color:#333;text-decoration:none;}
-.mod_btn_green{border:1px solid #31c27c;background-color:#31c27c;color:#fff}
-.mod_btn_green:hover{background-color:#2caf6f;border-color:#2caf6f;color:#fff;text-decoration:none;}
+.mod_btn, .mod_btn_green {
+    border-radius: 10px;
+    font-size: 16px;
+    margin-right: 6px;
+    padding: 0 23px;
+    height: 38px;
+    line-height: 38px;
+    display: inline-block;
+    white-space: nowrap;
+    box-sizing: border-box;
+    overflow: hidden;
+    cursor: pointer;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+    background: #FFDF35 !important;
+    color: #fff !important;
+    border: 2px solid #FFDF35 !important;
+    box-shadow: 0 2px 8px #FFDF35;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+.mod_btn--hover,.mod_btn:hover{background-color:#fbc02d !important;color:#fffde4 !important;text-decoration:none;}
 .mod_btn_green:active{background-color:#279c63;border-color:#279c63}
-.mod_playlist_text .playlist__header{height:50px;line-height:50px;background-color:#fbfbfd;color:#999}
-.mod_playlist_text .playlist__author,.mod_playlist_text .playlist__header_author,.mod_playlist_text .playlist__header_name,.mod_playlist_text .playlist__header_number,.mod_playlist_text .playlist__number{float:left;padding-left:20px;font-size:14px;}.mod_playlist_text .playlist__header_other,.mod_playlist_text .playlist__other{float:right;padding-right:20px;text-align:right;}
-.mod_playlist_text .playlist__header_name{width:57%}
-.mod_playlist_text .playlist__item{position:relative;height:70px;line-height:70px;zoom:1;overflow:hidden;clear:both;font-size:0}
-.mod_playlist_text .playlist__item--even{background-color:#fbfbfd}
-.mod_playlist_text .playlist__cover{float:left;width:50px;height:50px;overflow:hidden;margin-top:10px;padding-left:20px}
-.mod_playlist_text .playlist__pic{display:block;width:100%;min-height:50px}
-.playlist__title{float:left;height:70px}
-.mod_playlist_text .playlist__author,.mod_playlist_text .playlist__number,.mod_playlist_text .playlist__other,.mod_playlist_text .playlist__title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
-.mod_playlist_text .playlist__title{width:52.66667%;font-weight:400;text-indent:15px;overflow:hidden}
-.mod_playlist_text .playlist__title_txt{float:left;max-width:90%;overflow:hidden;text-overflow:ellipsis}
-.mod_playlist_text .playlist__item--current .playlist__title_txt,.mod_playlist_text .playlist__item--hover .playlist__title_txt{max-width:70%}
-.mod_playlist_text .playlist__other{color:#999}
-.mod_playlist_text .mod_list_menu{position:absolute;left:44%;left:-9999px\9;top:19px;overflow:hidden;opacity:0;pointer-events:none}
-.mod_playlist_text .playlist__item--current .mod_list_menu,.mod_playlist_text .playlist__item--hover .mod_list_menu{opacity:1;left:44%;pointer-events:inherit}
-.list_current,.list_hover{background-color:#f7f7f7}
-.list_current .mod_playlist_text .playlist__title,.list_hover .mod_playlist_text .playlist__title{width:30.8986%}
-.mod_playlist_text .playlist__delete{position:absolute;top:50%;right:-99px;margin-top:-18px;width:36px;height:36px;border:1px solid #ccc;border-radius:50%;text-align:center;visibility:hidden;color:#ccc;line-height:2px;}
-.mod_playlist_text .playlist__delete span::after{content:"\e66d";display:block;font-family:iconfont;font-size:20px;line-height:36px;}
-.mod_playlist_text .playlist__delete:hover{border-color:#30C37E;color:#30C37E;text-decoration:none;}
-.mod_playlist_text .playlist__item--current .playlist__delete,.mod_playlist_text .playlist__item--hover .playlist__delete{right:20px;visibility:visible;}
-.mod_popup_mask{position:fixed;top:0;left:0;width:100%;height:100%;filter:progid:DXImageTransform.Microsoft.gradient(enabled='true', startColorstr='#33000000', endColorstr='#33000000');background:rgba(0,0,0,.2);z-index:999;display:none;}
-.mod_popup{position:fixed;z-index:100000;top:50%;left:50%;border:1px solid #bfbfbf;box-shadow:0 0 10px rgba(0,0,0,.3);background-color:#fff;font-size:14px;color:#333;margin:-123px 0 0 -260px;display:none;}
-.popup__hd{position:relative;line-height:55px;text-align:center;border-bottom:1px solid #f2f2f2}
-.popup__tit{font-size:16px;font-weight:400}
-.popup__tit_item{margin:0 55px}
-.popup__tit_item.current{color:#31c27c}
-.popup__tit_item.new:after{content:"";display:inline-block;width:6px;height:6px;margin-left:8px;background-color:#fc4c24;vertical-align:4px;border-radius:6px}
-.popup__close{position:absolute;top:6px;right:6px;width:24px;height:24px;overflow:hidden;z-index:2;line-height:24px;}
-.popup__close:hover{text-decoration:none;}
-.popup__icon_close::before{content:"\e601";font-family:iconfont;font-size:12px;}
-.popup__close:hover .popup__icon_close{background-position:-14px -200px}
-.popup__ft{padding:20px 20px 0 0;height:60px;text-align:right}
-.popup__ft .mod_btn,.popup__ft .mod_btn_green{width:auto;min-width:122px;text-align:center}
-.popup__ft .popup_btns__item{min-width:76px}
-.popup__bd:after{clear:both;content:' ';display:block}
-.popup__bd_inner{margin-top:30px;padding:0 108px 28px;position:relative}
-.popup__icon_tips{position:absolute;top:0;left:40px;width:48px;height:48px}
-.icon_popup_note{background-position:0 0}
-.icon_popup_warn{background-position:0 -50px}
-.icon_popup_success{background-position:0 -100px}
-.popup__subtit{font-size:14px;padding:0 0 7px 0;font-weight:400}
-.popup__subtit--single{padding-top:13px}
-.popup__desc{color:#999}
-.popup__desc a{color:#31c27c}
-.popup_upload_cover{width:336px;height:488px}
-.popup_new_list .popup__bd{position:relative;margin-top:39px;padding:0 40px 0 101px;padding-bottom:28px;overflow:hidden}
-.popup_new_list .form__label{position:absolute;top:0;left:0;width:81px;line-height:40px;text-align:right}
-.popup_new_list .mod_form_txt{width:377px;border-color:#e1e1e1}
-.popup_new_list .form_txt__input{width:330px;line-height:38px;border:1px solid #ccc;}
-.popup_new_list__tips{position:absolute;top:45px;left:101px;color:#ff4222}
-.popup_share_wechat{width:336px;text-align:center;height:518px}
-.popup_share_wechat__qrcode{width:188px;height:188px;display:block;margin:82px auto 50px}
-.popup_share_wechat__img{vertical-align:-2px;margin:0 4px}
-.popup_share_wechat__txt{line-height:27px;font-size:16px}
-.popup_share{width:598px}
-.popup_share__bd{margin:39px 35px 0}
-.popup_share_cont{position:relative;border:1px solid #e1e1e1;height:332px}
-.popup_share__textarea{border:0 none}
-.mod_data{position:relative;height:250px;padding-left:305px;margin-top:40px;margin-bottom:35px}
-.data__cont{padding-top:13px}
-.data__cover{position:absolute;left:0;top:0;width:250px;height:250px}
-.data__photo{width:100%;height:100%;object-fit:cover}
-.data__name{overflow:hidden;height:50px;line-height:50px}
-.data__name_txt{float:left;font-size:31px;line-height:50px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%;margin-right:10px}
-.data__singer{height:24px;line-height:24px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90%}
-.icon_singer{float:left;width:16px;height:16px;margin:0px 7px 0 0}
-.icon_singer::before{content:"\e604";font-family:iconfont;font-size:20px;}
-.data__singer_txt{font-size:16px;color:#333}
-.data__singer_line{padding:1px 4px}
-.data__actions{position:absolute;bottom:23px;font-size:0}
-.data__actions .mod_btn,.data__actions .mod_btn_green{min-width:122px;text-align:center}
-.data__name:hover .btn_edit,.data_info__item:hover .btn_edit,.mod_about:hover .btn_edit{display:inline-block;vertical-align:middle;width:14px;height:14px}
-.btn_edit:hover{background-position:-140px -60px}
-.data__name .form_txt__input{font-size:31px;line-height:32px}
-.data__info{width:520px;padding-top:8px}
-.data_info__item{height:27px;line-height:27px;width:400px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
-.data_info__tags{margin-right:12px}
-.mod_btn_green__icon_play{padding-right:10px;}
-.mod_btn_green__icon_play::before{content:"\e634";font-family:iconfont;font-size:12px;color:#fff;}
-.mod_btn__icon_like{padding-right:10px;}
-.mod_btn__icon_like::before{content:"\e618";font-family:iconfont;font-size:14px;color:#aaa;}
+
+/* 分页按钮 */
+.pagebar a, .pagebar span.sel {
+    display: inline-block;
+    border-radius: 8px;
+    background: #FFDF35 !important;
+    color: #fff !important;
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+    font-size: 16px;
+    padding: 4px 12px;
+    margin: 0 2px;
+    border: 2px solid #FFDF35 !important;
+    box-shadow: 0 2px 8px #FFDF35;
+    letter-spacing: 1px;
+}
+.pagebar a:hover {
+    background: #fbc02d !important;
+    color: #fffde4 !important;
+    text-decoration: underline;
+}
+.pagebar span.sel {
+    background: #f59e42 !important;
+    color: #fffde4 !important;
+    font-weight: bold;
+}
+
+/* 表单和输入美化 */
+input,
+select,
+textarea {
+    font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
+    color: #a66a00 !important;
+    background-color: #FFF9E0 !important;
+    border-radius: 10px !important;
+    border: 2px solid #FFDF35 !important;
+}
+input[type="text"],
+input[type="password"],
+input[type="search"] {
+    padding: 6px 10px !important;
+    font-size: 16px !important;
+}
+input[type="checkbox"] {
+    accent-color: #FFDF35 !important;
+}
+::-webkit-input-placeholder { color: #ffbc42 !important; font-style: italic; }
+::-moz-placeholder { color: #ffbc42 !important; font-style: italic; }
+:-ms-input-placeholder { color: #ffbc42 !important; font-style: italic; }
+::placeholder { color: #ffbc42 !important; font-style: italic; }
+
+/* 其它细节区域 */
 .main .info_con{padding-top:20px;line-height:40px;font-size:16px;}
-.main .info_con h3{font-size:22px;padding:0 0 10px 10px;}
-.main .info_con dt{float:left;width:120px;text-align:right;clear:left;background:#e0e0e0;margin-bottom:1px;}
-.main .info_con dd{float:left;width:1070px;text-align:left;padding-left:10px;background:#f0f0f0;margin-bottom:1px;}
-.main .info_con dd .modify{float:right;font-size:12px;color:#aaa;margin-right:20px;}
-.main .info_con dd .modify:hover{color:#666;}
+.main .info_con h3{font-size:22px;padding:0 0 10px 10px;color:#f59e42;}
+.main .info_con dt{float:left;width:120px;text-align:right;clear:left;background:#ffe066;margin-bottom:1px;}
+.main .info_con dd{float:left;width:1070px;text-align:left;padding-left:10px;background:#fffbe6;margin-bottom:1px;}
+.main .info_con dd .modify{float:right;font-size:12px;color:#f59e42;margin-right:20px;}
+.main .info_con dd .modify:hover{color:#d17d00;}
+.main-nav-bar {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 3;
+}
+
+.profile_nav {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding-left: 60px;
+    padding-bottom: 10px;
+    position: relative;
+    /* background: transparent;  不需要底色 */
+}
+
+.profile_nav .mod_tab__item {
+    font-size: 30px; /* 原本是30px */
+    font-weight: 400;
+    color: #f59e42 !important;
+    text-shadow: 1px 1px 0 #fffbe6;
+    background: transparent !important;
+    margin-right: 38px;
+    /* 让字号变小一点 */
+    font-size: 24px !important;
+}
+
+.profile_nav .mod_tab__current {
+    border-bottom: 2px solid #FFDF35 !important;
+    color: #f59e42 !important;
+}
+
+@media (max-width: 800px) {
+    .profile_nav {
+        padding-left: 20px;
+    }
+    .profile_nav .mod_tab__item {
+        font-size: 18px !important;
+    }
+}
+.user-profile-flex {
+    display: flex;
+    align-items: flex-start;
+    gap: 60px;
+}
+
+.user-profile-left {
+    min-width: 220px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.profile__cover_link {
+    margin-bottom: 10px;
+}
+
+.profile__cover {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #ffdf35;
+    background: #fff9e0;
+    margin-bottom: 10px;
+}
+
+.profile__name {
+    font-size: 32px;
+    font-weight: bold;
+    color: #f59e42 !important;
+    margin-bottom: 18px;
+    display: block;
+    text-shadow: 1px 1px 0 #fffbe6;
+}
+
+.logout-link {
+    margin-bottom: 24px;
+    color: #fff;
+    background: #ffb3b3;
+    padding: 8px 30px;
+    border-radius: 18px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
+    display: inline-block;
+    border: none;
+}
+
+.logout-link:hover {
+    background: #ff7b7b;
+    color: #fff;
+}
+
+.user-profile-flex {
+    display: flex;
+    align-items: flex-start;
+    gap: 60px;
+}
+
+.user-profile-left {
+    min-width: 220px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.profile__cover_link {
+    margin-bottom: 10px;
+}
+
+.profile__cover {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #ffdf35;
+    background: #fff9e0;
+    margin-bottom: 10px;
+}
+
+.profile__name {
+    font-size: 32px;
+    font-weight: bold;
+    color: #f59e42 !important;
+    margin-bottom: 18px;
+    display: block;
+    text-shadow: 1px 1px 0 #fffbe6;
+}
+
+.logout-link {
+    margin-bottom: 24px;
+    color: #fff;
+    background: #ffb3b3;
+    padding: 8px 30px;
+    border-radius: 18px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
+    display: inline-block;
+    border: none;
+}
+
+.logout-link:hover {
+    background: #ff7b7b;
+    color: #fff;
+}
+
+.user-profile-right {
+    flex: 1;
+    padding: 36px 40px;
+    background: #fff;
+    border-radius: 20px;
+    min-width: 340px;
+    min-height: 220px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-info h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #ffb300;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.user-info form {
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.form-group label {
+    min-width: 64px;
+    margin-right: 8px;
+    color: #a66a00;
+    font-size: 18px;
+    text-align: right;
+}
+
+.form-group input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 2px solid #ffdf35;
+    border-radius: 10px;
+    background: #FFF9E0;
+    color: #a66a00;
+    font-size: 18px;
+    outline: none;
+    transition: border 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #ffb300;
+}
+
+.save-btn {
+    margin-top: 8px;
+    background: #ffb300;
+    color: #fff;
+    padding: 10px 36px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-weight: bold;
+}
+
+.save-btn:hover {
+    background: #ff7b7b;
+}
+
+@media (max-width: 950px) {
+    .user-profile-flex {
+        flex-direction: column;
+        gap: 30px;
+    }
+    .user-profile-right {
+        min-width: 0;
+        width: 100%;
+    }
+}
