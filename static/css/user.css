@@ -194,7 +194,15 @@ a:hover {
 .mod_tab__current {
     border-bottom: 2px solid #FFDF35 !important;
 }
-.profile_nav{position:absolute;top:-56px;left:0;margin-bottom:0;width:80%}
+.profile_nav {
+    position: static;         /* 不要 absolute */
+    top: auto;                /* 清除 top */
+    left: auto;               /* 清除 left */
+    margin-bottom: 0;
+    width: 100%;              /* 或 80%，依你布局定 */
+    padding-top: 28px;        /* 距离黄色框顶部的间距，可微调 */
+    box-sizing: border-box;
+}
 .profile_nav .mod_tab__item{color:#fff;margin-right:40px}
 .profile_nav .mod_tab__current,.profile_nav .mod_tab__item:hover{color:#f59e42 !important;text-decoration:none;}
 .songlist__delete{position:absolute;top:50%;right:58px;margin-top:-18px;width:36px;height:36px;border:1px solid #FFDF35;border-radius:50%;text-align:center;visibility:hidden;color:#FFDF35;}
@@ -329,7 +337,14 @@ input[type="checkbox"] {
     align-items: flex-start;
     gap: 60px;
 }
-
+.user-profile-right {
+    margin-left: 10px;      /* 保持你期望的左侧距离 */
+    margin-top: -30px;      /* 保持你期望的顶部对齐 */
+    width: calc(100% - 260px); /* 减去左侧头像宽度（约220px）和右侧预留空间（约40px，可调整） */
+    max-width: 900px;       /* 可根据实际情况调整最大宽度 */
+    margin-right: 40px;     /* 右侧留白，防止白框紧贴背景图片右边 */
+    box-sizing: border-box; /* 避免超出父容器 */
+}
 .user-profile-left {
     min-width: 220px;
     text-align: center;
@@ -524,4 +539,14 @@ input[type="checkbox"] {
         min-width: 0;
         width: 100%;
     }
+}
+.main,
+.main--profile {
+    width: 80%;             /* 用百分比，和上方背景保持一致 */
+    max-width: 1200px;      /* 防止超大屏太宽 */
+    margin: 0 auto;
+    border-radius: 18px;
+    box-shadow: 0 4px 18px 0 #FFDF35;
+    background: #FFF7CF !important;
+    position: relative;
 }
