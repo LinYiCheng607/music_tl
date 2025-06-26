@@ -173,7 +173,36 @@ def song_analysis(request):
     album_labels = [a[0] for a in top_albums]
     album_data = [a[1] for a in top_albums]
 
-    # 7. 听歌习惯总结
+    # 7. 词云数据统计
+    # 词云数据统计（以歌曲类型为例）
+    logs = SongLog.objects.filter(user=user).select_related("song")
+    # genre_counter = Counter()
+    # 歌曲类型词云
+    type_counter = Counter()
+    # 歌手词云
+    artist_counter = Counter()
+    # 专辑词云
+    album_counter = Counter()
+    # 歌曲名词云
+    name_counter = Counter()
+    for log in logs:
+        if getattr(log.song, "song_type", None):
+            type_counter[log.song.song_type] += 1
+        if getattr(log.song, "song_singer", None):
+            artist_counter[log.song.song_singer] += 1
+        if getattr(log.song, "song_album", None):
+            album_counter[log.song.song_album] += 1
+        if getattr(log.song, "song_name", None):
+            name_counter[log.song.song_name] += 1
+
+    # wordcloud_data = [{"name": k, "value": v} for k, v in genre_counter.items()]
+    wordcloud_type = [{"name": k, "value": v} for k, v in type_counter.items()]
+    wordcloud_artist = [{"name": k, "value": v} for k, v in artist_counter.items()]
+    wordcloud_album = [{"name": k, "value": v} for k, v in album_counter.items()]
+    wordcloud_name = [{"name": k, "value": v} for k, v in name_counter.items()]
+
+
+    # 8. 听歌习惯总结
     fav_hour = hour_labels[hour_counts.index(max(hour_counts))] if any(hour_counts) else ""
     fav_artist = artist_labels[0] if artist_labels else ""
     trend = ("上升" if weekly_counts and weekly_counts[-1] > weekly_counts[0] else "下降") if weekly_counts else ""
@@ -192,6 +221,11 @@ def song_analysis(request):
         'artist_labels': json.dumps(artist_labels, ensure_ascii=False),
         'artist_data': json.dumps(artist_data),
         'album_labels': json.dumps(album_labels, ensure_ascii=False),
+        # 'wordcloud_data': json.dumps(wordcloud_data, ensure_ascii=False),
+        'wordcloud_type': json.dumps(wordcloud_type, ensure_ascii=False),
+        'wordcloud_artist': json.dumps(wordcloud_artist, ensure_ascii=False),
+        'wordcloud_album': json.dumps(wordcloud_album, ensure_ascii=False),
+        'wordcloud_name': json.dumps(wordcloud_name, ensure_ascii=False),
         'album_data': json.dumps(album_data),
         'summary_text': summary_text,
         # 你可以补充热门搜索/推荐等

@@ -17,9 +17,9 @@
                 <input id="subSerch" type="submit" class="search-btn" value="搜索" />
             </form>
             <div class="search-hot-words">
-                {% for song in search_song  %}
+                {% for song in search_song %}
                     <a target="play" href="{% url 'play' song.song.song_id %}">{{ song.song.song_name }}</a>
-                {% endfor  %}
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -80,13 +80,10 @@
         </div>
         <div class="js_box" style="display: block;">
             <div style="width: 80%; margin: 30px auto;">
-                <!-- 原有功能 -->
                 <h2>听歌时间-曲目数量折线图</h2>
                 <div id="line_chart" style="width: 100%; height: 400px;"></div>
                 <h2 style="margin-top:40px;">听过的歌曲类型分布饼图</h2>
                 <div id="pie_chart" style="width: 100%; height: 400px;"></div>
-
-                <!-- 新增分析功能 -->
                 <h2 style="margin-top:40px;">每天听歌时段分布</h2>
                 <div id="hourly_chart" style="width:100%; height:350px"></div>
                 <h2 style="margin-top:40px;">近四周听歌统计</h2>
@@ -95,6 +92,14 @@
                 <div id="artist_chart" style="width:100%; height:300px"></div>
                 <h2 style="margin-top:40px;">最常听的专辑TOP5</h2>
                 <div id="album_chart" style="width:100%; height:300px"></div>
+                <h2 style="margin-top:40px;">关键词词云</h2>
+                <select id="wordcloud_select" style="margin-bottom:10px;">
+                  <option value="type">类型</option>
+                  <option value="artist">歌手</option>
+                  <option value="album">专辑</option>
+                  <option value="name">歌曲名称</option>
+                </select>
+                <div id="wordcloud_chart" style="width:100%; height:350px"></div>
                 <h2 style="margin-top:40px;">听歌习惯总结</h2>
                 <div style="background: #fffbe8; border-radius: 8px; padding: 18px 24px; margin-top: 12px; color:#6d4e2b; font-size: 16px;">
                     {{ summary_text }}
@@ -105,22 +110,12 @@
 
     <!-- ECharts JS -->
     <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.0.0/dist/echarts-wordcloud.min.js"></script>
     <script>
-        // 原有功能
+        // 折线图
         var lineLabels = {{ line_labels|safe }};
         var lineData = {{ line_data|safe }};
         var pieData = {{ pie_data|safe }};
-        // 新增功能
-        var hourlyLabels = {{ hourly_labels|safe }};
-        var hourlyData = {{ hourly_data|safe }};
-        var weeklyLabels = {{ weekly_labels|safe }};
-        var weeklyData = {{ weekly_data|safe }};
-        var artistLabels = {{ artist_labels|safe }};
-        var artistData = {{ artist_data|safe }};
-        var albumLabels = {{ album_labels|safe }};
-        var albumData = {{ album_data|safe }};
-
-        // 折线图
         var maxCount = 5;
         if (Array.isArray(lineData) && lineData.length > 0) {
             var realMax = Math.max.apply(null, lineData);
@@ -149,7 +144,9 @@
         };
         pieChart.setOption(pieOption);
 
-        // 新增：每天听歌时段分布
+        // 每天听歌时段分布
+        var hourlyLabels = {{ hourly_labels|safe }};
+        var hourlyData = {{ hourly_data|safe }};
         var hourlyChart = echarts.init(document.getElementById('hourly_chart'));
         hourlyChart.setOption({
             xAxis: { type: 'category', data: hourlyLabels, name: '时段' },
@@ -157,7 +154,9 @@
             series: [{ data: hourlyData, type: 'bar', barWidth: '60%', itemStyle:{color:'#f9c449'} }]
         });
 
-        // 新增：近4周听歌统计
+        // 近4周听歌统计
+        var weeklyLabels = {{ weekly_labels|safe }};
+        var weeklyData = {{ weekly_data|safe }};
         var weeklyChart = echarts.init(document.getElementById('weekly_chart'));
         weeklyChart.setOption({
             xAxis: { type: 'category', data: weeklyLabels, name: '周' },
@@ -165,7 +164,9 @@
             series: [{ data: weeklyData, type: 'bar', barWidth: '60%', itemStyle:{color:'#f7a440'} }]
         });
 
-        // 新增：歌手排行
+        // 最常听的歌手排行
+        var artistLabels = {{ artist_labels|safe }};
+        var artistData = {{ artist_data|safe }};
         var artistChart = echarts.init(document.getElementById('artist_chart'));
         artistChart.setOption({
             xAxis: { type: 'value', name: '播放次数', min: 0 },
@@ -173,12 +174,45 @@
             series: [{ data: artistData, type: 'bar', barWidth: '60%', itemStyle:{color:'#6dbee7'} }]
         });
 
-        // 新增：专辑排行
+        // 最常听的专辑排行
+        var albumLabels = {{ album_labels|safe }};
+        var albumData = {{ album_data|safe }};
         var albumChart = echarts.init(document.getElementById('album_chart'));
         albumChart.setOption({
             xAxis: { type: 'value', name: '播放次数', min: 0 },
             yAxis: { type: 'category', data: albumLabels, name: '专辑', inverse: true },
             series: [{ data: albumData, type: 'bar', barWidth: '60%', itemStyle:{color:'#b4d99f'} }]
+        });
+
+        // 多标签词云
+        var wordcloudData = {
+            "type": {{ wordcloud_type|safe }},
+            "artist": {{ wordcloud_artist|safe }},
+            "album": {{ wordcloud_album|safe }},
+            "name": {{ wordcloud_name|safe }},
+        };
+        var wordcloudChart = echarts.init(document.getElementById('wordcloud_chart'));
+        function setWordcloud(typeKey) {
+            wordcloudChart.setOption({
+                tooltip: {},
+                series: [{
+                    type: 'wordCloud',
+                    gridSize: 8,
+                    sizeRange: [18, 60],
+                    rotationRange: [-45, 90],
+                    shape: 'circle',
+                    textStyle: {
+                        normal: {
+                            color: function() { return '#' + Math.floor(Math.random() * 0xffffff).toString(16); }
+                        }
+                    },
+                    data: wordcloudData[typeKey]
+                }]
+            });
+        }
+        setWordcloud('type');
+        document.getElementById('wordcloud_select').addEventListener('change', function(e) {
+            setWordcloud(e.target.value);
         });
     </script>
 </body>
