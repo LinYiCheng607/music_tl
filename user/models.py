@@ -4,12 +4,10 @@ from django.conf import settings
 from index.models import Song  # 跨应用导入Song模型
 
 class MyUser(AbstractUser):
+    nickname = models.CharField('昵称', max_length=30, blank=True, default='')
     qq = models.CharField('QQ号码', max_length=20)
     weChat = models.CharField('微信号', max_length=20)
     mobile = models.CharField('手机号码', max_length=11, unique=True)
-
-    def __str__(self):
-        return self.username
 
 class SongLog(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='用户')
