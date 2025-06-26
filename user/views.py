@@ -75,7 +75,7 @@ def homeview(request, page):
         }
         for item in song_count_qs
     ]
-    print(song_info)  # <---- 检查这里输出的内容
+    # print(song_info)  # <---- 检查这里输出的内容
     paginator = Paginator(song_info, 10)
     try:
         contacts = paginator.page(page)
