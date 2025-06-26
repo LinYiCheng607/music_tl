@@ -61,7 +61,15 @@ def homeview(request, page):
     song_count_qs = (
         SongLog.objects
         .filter(user=request.user)
-        .values('song', 'song__song_id', 'song__song_name', 'song__song_singer', 'song__song_time')
+        .values(
+            'song',
+            'song__song_id',
+            'song__song_name',
+            'song__song_singer',
+            'song__song_time',
+            'song__song_type',
+            'song__song_languages'
+        )
         .annotate(listen_count=Sum('listen_count'))
         .order_by('-listen_count', '-song')
     )
@@ -71,11 +79,12 @@ def homeview(request, page):
             'song_name': item['song__song_name'],
             'song_singer': item['song__song_singer'],
             'song_time': item['song__song_time'],
+            'song_type': item['song__song_type'],
+            'song_languages': item['song__song_languages'],
             'listen_count': item['listen_count'] or 0,
         }
         for item in song_count_qs
     ]
-    # print(song_info)  # <---- 检查这里输出的内容
     paginator = Paginator(song_info, 10)
     try:
         contacts = paginator.page(page)

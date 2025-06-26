@@ -82,30 +82,32 @@
             <div class="profile_cont">
                 <div class="js_sub" style="display: block;">
                     <div class="mod_songlist">
-                        <ul class="songlist__header">
-                            <li class="songlist__header_name">歌曲</li>
-                            <li class="songlist__header_author">歌手</li>
-                            <li class="songlist__header_time">时长</li>
-                            <li class="songlist__header_count">听过的次数</li>
-                        </ul>
-                        <ul class="songlist__list">
-                            {% for item in contacts.object_list %}
-                            <li>
-                                <div class="songlist__item songlist__item--even">
-                                    <div class="songlist__songname">
-                                        <a href="{% url 'play' item.song_id %}" class="js_song songlist__songname_txt" >{{ item.song_name }}</a>
-                                    </div>
-                                    <div class="songlist__artist">
-                                        <a href="javascript:;" class="singer_name">{{ item.song_singer }}</a>
-                                    </div>
-                                    <div class="songlist__time">{{ item.song_time }}</div>
-                                    <div class="songlist__count">
-                                        {{ item.listen_count }}
-                                    </div>
-                                </div>
-                            </li>
-                            {% endfor %}
-                        </ul>
+                        <table class="songlist__table" style="width: 100%; text-align: left;">
+                            <thead>
+                                <tr>
+                                    <th>歌曲</th>
+                                    <th>类型</th>
+                                    <th>语种</th>
+                                    <th>歌手</th>
+                                    <th>听过的次数</th>
+                                    <th>时长</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in contacts.object_list %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'play' item.song_id %}" class="js_song songlist__songname_txt">{{ item.song_name }}</a>
+                                    </td>
+                                    <td>{{ item.song_type }}</td>
+                                    <td>{{ item.song_languages }}</td>
+                                    <td>{{ item.song_singer }}</td>
+                                    <td>{{ item.listen_count }}</td>
+                                    <td>{{ item.song_time }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                     <div class="page-box">
                         <div class="pagebar" id="pageBar">
