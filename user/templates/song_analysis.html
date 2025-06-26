@@ -32,15 +32,14 @@
         </div>
     </div><!--end nav-box-->
 
+    <!-- 个人信息展示，与 home.html 同步 -->
     <div class="mod_profile js_user_data">
-        <div class="section_inner">
+        <div class="section_inner" style="display: flex; flex-direction: column; align-items: center;">
             <div class="profile__cover_link">
                 <img src="{% static "image/users.jpg" %}" class="profile__cover">
             </div>
-            <h1 class="profile__tit">
-                <span class="profile__name">{{ user.username }}</span>
-            </h1>
-            <a href="{% url 'logout' %}" style="color:white;">退出登录</a>
+            <span class="profile__name">{{ user.nickname|default:user.username }}</span>
+            <a href="{% url 'logout' %}" class="logout-link">退出登录</a>
         </div>
     </div>
 
