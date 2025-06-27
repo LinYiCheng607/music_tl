@@ -1,0 +1,784 @@
+{% extends "title_base.html"  %}
+{% block title %}
+{% load static %}
+<link type="image/x-icon" rel="shortcut icon" href="{% static "favicon.ico" %}">
+<link type="text/css" rel="stylesheet" href="{% static "css/common.css" %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    /* 现代化点评页面样式 */
+    body {
+        background-color: #f9f9f9;
+    }
+    
+    .review-container {
+        max-width: 800px;
+        margin: 30px auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    
+    .review-header {
+        background: linear-gradient(135deg, #30C37E, #25A76C);
+        color: white;
+        padding: 25px 30px;
+        position: relative;
+    }
+    
+    .review-header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    
+    .review-header h1 i {
+        margin-right: 12px;
+    }
+    
+    .song-info {
+        display: flex;
+        align-items: center;
+        margin-top: 20px;
+    }
+    
+    .song-cover {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-right: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .song-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .song-details h2 {
+        margin: 0 0 5px 0;
+        font-size: 20px;
+    }
+    
+    .song-details p {
+        margin: 0;
+        opacity: 0.9;
+    }
+    
+    .review-form {
+        padding: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    /* 星级评分样式 */
+    .rating-container {
+        margin-bottom: 25px;
+    }
+    
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-start;
+    }
+    
+    .rating input {
+        display: none;
+    }
+    
+    .rating label {
+        cursor: pointer;
+        width: 36px;
+        height: 36px;
+        margin-right: 8px;
+        position: relative;
+        color: #ddd;
+    }
+    
+    .rating label:before {
+        content: '\f005';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: 32px;
+        transition: all 0.2s ease;
+    }
+    
+    .rating input:checked ~ label,
+    .rating label:hover,
+    .rating label:hover ~ label {
+        color: #ffb700;
+    }
+    
+    /* 情感选择样式 */
+    .emotion-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .emotion-options input {
+        display: none;
+    }
+    
+    .emotion-options label {
+        display: flex;
+        align-items: center;
+        padding: 10px 16px;
+        background: #f5f5f5;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: normal;
+    }
+    
+    .emotion-options label i {
+        margin-right: 8px;
+    }
+    
+    .emotion-options input:checked + label {
+        background: #30C37E;
+        color: white;
+        box-shadow: 0 2px 8px rgba(48, 195, 126, 0.3);
+    }
+    
+    .emotion-options label:hover {
+        background: #e0e0e0;
+    }
+    
+    /* 标签和场景选择样式 */
+    .tags-options,
+    .scene-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .tags-options input,
+    .scene-options input {
+        display: none;
+    }
+    
+    .tags-options label,
+    .scene-options label {
+        display: flex;
+        align-items: center;
+        padding: 10px 16px;
+        background: #f5f5f5;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: normal;
+    }
+    
+    .tags-options label i,
+    .scene-options label i {
+        margin-right: 8px;
+    }
+    
+    .tags-options input:checked + label,
+    .scene-options input:checked + label {
+        background: #30C37E;
+        color: white;
+        box-shadow: 0 2px 8px rgba(48, 195, 126, 0.3);
+    }
+    
+    .tags-options label:hover,
+    .scene-options label:hover {
+        background: #e0e0e0;
+    }
+    
+    /* 文本域样式 */
+    .review-textarea {
+        width: 100%;
+        height: 150px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        resize: vertical;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+    
+    .review-textarea:focus {
+        border-color: #30C37E;
+        box-shadow: 0 0 0 2px rgba(48, 195, 126, 0.2);
+        outline: none;
+    }
+    
+    .review-textarea::placeholder {
+        color: #aaa;
+    }
+    
+    /* 按钮样式 */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+    }
+    
+    .submit-btn {
+        padding: 12px 24px;
+        background: #30C37E;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(48, 195, 126, 0.3);
+    }
+    
+    .submit-btn i {
+        margin-right: 10px;
+    }
+    
+    .submit-btn:hover {
+        background: #28a76c;
+        transform: translateY(-2px);
+    }
+    
+    .cancel-btn {
+        padding: 12px 24px;
+        background: #f5f5f5;
+        color: #666;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+    }
+    
+    .cancel-btn i {
+        margin-right: 10px;
+    }
+    
+    .cancel-btn:hover {
+        background: #e0e0e0;
+    }
+    
+    /* 成功提示 */
+    .toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: rgba(48, 195, 126, 0.9);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        transition: all 0.5s ease;
+        z-index: 1000;
+    }
+    
+    .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+    
+    .toast i {
+        margin-right: 10px;
+        font-size: 20px;
+    }
+    
+    /* 评论列表样式 */
+    .comments-section {
+        padding: 30px;
+        border-top: 1px solid #eee;
+    }
+    
+    .comments-section h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+        color: #333;
+        display: flex;
+        align-items: center;
+    }
+    
+    .comments-section h2 i {
+        margin-right: 10px;
+        color: #30C37E;
+    }
+    
+    .comment-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .comment-item {
+        border-bottom: 1px solid #f0f0f0;
+        padding: 20px 0;
+        display: flex;
+        position: relative;
+    }
+    
+    .comment-item:last-child {
+        border-bottom: none;
+    }
+    
+    .comment-user {
+        width: 80px;
+        text-align: center;
+    }
+    
+    .comment-user .face {
+        margin-bottom: 5px;
+    }
+    
+    .comment-user .face img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .user-name {
+        font-size: 14px;
+        color: #333;
+        margin-top: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .comment-content {
+        flex: 1;
+        padding-left: 20px;
+    }
+    
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .comment-date {
+        color: #999;
+        font-size: 14px;
+    }
+    
+    .user-rating-display {
+        display: flex;
+        align-items: center;
+    }
+    
+    .user-rating {
+        margin-right: 15px;
+    }
+    
+    .user-rating .filled {
+        color: #ffb700;
+    }
+    
+    .user-rating .far {
+        color: #ddd;
+    }
+    
+    .user-emotion {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        background: #f5f5f5;
+        border-radius: 20px;
+        font-size: 13px;
+        margin-left: 10px;
+    }
+    
+    .user-emotion i {
+        margin-right: 5px;
+    }
+    
+    .comment-text {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+    
+    .comment-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 13px;
+        color: #666;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+    }
+    
+    .meta-item i {
+        margin-right: 5px;
+        color: #30C37E;
+    }
+    
+    .tags-list,
+    .scenes-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .tag,
+    .scene {
+        display: inline-block;
+        padding: 3px 10px;
+        background: #f0f0f0;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+    
+    /* 分页样式 */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .pagination a,
+    .pagination .current {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 35px;
+        height: 35px;
+        margin: 0 5px;
+        padding: 0 10px;
+        border-radius: 4px;
+        background: #f5f5f5;
+        color: #666;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination .current {
+        background: #30C37E;
+        color: white;
+    }
+    
+    .pagination a:hover {
+        background: #e0e0e0;
+    }
+    
+    .no-comments {
+        padding: 30px 0;
+        text-align: center;
+        color: #999;
+    }
+    
+    .no-comments i {
+        font-size: 40px;
+        margin-bottom: 15px;
+        color: #ddd;
+    }
+    
+    .success-alert {
+        background: #d4edda;
+        color: #155724;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .success-alert i {
+        margin-right: 10px;
+        font-size: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="review-container">
+    <div class="review-header">
+        <h1><i class="fas fa-star"></i> 点评歌曲</h1>
+        <div class="song-info">
+            <div class="song-cover">
+                {% if song_info.song_img_url %}
+                    <img src="{{ song_info.song_img_url }}" alt="{{ song_info.song_name }}">
+                {% else %}
+                    <img src="{% static "songImg/" %}{{ song_info.song_img }}" alt="{{ song_info.song_name }}">
+                {% endif %}
+            </div>
+            <div class="song-details">
+                <h2>{{ song_info.song_name }}</h2>
+                <p>{{ song_info.song_singer }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="review-form">
+        {% if comment_success %}
+        <div class="success-alert">
+            <i class="fas fa-check-circle"></i>
+            <span>您的点评已成功提交！感谢您的分享。</span>
+        </div>
+        {% endif %}
+        
+        <form method="post" action="{% url 'song_review' song_info.song_id %}" id="reviewForm">
+            {% csrf_token %}
+            <input type="hidden" name="return_url" value="{{ return_url }}">
+            
+            <div class="form-group rating-container">
+                <label>为这首歌打分</label>
+                <div class="rating">
+                    <input type="radio" name="rating" id="star5" value="5" required>
+                    <label for="star5" title="5星"></label>
+                    <input type="radio" name="rating" id="star4" value="4">
+                    <label for="star4" title="4星"></label>
+                    <input type="radio" name="rating" id="star3" value="3">
+                    <label for="star3" title="3星"></label>
+                    <input type="radio" name="rating" id="star2" value="2">
+                    <label for="star2" title="2星"></label>
+                    <input type="radio" name="rating" id="star1" value="1">
+                    <label for="star1" title="1星"></label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>这首歌给你的感觉是？</label>
+                <div class="emotion-options">
+                    <input type="radio" name="emotion" id="happy" value="happy" required>
+                    <label for="happy"><i class="fas fa-smile"></i> 开心</label>
+                    
+                    <input type="radio" name="emotion" id="sad" value="sad">
+                    <label for="sad"><i class="fas fa-sad-tear"></i> 伤感</label>
+                    
+                    <input type="radio" name="emotion" id="excited" value="excited">
+                    <label for="excited"><i class="fas fa-bolt"></i> 兴奋</label>
+                    
+                    <input type="radio" name="emotion" id="relaxed" value="relaxed">
+                    <label for="relaxed"><i class="fas fa-spa"></i> 放松</label>
+                    
+                    <input type="radio" name="emotion" id="nostalgic" value="nostalgic">
+                    <label for="nostalgic"><i class="fas fa-history"></i> 怀旧</label>
+                    
+                    <input type="radio" name="emotion" id="other" value="other">
+                    <label for="other"><i class="fas fa-ellipsis-h"></i> 其他</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>你觉得这首歌的特点是？</label>
+                <div class="tags-options">
+                    <input type="checkbox" name="tags" id="melodic" value="melodic">
+                    <label for="melodic"><i class="fas fa-music"></i> 旋律优美</label>
+                    
+                    <input type="checkbox" name="tags" id="lyrics" value="lyrics">
+                    <label for="lyrics"><i class="fas fa-pen-fancy"></i> 歌词走心</label>
+                    
+                    <input type="checkbox" name="tags" id="vocal" value="vocal">
+                    <label for="vocal"><i class="fas fa-microphone"></i> 唱功出色</label>
+                    
+                    <input type="checkbox" name="tags" id="rhythm" value="rhythm">
+                    <label for="rhythm"><i class="fas fa-drum"></i> 节奏感强</label>
+                    
+                    <input type="checkbox" name="tags" id="arrangement" value="arrangement">
+                    <label for="arrangement"><i class="fas fa-sliders-h"></i> 编曲精彩</label>
+                    
+                    <input type="checkbox" name="tags" id="catchy" value="catchy">
+                    <label for="catchy"><i class="fas fa-headphones"></i> 朗朗上口</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>这首歌适合什么场景？</label>
+                <div class="scene-options">
+                    <input type="checkbox" name="scene" id="workout" value="workout">
+                    <label for="workout"><i class="fas fa-running"></i> 运动</label>
+                    
+                    <input type="checkbox" name="scene" id="study" value="study">
+                    <label for="study"><i class="fas fa-book"></i> 学习</label>
+                    
+                    <input type="checkbox" name="scene" id="relax" value="relax">
+                    <label for="relax"><i class="fas fa-couch"></i> 休闲</label>
+                    
+                    <input type="checkbox" name="scene" id="party" value="party">
+                    <label for="party"><i class="fas fa-glass-cheers"></i> 派对</label>
+                    
+                    <input type="checkbox" name="scene" id="commute" value="commute">
+                    <label for="commute"><i class="fas fa-car"></i> 通勤</label>
+                    
+                    <input type="checkbox" name="scene" id="sleep" value="sleep">
+                    <label for="sleep"><i class="fas fa-moon"></i> 睡前</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>写下你对这首歌的评价</label>
+                <textarea name="comment" class="review-textarea" placeholder="分享你对这首歌的感受和想法..." required></textarea>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{{ return_url }}" class="cancel-btn"><i class="fas fa-arrow-left"></i> 返回</a>
+                <button type="submit" class="submit-btn"><i class="fas fa-paper-plane"></i> 提交点评</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- 其他用户的评论 -->
+    <div class="comments-section">
+        <h2><i class="fas fa-comments"></i> 其他用户的点评 ({{ comment_all.count }})</h2>
+        
+        {% if comment_all %}
+        <ul class="comment-list">
+            {% for item in contacts %}
+            <li class="comment-item">
+                <div class="comment-user">
+                    <div class="face">
+                        <img src="{% static 'image/user_avatar.png' %}" alt="{{ item.comment_user }}">
+                    </div>
+                    <div class="user-name">{{ item.comment_user }}</div>
+                </div>
+                <div class="comment-content">
+                    <div class="comment-header">
+                        <div class="user-rating-display">
+                            <div class="user-rating">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= item.rating %}
+                                        <i class="fas fa-star filled"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            
+                            {% if item.emotion %}
+                            <div class="user-emotion">
+                                {% if item.emotion == 'happy' %}
+                                    <i class="fas fa-smile"></i> 开心
+                                {% elif item.emotion == 'sad' %}
+                                    <i class="fas fa-sad-tear"></i> 伤感
+                                {% elif item.emotion == 'excited' %}
+                                    <i class="fas fa-bolt"></i> 兴奋
+                                {% elif item.emotion == 'relaxed' %}
+                                    <i class="fas fa-spa"></i> 放松
+                                {% elif item.emotion == 'nostalgic' %}
+                                    <i class="fas fa-history"></i> 怀旧
+                                {% else %}
+                                    <i class="fas fa-ellipsis-h"></i> 其他
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="comment-date">{{ item.comment_date }}</div>
+                    </div>
+                    
+                    <div class="comment-text">{{ item.comment_text }}</div>
+                    
+                    <div class="comment-meta">
+                        {% if item.tags.all %}
+                        <div class="meta-item">
+                            <i class="fas fa-tags"></i>
+                            <div class="tags-list">
+                                {% for tag in item.tags.all %}
+                                <span class="tag">{{ tag.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if item.scenes.all %}
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div class="scenes-list">
+                                {% for scene in item.scenes.all %}
+                                <span class="scene">{{ scene.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        
+        <!-- 分页 -->
+        {% if contacts.paginator.num_pages > 1 %}
+        <div class="pagination">
+            {% if contacts.has_previous %}
+                <a href="?page={{ contacts.previous_page_number }}&return_url={{ return_url|urlencode }}"><i class="fas fa-chevron-left"></i></a>
+            {% endif %}
+            
+            {% for i in contacts.paginator.page_range %}
+                {% if contacts.number == i %}
+                    <span class="current">{{ i }}</span>
+                {% else %}
+                    <a href="?page={{ i }}&return_url={{ return_url|urlencode }}">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if contacts.has_next %}
+                <a href="?page={{ contacts.next_page_number }}&return_url={{ return_url|urlencode }}"><i class="fas fa-chevron-right"></i></a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="no-comments">
+            <i class="far fa-comment-dots"></i>
+            <p>还没有人评论这首歌，成为第一个吧！</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 成功提示弹窗 -->
+<div id="success-toast" class="toast">
+    <i class="fas fa-check-circle"></i>
+    <span>点评提交成功！</span>
+</div>
+
+<script>
+    // 检查URL参数是否有成功提示
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('comment_success')) {
+            const toast = document.getElementById('success-toast');
+            toast.classList.add('show');
+            
+            // 3秒后自动关闭
+            setTimeout(function() {
+                toast.classList.remove('show');
+                
+                // 如果有返回URL，则跳转回去
+                if (urlParams.has('auto_return') && urlParams.get('auto_return') === '1') {
+                    const returnUrl = urlParams.get('return_url');
+                    if (returnUrl) {
+                        window.location.href = returnUrl;
+                    }
+                }
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %} 
