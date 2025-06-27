@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>知识图谱可视化</title>
+  <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+  <style>
+    #cy {
+      width: 100vw;
+      height: 90vh;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>知识图谱可视化</h1>
+  <div id="cy"></div>
+  <script>
+    fetch('/api/graph/')
+      .then(response => response.json())
+      .then(data => {
+        const elements = [];
+        // 添加节点
+        data.nodes.forEach(node => {
+          elements.push({
+            data: { id: String(node.id), label: node.name, group: node.labels[0] }
+          });
+        });
+        // 添加边
+        data.edges.forEach(edge => {
+          elements.push({
+            data: {
+              id: edge.source + '_' + edge.target + '_' + edge.label,
+              source: String(edge.source),
+              target: String(edge.target),
+              label: edge.label
+            }
+          });
+        });
+
+        cytoscape({
+          container: document.getElementById('cy'),
+          elements: elements,
+          style: [
+            { selector: 'node', style: { 'label': 'data(label)', 'background-color': '#29a', 'shape': 'ellipse' } },
+            { selector: 'edge', style: { 'label': 'data(label)', 'width': 2, 'line-color': '#ccc', 'target-arrow-shape': 'triangle' } }
+          ],
+          layout: { name: 'cose' }
+        });
+      });
+  </script>
+</body>
+</html>
