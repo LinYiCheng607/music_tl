@@ -49,7 +49,7 @@ require(['jquery','com',"jquery.jplayer"], function ($,com){
     $("#jquery_jplayer_1").jPlayer({
         ready: function (event) {
             $(this).jPlayer("setMedia", {
-                mp3: $("#jquery_jplayer_1").attr('data-url') //mp3的播放地址
+                mp3: $(this).attr('data-url') //获取歌曲URL
             });
             $("#jquery_jplayer_1").jPlayer('play');
         },

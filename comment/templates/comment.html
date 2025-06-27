@@ -1,10 +1,557 @@
 {% extends "title_base.html"  %}
+{% block title %}
 {% load static %}
 <link type="image/x-icon" rel="shortcut icon" href="{% static "favicon.ico" %}">
 <link type="text/css" rel="stylesheet" href="{% static "css/common.css" %}">
 <link type="text/css" rel="stylesheet" href="{% static "css/comment.css" %}">
-</head>
+<link type="text/css" rel="stylesheet" href="{% static "css/comment_fix.css" %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    /* 音乐点评页面样式 */
 
+    /* 整体容器样式 */
+    .comment-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 20px;
+        max-width: 1200px;
+    }
+
+    .comment-form-container, 
+    .comment-list-container {
+        flex: 1;
+        min-width: 300px;
+    }
+
+    /* 区块样式 */
+    .section {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .section:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        background: #f9f9f9;
+    }
+
+    .section-title {
+        font-size: 18px;
+        margin: 0;
+        color: #333;
+        display: flex;
+        align-items: center;
+    }
+
+    .section-title i {
+        margin-right: 8px;
+        color: #30C37E;
+    }
+
+    .section-content {
+        padding: 20px;
+    }
+
+    /* 表单样式 */
+    .comments-box {
+        padding: 10px 0;
+    }
+
+    .comments-box-title {
+        font-size: 18px;
+        color: #333;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    /* 星级评分样式 */
+    .rating-container {
+        margin-bottom: 20px;
+    }
+
+    .rating-container p {
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #555;
+    }
+
+    .rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+
+    .rating input {
+        display: none;
+    }
+
+    .rating label {
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        margin-right: 5px;
+        position: relative;
+        color: #ddd;
+    }
+
+    .rating label:before {
+        content: '\f005';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: 24px;
+    }
+
+    .rating input:checked ~ label,
+    .rating label:hover,
+    .rating label:hover ~ label {
+        color: #ffb700;
+        transition: 0.2s;
+    }
+
+    /* 情感选择样式 */
+    .emotion-selection {
+        margin-bottom: 20px;
+    }
+
+    .emotion-selection p {
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #555;
+    }
+
+    .emotion-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .emotion-options input {
+        display: none;
+    }
+
+    .emotion-options label {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        background: #f5f5f5;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .emotion-options label i {
+        margin-right: 5px;
+    }
+
+    .emotion-options input:checked + label {
+        background: #30C37E;
+        color: white;
+    }
+
+    .emotion-options label:hover {
+        background: #e0e0e0;
+    }
+
+    /* 标签和场景选择样式 */
+    .tags-selection,
+    .scene-selection {
+        margin-bottom: 20px;
+    }
+
+    .tags-selection p,
+    .scene-selection p {
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #555;
+    }
+
+    .tags-options,
+    .scene-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .tags-options input,
+    .scene-options input {
+        display: none;
+    }
+
+    .tags-options label,
+    .scene-options label {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        background: #f5f5f5;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .tags-options label i,
+    .scene-options label i {
+        margin-right: 5px;
+    }
+
+    .tags-options input:checked + label,
+    .scene-options input:checked + label {
+        background: #30C37E;
+        color: white;
+    }
+
+    .tags-options label:hover,
+    .scene-options label:hover {
+        background: #e0e0e0;
+    }
+
+    /* 文本域样式 */
+    .writebox {
+        margin-bottom: 20px;
+    }
+
+    .writebox p {
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #555;
+    }
+
+    .writebox textarea {
+        width: 100%;
+        height: 120px;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        resize: vertical;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .writebox textarea:focus {
+        border-color: #30C37E;
+        box-shadow: 0 0 0 2px rgba(48, 195, 126, 0.2);
+        outline: none;
+    }
+
+    .writebox textarea::placeholder {
+        color: #aaa;
+    }
+
+    /* 按钮样式 */
+    .comments-box-button {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .cc-post-entry {
+        padding: 10px 20px;
+        background: #30C37E;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+
+    .cc-post-entry i {
+        margin-right: 8px;
+    }
+
+    .cc-post-entry:hover {
+        background: #28a76c;
+    }
+
+    .cc-back-button {
+        padding: 10px 20px;
+        background: #f5f5f5;
+        color: #666;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+
+    .cc-back-button i {
+        margin-right: 8px;
+    }
+
+    .cc-back-button:hover {
+        background: #e0e0e0;
+    }
+
+    /* 评论列表样式 */
+    .comment-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .comment-item {
+        border-bottom: 1px solid #f0f0f0;
+        padding: 20px 0;
+        display: flex;
+        position: relative;
+    }
+
+    .comment-item:last-child {
+        border-bottom: none;
+    }
+
+    .comments-user {
+        width: 80px;
+        text-align: center;
+    }
+
+    .comments-user .face {
+        margin-bottom: 5px;
+    }
+
+    .comments-user .face img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-name {
+        font-size: 14px;
+        color: #333;
+        margin-top: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .comments-list-content {
+        flex: 1;
+        padding-left: 20px;
+    }
+
+    .single-score {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .date {
+        color: #999;
+        font-size: 14px;
+    }
+
+    .user-rating-display {
+        display: flex;
+        align-items: center;
+    }
+
+    .user-rating {
+        margin-right: 15px;
+    }
+
+    .user-rating .filled {
+        color: #ffb700;
+    }
+
+    .user-rating .far {
+        color: #ddd;
+    }
+
+    .user-emotion {
+        display: flex;
+        align-items: center;
+        padding: 2px 8px;
+        background: #f5f5f5;
+        border-radius: 10px;
+        font-size: 14px;
+    }
+
+    .user-emotion i {
+        margin-right: 5px;
+    }
+
+    .comments-content {
+        margin-top: 10px;
+    }
+
+    .comments-words {
+        background: #f9f9f9;
+        padding: 15px;
+        border-radius: 4px;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+
+    .comment-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .user-tags,
+    .user-scenes {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .user-tags i,
+    .user-scenes i {
+        margin-right: 5px;
+    }
+
+    .tag,
+    .scene {
+        display: inline-block;
+        padding: 2px 8px;
+        background: #f0f0f0;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    /* 分页样式 */
+    .pagebar {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .pagebar a,
+    .pagebar .sel {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 32px;
+        margin: 0 5px;
+        padding: 0 10px;
+        border-radius: 4px;
+        background: #f5f5f5;
+        color: #666;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .pagebar .sel {
+        background: #30C37E;
+        color: white;
+    }
+
+    .pagebar a:hover {
+        background: #e0e0e0;
+    }
+
+    .pagebar .prev i,
+    .pagebar .next i {
+        margin: 0 5px;
+    }
+
+    /* 无评论状态 */
+    .no-comments {
+        padding: 50px 20px;
+        text-align: center;
+        color: #999;
+    }
+
+    .no-comments i {
+        font-size: 40px;
+        margin-bottom: 10px;
+        color: #ddd;
+    }
+
+    .no-comments p {
+        font-size: 16px;
+    }
+
+    /* 成功提示 */
+    .toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: rgba(48, 195, 126, 0.9);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        z-index: 1000;
+    }
+
+    .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+
+    .toast-content {
+        display: flex;
+        align-items: center;
+    }
+
+    .toast i {
+        margin-right: 10px;
+        font-size: 20px;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 768px) {
+        .comment-container {
+            flex-direction: column;
+        }
+        
+        .comments-user {
+            width: 60px;
+        }
+        
+        .comments-user .face img {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .comments-list-content {
+            padding-left: 15px;
+        }
+        
+        .emotion-options,
+        .tags-options,
+        .scene-options {
+            gap: 5px;
+        }
+        
+        .emotion-options label,
+        .tags-options label,
+        .scene-options label {
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
 <body class="review">
 	<div class="header">
 		<a href="/" class="logo" title="首页"><img alt="易点音乐" src="{% static "image/logo.png" %}"></a>
@@ -18,9 +565,9 @@
 	        </form>
 			<div id="suggest" class="search-suggest"></div>
 			<div class="search-hot-words">
-                {% for song in search_song  %}
-                    <a target="play" href="{% url 'play' song.song.song_id %}" >{{ song.song.song_name }}</a>
-                {% endfor  %}
+                {% for item in search_song %}
+                    <a target="play" href="{% url 'play' item.song.song_id %}" >{{ item.song.song_name }}</a>
+                {% endfor %}
 			</div>
 		</div>
 	</div><!--end header-->
@@ -39,70 +586,190 @@
 					<a href="{% url 'play' song_id %}" target="_self">{{song_name}}</a> &gt;
 			<span>点评</span>
 		</div>
-		<div class="page-title" id="currentSong"></div>
+		<div class="page-title" id="currentSong">
+			<h1>{{song_name}} - 点评</h1>
+		</div>
 	</div>
-	<div class="wrapper">
-        <div class="section">
-            <div class="section-header"><h3 class="section-title">网友点评</h3></div>
-            <div class="section-content comments-score-new review-comments-score clearfix">
-                <div class="clearfix">
 
-                <!--点评框-->
+	<div class="wrapper">
+		<div class="comment-container">
+			<!-- 左侧点评表单 -->
+			<div class="comment-form-container">
+        <div class="section">
+					<div class="section-header"><h3 class="section-title"><i class="fas fa-edit"></i> 我要点评</h3></div>
+					<div class="section-content">
                     <div class="comments-box">
-                    <div class="comments-box-title">我要点评<<{{ song_name }}>></div>
-                    <div class="comments-default-score clearfix"></div>
+							<div class="comments-box-title">我要点评《{{ song_name }}》</div>
                     <form action="" method="post" id="usrform">
                         {% csrf_token %}
+								<!-- 整体评分 -->
+								<div class="rating-container">
+									<p><i class="fas fa-star"></i> 为这首歌打个分</p>
+									<div class="rating">
+										<input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="5星"></label>
+										<input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4星"></label>
+										<input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3星"></label>
+										<input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2星"></label>
+										<input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1星"></label>
+									</div>
+								</div>
+								
+								<!-- 情绪选择 -->
+								<div class="emotion-selection">
+									<p><i class="fas fa-heart"></i> 这首歌给你的感觉是？</p>
+									<div class="emotion-options">
+										<input type="radio" id="happy" name="emotion" value="happy" /><label for="happy"><i class="fas fa-smile"></i> 开心</label>
+										<input type="radio" id="sad" name="emotion" value="sad" /><label for="sad"><i class="fas fa-sad-tear"></i> 伤感</label>
+										<input type="radio" id="excited" name="emotion" value="excited" /><label for="excited"><i class="fas fa-grin-stars"></i> 兴奋</label>
+										<input type="radio" id="relaxed" name="emotion" value="relaxed" /><label for="relaxed"><i class="fas fa-cloud"></i> 放松</label>
+										<input type="radio" id="nostalgic" name="emotion" value="nostalgic" /><label for="nostalgic"><i class="fas fa-history"></i> 怀旧</label>
+										<input type="radio" id="other" name="emotion" value="other" /><label for="other"><i class="fas fa-ellipsis-h"></i> 其他</label>
+									</div>
+								</div>
+								
+								<!-- 标签选择 -->
+								<div class="tags-selection">
+									<p><i class="fas fa-tags"></i> 你觉得这首歌的特点有哪些？</p>
+									<div class="tags-options">
+										<input type="checkbox" id="melodic" name="tags" value="melodic" /><label for="melodic"><i class="fas fa-music"></i> 旋律优美</label>
+										<input type="checkbox" id="lyrics" name="tags" value="lyrics" /><label for="lyrics"><i class="fas fa-pen-fancy"></i> 歌词走心</label>
+										<input type="checkbox" id="vocal" name="tags" value="vocal" /><label for="vocal"><i class="fas fa-microphone"></i> 唱功出色</label>
+										<input type="checkbox" id="rhythm" name="tags" value="rhythm" /><label for="rhythm"><i class="fas fa-drum"></i> 节奏感强</label>
+										<input type="checkbox" id="arrangement" name="tags" value="arrangement" /><label for="arrangement"><i class="fas fa-sliders-h"></i> 编曲精彩</label>
+										<input type="checkbox" id="catchy" name="tags" value="catchy" /><label for="catchy"><i class="fas fa-fire"></i> 朗朗上口</label>
+									</div>
+								</div>
+								
+								<!-- 使用场景 -->
+								<div class="scene-selection">
+									<p><i class="fas fa-map-marker-alt"></i> 这首歌适合什么场景？</p>
+									<div class="scene-options">
+										<input type="checkbox" id="workout" name="scene" value="workout" /><label for="workout"><i class="fas fa-running"></i> 运动</label>
+										<input type="checkbox" id="study" name="scene" value="study" /><label for="study"><i class="fas fa-book"></i> 学习</label>
+										<input type="checkbox" id="relax" name="scene" value="relax" /><label for="relax"><i class="fas fa-couch"></i> 休闲</label>
+										<input type="checkbox" id="party" name="scene" value="party" /><label for="party"><i class="fas fa-glass-cheers"></i> 派对</label>
+										<input type="checkbox" id="commute" name="scene" value="commute" /><label for="commute"><i class="fas fa-car"></i> 通勤</label>
+										<input type="checkbox" id="sleep" name="scene" value="sleep" /><label for="sleep"><i class="fas fa-moon"></i> 睡前</label>
+									</div>
+								</div>
+
+								<!-- 文本点评 -->
                         <div class="writebox">
-                            <textarea name="comment" form="usrform"></textarea>
+									<p><i class="fas fa-comment-alt"></i> 分享你的详细想法（可选）</p>
+									<textarea name="comment" form="usrform" placeholder="写下你对这首歌的感受、喜欢的部分或相似歌曲推荐..."></textarea>
                         </div>
                         <div class="comments-box-button clearfix">
-                        <input type="submit" value="发布" class="_j_cc_post_entry cc-post-entry" id="scoreBtn">
-                        <div data-role="user-login" class="_j_cc_post_login"></div>
+									<button type="submit" class="cc-post-entry" id="scoreBtn">
+										<i class="fas fa-paper-plane"></i> 发布点评
+									</button>
+									<a href="{% url 'play' song_id %}" class="cc-back-button">
+										<i class="fas fa-arrow-left"></i> 返回歌曲
+									</a>
                         </div>
-                        <div id="scoreTips2" style="padding-top:10px;"></div>
+								<input type="hidden" name="return_to_player" value="1">
                     </form>
                     </div>
                 </div>
             </div>
         </div>
+
+			<!-- 右侧评论列表 -->
+			<div class="comment-list-container">
+				<div class="section">
+					<div class="section-header">
+						<h3 class="section-title"><i class="fas fa-comments"></i> 网友点评 ({{ comment_all.count }}条)</h3>
     </div>
-
-
-    <div class="wrapper clearfix">
-	<div class="content">
+					<div class="section-content">
   	<div id="J_CommentList">
+							{% if contacts.object_list %}
         <ul class="comment-list">
-            {% for item in contacts.object_list  %}
-            <li class="comment-item ">
+								{% for item in contacts.object_list %}
+								<li class="comment-item">
                 <div class="comments-user">
                 <span class="face">
                 <img src="{% static "image/user.jpg" %}" width="60" height="60">
                 </span>
+										<div class="user-name">{{ item.comment_user }}</div>
                 </div>
                 <div class="comments-list-content">
                 <div class="single-score clearfix">
                     <span class="date">{{ item.comment_date }}</span>
-                    <div><span class="score">{{ item.comment_user }}</span></div>
+											<div class="user-rating-display">
+												{% if item.rating %}
+												<span class="user-rating">
+													{% for i in "12345" %}
+														{% if forloop.counter <= item.rating %}
+															<i class="fas fa-star filled"></i>
+														{% else %}
+															<i class="far fa-star"></i>
+														{% endif %}
+													{% endfor %}
+												</span>
+												{% endif %}
+												{% if item.emotion %}
+													<span class="user-emotion">
+														{% if item.emotion == 'happy' %}
+															<i class="fas fa-smile"></i>
+														{% elif item.emotion == 'sad' %}
+															<i class="fas fa-sad-tear"></i>
+														{% elif item.emotion == 'excited' %}
+															<i class="fas fa-grin-stars"></i>
+														{% elif item.emotion == 'relaxed' %}
+															<i class="fas fa-cloud"></i>
+														{% elif item.emotion == 'nostalgic' %}
+															<i class="fas fa-history"></i>
+														{% else %}
+															<i class="fas fa-ellipsis-h"></i>
+														{% endif %}
+														{{ item.get_emotion_display }}
+													</span>
+												{% endif %}
+											</div>
                 </div>
                 <!--comments-content-->
                 <div class="comments-content">
-                    <div class="J_CommentContent comment-height-limit">
+											<div class="J_CommentContent">
                         <div class="content-inner">
+													{% if item.comment_text %}
                             <div class="comments-words">
                                 <p>{{ item.comment_text }}</p>
                             </div>
+													{% endif %}
+													<div class="comment-meta">
+														{% if item.tags.all %}
+														<div class="user-tags">
+															<i class="fas fa-tags"></i>
+															{% for tag in item.tags.all %}
+																<span class="tag">{{ tag.name }}</span>
+															{% endfor %}
+														</div>
+														{% endif %}
+														{% if item.scenes.all %}
+														<div class="user-scenes">
+															<i class="fas fa-map-marker-alt"></i>
+															{% for scene in item.scenes.all %}
+																<span class="scene">{{ scene.name }}</span>
+															{% endfor %}
+														</div>
+														{% endif %}
+													</div>
                         </div>
                     </div>
                 </div>
                 </div>
             </li>
-            {% endfor  %}
+								{% endfor %}
         </ul>
+							{% else %}
+							<div class="no-comments">
+								<i class="fas fa-comment-slash"></i>
+								<p>还没有人点评这首歌，来做第一个点评的人吧！</p>
+							</div>
+							{% endif %}
         <div class="page-box">
             <div class="pagebar" id="pageBar">
                 {% if contacts.has_previous %}
-                    <a href="{% url 'comment' song_id %}?page={{ contacts.previous_page_number }}" class="prev" target="_self"><i></i>上一页</a>
+										<a href="{% url 'comment' song_id %}?page={{ contacts.previous_page_number }}" class="prev" target="_self"><i class="fas fa-chevron-left"></i> 上一页</a>
                 {% endif %}
                 {% for page in contacts.paginator.page_range %}
                     {% if contacts.number == page %}
@@ -112,11 +779,41 @@
                     {% endif %}
                 {% endfor %}
                 {% if contacts.has_next %}
-                    <a href="{% url 'comment' song_id %}?page={{ contacts.next_page_number }}" class="next" target="_self">下一页<i></i></a>
+										<a href="{% url 'comment' song_id %}?page={{ contacts.next_page_number }}" class="next" target="_self">下一页 <i class="fas fa-chevron-right"></i></a>
                 {% endif %}
             </div>
         </div>
     </div>
 	</div>
     </div>
-{% endblock  %}
+			</div>
+		</div>
+	</div>
+
+	<!-- 提示弹窗 -->
+	<div id="success-toast" class="toast">
+		<div class="toast-content">
+			<i class="fas fa-check-circle"></i>
+			<span id="toast-message">点评成功！</span>
+		</div>
+	</div>
+	
+	<!-- 添加提示脚本 -->
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const urlParams = new URLSearchParams(window.location.search);
+			if (urlParams.has('comment_success')) {
+				const toast = document.getElementById('success-toast');
+				toast.classList.add('show');
+				setTimeout(function() {
+					toast.classList.remove('show');
+					// 清除URL参数
+					let url = new URL(window.location.href);
+					url.searchParams.delete('comment_success');
+					history.replaceState({}, document.title, url);
+				}, 3000);
+			}
+		});
+	</script>
+</body>
+{% endblock %}

@@ -1,11 +1,11 @@
 {% extends "title_base.html"  %}
-
-{% block title  %}
+{% block title %}
 {% load static %}
 <link type="image/x-icon" rel="shortcut icon" href="{% static "favicon.ico" %}">
 <link type="text/css" rel="stylesheet" href="{% static "css/common.css" %}">
+<link type="text/css" rel="stylesheet" href="{% static "css/player.css" %}">
 <link type="text/css" rel="stylesheet" href="{% static "css/play.css" %}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
     /* 播放页面现代化样式 */
     .music-player-container {
@@ -442,9 +442,115 @@
     .jplayer_content {
         display: none;
     }
+
+    .toast {
+        position: fixed;
+        left: 50%;
+        bottom: -100px;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 30px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        z-index: 10000;
+        transition: all 0.5s ease;
+    }
+
+    .toast.show {
+        bottom: 30px;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    .toast-content {
+        display: flex;
+        align-items: center;
+    }
+
+    .toast-content i {
+        color: #4CAF50;
+        font-size: 20px;
+        margin-right: 10px;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            transform: translate(-50%, 20px);
+            opacity: 0;
+        }
+        to {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+    }
+
+    /* 添加歌曲操作区域的样式 */
+    .song-actions {
+        margin: 20px auto;
+        max-width: 1000px;
+    }
+    
+    .btn_area {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+    
+    .action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #a66a00;
+        transition: all 0.3s ease;
+        padding: 15px;
+        border-radius: 10px;
+        background: linear-gradient(45deg, #fff6d5, #fffbea);
+        box-shadow: 0 4px 10px rgba(252, 196, 25, 0.2);
+        width: 80px;
+    }
+    
+    .action-btn i {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+    
+    .action-btn span {
+        font-size: 14px;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(252, 196, 25, 0.3);
+        color: #ff9800;
+    }
+    
+    .btn-love:hover {
+        background: #ffe6e6;
+        color: #ff4081;
+    }
+    
+    .btn-comment:hover {
+        background: #e6f7ff;
+        color: #2196f3;
+    }
+    
+    .btn-download:hover {
+        background: #e6ffe6;
+        color: #4caf50;
+    }
+    
+    .btn-collect:hover {
+        background: #fff2e6;
+        color: #ff9800;
+    }
 </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
+<body class="windows">
 	<div class="header">
 		<a href="/" class="logo" title="首页"><img src="{% static "image/logo2.png" %}"></a>
 		<div class="search-box">
@@ -672,6 +778,36 @@
                     </textarea>
                 </div><!--end product-pics-->
             </div>
+        </div>
+    </div>
+
+    <!-- 成功提示弹窗 -->
+    <div id="success-toast" class="toast">
+        <div class="toast-content">
+            <i class="fas fa-check-circle"></i>
+            <span id="toast-message">操作成功</span>
+        </div>
+    </div>
+
+    <!-- 歌曲操作区域，添加新的点评按钮 -->
+    <div class="song-actions">
+        <div class="btn_area">
+            <a href="javascript:;" class="action-btn btn-love">
+                <i class="fas fa-heart"></i>
+                <span>喜欢</span>
+            </a>
+            <a href="/comment/{{ song_info.song_id }}.html" class="action-btn btn-comment">
+                <i class="fas fa-comment"></i>
+                <span>点评</span>
+            </a>
+            <a href="/download/{{ song_info.song_id }}.html" class="action-btn btn-download">
+                <i class="fas fa-download"></i>
+                <span>下载</span>
+            </a>
+            <a href="javascript:;" class="action-btn btn-collect">
+                <i class="fas fa-plus"></i>
+                <span>收藏</span>
+            </a>
         </div>
     </div>
 
@@ -1424,5 +1560,24 @@
                 let wasPaused = true;
             }, 1000); // 延迟一秒等待原播放器加载
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('comment_success')) {
+                const toast = document.getElementById('success-toast');
+                const toastMessage = document.getElementById('toast-message');
+                toastMessage.textContent = "点评成功！";
+                toast.classList.add('show');
+                
+                // 3秒后隐藏提示
+                setTimeout(function() {
+                    toast.classList.remove('show');
+                    // 清除URL参数
+                    let url = new URL(window.location.href);
+                    url.searchParams.delete('comment_success');
+                    history.replaceState({}, document.title, url);
+                }, 3000);
+            }
+        });
     </script>
-{% endblock  %}
+{% endblock %}
