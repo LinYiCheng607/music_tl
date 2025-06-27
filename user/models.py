@@ -11,15 +11,15 @@ class MyUser(AbstractUser):
     bio = models.CharField('个人签名', max_length=100, blank=True, default='')
     # 其他字段...
 
-# 听歌记录表（已新增 song_type 和 song_languages 字段，信息和 Song 保持一致）
+# 听歌记录表（已修改 song_type 和 song_languages 字段为可选）
 class SongLog(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='用户')
     song = models.ForeignKey(Song, on_delete=models.CASCADE, verbose_name='歌曲')
     listen_time = models.DateTimeField('听歌时间', auto_now_add=True)
     listen_count = models.PositiveIntegerField('听过的次数', default=1)
     total_listen_seconds = models.PositiveIntegerField('总听歌时长(秒)', default=0)
-    song_type = models.CharField('类型', max_length=20)
-    song_languages = models.CharField('语种', max_length=20, default='中文')
+    song_type = models.CharField('类型', max_length=20, null=True, blank=True)
+    song_languages = models.CharField('语种', max_length=20, default='中文', null=True, blank=True)
 
     class Meta:
         verbose_name = '听歌记录'

@@ -69,7 +69,6 @@ def homeview(request, page):
             'song__song_name',
             'song__song_singer',
             'song__song_time',
-            'song__song_type',
             'song__song_languages'
         )
         .annotate(listen_count=Sum('listen_count'))
@@ -81,7 +80,6 @@ def homeview(request, page):
             'song_name': item['song__song_name'],
             'song_singer': item['song__song_singer'],
             'song_time': item['song__song_time'],
-            'song_type': item['song__song_type'],
             'song_languages': item['song__song_languages'],
             'listen_count': item['listen_count'] or 0,
         }
@@ -176,7 +174,6 @@ def song_analysis(request):
     # 7. 词云数据统计
     # 词云数据统计（以歌曲类型为例）
     logs = SongLog.objects.filter(user=user).select_related("song")
-    # genre_counter = Counter()
     # 歌曲类型词云
     type_counter = Counter()
     # 歌手词云
@@ -186,13 +183,13 @@ def song_analysis(request):
     # 歌曲名词云
     name_counter = Counter()
     for log in logs:
-        if getattr(log.song, "song_type", None):
+        if hasattr(log.song, "song_type") and log.song.song_type:
             type_counter[log.song.song_type] += 1
-        if getattr(log.song, "song_singer", None):
+        if hasattr(log.song, "song_singer") and log.song.song_singer:
             artist_counter[log.song.song_singer] += 1
-        if getattr(log.song, "song_album", None):
+        if hasattr(log.song, "song_album") and log.song.song_album:
             album_counter[log.song.song_album] += 1
-        if getattr(log.song, "song_name", None):
+        if hasattr(log.song, "song_name") and log.song.song_name:
             name_counter[log.song.song_name] += 1
 
     # wordcloud_data = [{"name": k, "value": v} for k, v in genre_counter.items()]

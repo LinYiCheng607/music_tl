@@ -537,7 +537,7 @@
     
     <div class="review-form">
         {% if comment_success %}
-        <div class="success-alert">
+        <div class="success-alert" id="success-message">
             <i class="fas fa-check-circle"></i>
             <span>您的点评已成功提交！感谢您的分享。</span>
         </div>
@@ -752,32 +752,57 @@
     </div>
 </div>
 
-<!-- 成功提示弹窗 -->
-<div id="success-toast" class="toast">
-    <i class="fas fa-check-circle"></i>
-    <span>点评提交成功！</span>
+<!-- 等待跳转遮罩层 -->
+<div class="overlay" id="redirectOverlay">
+    <div class="spinner"></div>
+    <div class="overlay-message">点评提交成功！</div>
+    <div class="overlay-submessage">正在返回歌曲页面...</div>
 </div>
 
 <script>
-    // 检查URL参数是否有成功提示
     document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('comment_success')) {
-            const toast = document.getElementById('success-toast');
-            toast.classList.add('show');
+        // 如果有成功消息，3秒后自动跳转
+        {% if comment_success %}
+            const overlay = document.getElementById('redirectOverlay');
+            overlay.classList.add('show');
             
-            // 3秒后自动关闭
             setTimeout(function() {
-                toast.classList.remove('show');
+                window.location.href = "{{ return_url }}";
+            }, 2500);
+        {% endif %}
+        
+        // Ajax提交表单
+        const form = document.getElementById('reviewForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
                 
-                // 如果有返回URL，则跳转回去
-                if (urlParams.has('auto_return') && urlParams.get('auto_return') === '1') {
-                    const returnUrl = urlParams.get('return_url');
-                    if (returnUrl) {
-                        window.location.href = returnUrl;
+                const formData = new FormData(form);
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
-                }
-            }, 3000);
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        // 显示遮罩层
+                        const overlay = document.getElementById('redirectOverlay');
+                        overlay.classList.add('show');
+                        
+                        // 2.5秒后跳转回播放页面
+                        setTimeout(function() {
+                            window.location.href = data.redirect;
+                        }, 2500);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
+                });
+            });
         }
     });
 </script>

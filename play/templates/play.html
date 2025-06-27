@@ -486,66 +486,7 @@
         }
     }
 
-    /* 添加歌曲操作区域的样式 */
-    .song-actions {
-        margin: 20px auto;
-        max-width: 1000px;
-    }
-    
-    .btn_area {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-    }
-    
-    .action-btn {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-decoration: none;
-        color: #a66a00;
-        transition: all 0.3s ease;
-        padding: 15px;
-        border-radius: 10px;
-        background: linear-gradient(45deg, #fff6d5, #fffbea);
-        box-shadow: 0 4px 10px rgba(252, 196, 25, 0.2);
-        width: 80px;
-    }
-    
-    .action-btn i {
-        font-size: 24px;
-        margin-bottom: 8px;
-    }
-    
-    .action-btn span {
-        font-size: 14px;
-    }
-    
-    .action-btn:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 15px rgba(252, 196, 25, 0.3);
-        color: #ff9800;
-    }
-    
-    .btn-love:hover {
-        background: #ffe6e6;
-        color: #ff4081;
-    }
-    
-    .btn-comment:hover {
-        background: #e6f7ff;
-        color: #2196f3;
-    }
-    
-    .btn-download:hover {
-        background: #e6ffe6;
-        color: #4caf50;
-    }
-    
-    .btn-collect:hover {
-        background: #fff2e6;
-        color: #ff9800;
-    }
+    /* 歌曲操作区域的样式已移除 */
 </style>
 {% endblock %}
 
@@ -608,7 +549,7 @@
                 <a class="action-button download-btn" href="{% url 'download' song_info.song_id %}">
                     <i class="fas fa-download"></i> 下载
                 </a>
-                <a class="action-button comment-btn" href="{% url 'comment' song_info.song_id %}" target="_blank">
+                <a class="action-button comment-btn" href="{% url 'song_review' song_info.song_id %}?return_url={% url 'play' song_info.song_id %}">
                     <i class="fas fa-comment"></i> 点评
                 </a>
             </div>
@@ -789,27 +730,7 @@
         </div>
     </div>
 
-    <!-- 歌曲操作区域，添加新的点评按钮 -->
-    <div class="song-actions">
-        <div class="btn_area">
-            <a href="javascript:;" class="action-btn btn-love">
-                <i class="fas fa-heart"></i>
-                <span>喜欢</span>
-            </a>
-            <a href="/comment/{{ song_info.song_id }}.html" class="action-btn btn-comment">
-                <i class="fas fa-comment"></i>
-                <span>点评</span>
-            </a>
-            <a href="/download/{{ song_info.song_id }}.html" class="action-btn btn-download">
-                <i class="fas fa-download"></i>
-                <span>下载</span>
-            </a>
-            <a href="javascript:;" class="action-btn btn-collect">
-                <i class="fas fa-plus"></i>
-                <span>收藏</span>
-            </a>
-        </div>
-    </div>
+    <!-- 使用原有的点评按钮 -->
 
 	<script data-main="{% static "js/play.js" %}" src="{% static "js/require.js" %}"></script>
     <!-- 现代播放器交互脚本 -->
