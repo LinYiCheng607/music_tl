@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'search',
     'user',
     'aiassistant',
+    'knowledge_graph',
 ]
 
 MIDDLEWARE = [
