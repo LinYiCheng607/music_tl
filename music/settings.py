@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'user',
     'aiassistant',
     'knowledge_graph',
+    'recommend',
 ]
 
 MIDDLEWARE = [
@@ -101,7 +102,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'music_db',
         'USER': 'root',
-        'PASSWORD': '2111601205',
+        'PASSWORD': '2003ccw',
         'HOST': 'localhost',
         'PORT': '3306',
     }

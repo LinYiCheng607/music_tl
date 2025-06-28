@@ -1,0 +1,112 @@
+{% extends 'title_base.html' %}
+{% load static %}
+{% block title %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/common.css' %}">
+<link type="text/css" rel="stylesheet" href="{% static 'css/index.css' %}">
+<link type="text/css" rel="stylesheet" href="{% static 'css/recommend.css' %}">
+<style>
+    .section {
+        width: 80%;
+        margin: 20px auto;
+    }
+    .recommend-header {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #4e54c8;
+    }
+    .recommend-header h2 {
+        color: #333;
+        font-size: 20px;
+        display: inline-block;
+    }
+    .recommend-container {
+        padding: 10px;
+        box-sizing: border-box;
+    }
+    .product-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+    .product-list li {
+        width: calc(20% - 16px); /* 5 per row */
+        margin: 10px 0;
+        margin-right: 16px;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .product-list li:nth-child(5n) {
+        margin-right: 0;
+    }
+    .product-list .pic img {
+        width: 100%;
+        height: auto;
+        border-radius: 4px;
+    }
+    .product-list h3 {
+        font-size: 14px;
+        margin: 10px 0;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+    }
+    .product-list .singer, .product-list .album {
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+    }
+    .no-history {
+        text-align: center;
+        padding: 50px 0;
+        color: #666;
+        font-size: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section">
+    <div class="recommend-header">
+        <h2>{% if has_history %}个性化歌曲推荐{% else %}热门歌曲推荐{% endif %}</h2>
+    </div>
+
+    {% if recommendations %}
+    <div class="recommend-container">
+    <ul class="product-list">
+        {% for song in recommendations %}
+        <li>
+            <a class="pic" target="play" href="{% url 'play' song.song_id %}">
+                {% if song.song_img_url %}
+                    <img src="{{ song.song_img_url }}" alt="{{ song.song_name }}">
+                {% elif song.song_img %}
+                    <img src="{{ song.song_img.url }}" alt="{{ song.song_name }}">
+                {% else %}
+                    <img src="{% static 'images/default-album.svg' %}" alt="默认专辑封面">
+                {% endif %}
+            </a>
+            <h3><a target="play" href="{% url 'play' song.song_id %}">{{ song.song_name|default_if_none:"未知歌曲"|default:"未知歌曲" }}</a></h3>
+            <!-- <div class="singer">{{ song.song_singer|default_if_none:"未知歌手"|default:"未知歌手" }}</div> -->
+            <!-- <div class="album">{{ song.song_album|default_if_none:"未知专辑"|default:"未知专辑" }}</div> -->
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+    {% else %}
+    <div class="no-history">
+        <p>暂无推荐歌曲，请先聆听一些歌曲吧~</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

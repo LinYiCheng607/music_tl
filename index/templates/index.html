@@ -119,7 +119,7 @@
                 <li><a href="/">主页</a></li>
                 <li><a href="{% url 'ranking' %}" target="_blank">歌曲排行榜</a></li>
                 <li><a href="#" target="_blank">数据可视化</a></li>
-                <li><a href="#" target="_blank">歌曲推荐</a></li>
+                <li><a href="{% url 'recommend:songs' %}" target="_blank">歌曲推荐</a></li>
                 <li><a href="{% url 'aiassistant:assistant_page' %}" target="_blank">AI音乐助手</a></li>
                 <li><a href="{% url 'home' 1 %}" target="_blank">用户</a></li>
             </ul>

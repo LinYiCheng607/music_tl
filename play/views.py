@@ -6,6 +6,8 @@ import os
 import random
 from user.models import SongLog
 from django.utils import timezone
+from recommend.views import update_similarity_scores, update_artist_similarity_scores
+import threading
 # Create your views here.
 
 
@@ -123,6 +125,10 @@ def playview(request, song_id):
             listen_count=1,
             total_listen_seconds=0
         )
+        # 重新计算相似度数据
+        # 在后台线程中更新相似度数据
+        threading.Thread(target=update_similarity_scores).start()
+        threading.Thread(target=update_artist_similarity_scores).start()
     
     return render(request, 'play.html', {
         'search_song': search_song,
