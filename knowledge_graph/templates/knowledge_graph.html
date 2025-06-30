@@ -9,44 +9,106 @@
       height: 90vh;
       border: 1px solid #ccc;
     }
+    #controls {
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
   <h1>知识图谱可视化</h1>
+  <div id="controls">
+    <label for="kg-type">请选择图谱类型：</label>
+    <select id="kg-type">
+      <option value="artist-song">歌手-歌曲</option>
+      <option value="song-album">歌曲-专辑</option>
+      <option value="song-language">歌曲-语言</option>
+    </select>
+    <button type="button" onclick="loadGraph()">加载图谱</button>
+  </div>
   <div id="cy"></div>
   <script>
-    fetch('/api/graph/')
-      .then(response => response.json())
-      .then(data => {
-        const elements = [];
-        // 添加节点
-        data.nodes.forEach(node => {
-          elements.push({
-            data: { id: String(node.id), label: node.name, group: node.labels[0] }
+    let cy = null; // 保存 Cytoscape 实例
+
+    function loadGraph() {
+      const kgType = document.getElementById('kg-type').value;
+      fetch(`/knowledge_graph/api/graph/?type=${kgType}`)
+        .then(response => response.json())
+        .then(data => {
+          const nodeIds = new Set(data.nodes.map(node => String(node.id)));
+          const elements = [];
+          // 添加节点
+          data.nodes.forEach(node => {
+            elements.push({
+              data: {
+                id: String(node.id),
+                label: node.name ? node.name : String(node.id),
+                group: node.labels && node.labels.length > 0 ? node.labels[0] : ''
+              }
+            });
           });
-        });
-        // 添加边
-        data.edges.forEach(edge => {
-          elements.push({
-            data: {
-              id: edge.source + '_' + edge.target + '_' + edge.label,
-              source: String(edge.source),
-              target: String(edge.target),
-              label: edge.label
+          // 添加边，source/target 必须都在 nodeIds 里
+          data.edges.forEach(edge => {
+            if (nodeIds.has(String(edge.source)) && nodeIds.has(String(edge.target))) {
+              elements.push({
+                data: {
+                  id: String(edge.source) + '_' + String(edge.target) + '_' + edge.label,
+                  source: String(edge.source),
+                  target: String(edge.target),
+                  label: edge.label
+                }
+              });
             }
           });
-        });
 
-        cytoscape({
-          container: document.getElementById('cy'),
-          elements: elements,
-          style: [
-            { selector: 'node', style: { 'label': 'data(label)', 'background-color': '#29a', 'shape': 'ellipse' } },
-            { selector: 'edge', style: { 'label': 'data(label)', 'width': 2, 'line-color': '#ccc', 'target-arrow-shape': 'triangle' } }
-          ],
-          layout: { name: 'cose' }
+          // 销毁旧实例，避免重复渲染和内存泄漏
+          if (cy) {
+            cy.destroy();
+          }
+
+          cy = cytoscape({
+            container: document.getElementById('cy'),
+            elements: elements,
+            style: [
+              { selector: 'node', style: { 
+                  'label': 'data(label)', 
+                  'background-color': '#29a', 
+                  'shape': 'ellipse',
+                  'color': '#fff',
+                  'text-valign': 'center',
+                  'font-size': 8,
+                  'width': 12,
+                  'height': 12,
+                  'text-wrap': 'wrap'
+                } 
+              },
+              { selector: 'edge', style: { 
+                  'label': '', // 只显示线，不显示关系名
+                  'width': 1, 
+                  'line-color': '#ccc', 
+                  'target-arrow-shape': 'triangle',
+                  'target-arrow-color': '#ccc',
+                  'curve-style': 'bezier'
+                } 
+              }
+            ],
+            layout: { 
+              name: 'cose',
+              fit: true,
+              animate: false,
+              nodeRepulsion: 2048,
+              idealEdgeLength: 80,
+              edgeElasticity: 100
+            }
+          });
+        })
+        .catch(err => {
+          document.getElementById('cy').innerHTML = "<p style='color:red'>知识图谱数据加载失败：" + err + "</p>";
+          console.error("知识图谱数据加载失败：", err);
         });
-      });
+    }
+
+    // 页面加载时默认展示
+    loadGraph();
   </script>
 </body>
 </html>
