@@ -139,44 +139,7 @@
     background: #ffe0b2;
     color: #4e54c8;
   }
-  .search-box {
-    flex: 0 0 260px;
-    display: flex;
-    justify-content: flex-end;
-  }
-  .search-box form {
-    display: flex;
-    align-items: center;
-    background: #fff9db;
-    border-radius: 10px;
-    padding: 2px 8px;
-    border: 1.5px solid #ffe082;
-  }
-  .keyword {
-    border: none;
-    background: transparent;
-    padding: 8px 12px;
-    font-size: 16px;
-    outline: none;
-    width: 140px;
-    color: #c97a00;
-  }
-  .search-button {
-    background: #ffe082;
-    color: #c97a00;
-    border: none;
-    border-radius: 7px;
-    padding: 7px 20px;
-    font-size: 15px;
-    font-weight: 600;
-    margin-left: 6px;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-  }
-  .search-button:hover {
-    background: #ffd24d;
-    color: #4e54c8;
-  }
+  /* 搜索按钮样式可共用，不用删除 */
 </style>
 {% endblock %}
 {% block content %}
@@ -193,13 +156,7 @@
     <li><a href="{% url 'aiassistant:assistant_page' %}" target="_blank">AI音乐助手</a></li>
     <li><a href="{% url 'home' 1 %}" target="_blank">用户</a></li>
   </ul>
-  <div class="search-box">
-    <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
-      {% csrf_token %}
-      <input name="kword" type="text" class="keyword" maxlength="120" placeholder="音乐节" />
-      <input type="submit" class="search-button" value="搜 索" />
-    </form>
-  </div>
+  <!-- 搜索框已删除 -->
 </div>
 
 <div class="kg-section">
@@ -226,6 +183,7 @@
       </div>
       <button type="button" onclick="loadGraph()">加载图谱</button>
       <button type="button" onclick="toggle3D()" id="toggle-3d-btn">切换3D/2D</button>
+      <button type="button" onclick="window.location.href='{% url 'search_kg' %}'" style="margin-left:8px;">去搜索</button>
     </div>
     <div class="kg-options-row">
       <div class="kg-control-group">

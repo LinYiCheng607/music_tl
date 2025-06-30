@@ -123,3 +123,6 @@ def graph_data(request):
 
 def knowledge_graph(request):
     return render(request, 'knowledge_graph.html')
+
+def search_kg(request):
+    return render(request, 'search_kg.html')

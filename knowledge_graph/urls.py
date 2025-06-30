@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/graph/', views.graph_data, name='graph_data'),      # 数据API
     path('api/graph_options/', views.graph_options, name='graph_options'),
     path('', indexview, name='index'),  
+    path('search_kg/', views.search_kg, name='search_kg'),
 ]
