@@ -68,8 +68,9 @@ def homeview(request, page):
             'song__song_id',
             'song__song_name',
             'song__song_singer',
-            'song__song_time',
-            'song__song_languages'
+            'song__song_time',  
+            'song__song_languages',
+            'song__song_type'
         )
         .annotate(listen_count=Sum('listen_count'))
         .order_by('-listen_count', '-song')
@@ -81,6 +82,7 @@ def homeview(request, page):
             'song_singer': item['song__song_singer'],
             'song_time': item['song__song_time'],
             'song_languages': item['song__song_languages'],
+            'song_type': item.get('song__song_type', ''),
             'listen_count': item['listen_count'] or 0,
         }
         for item in song_count_qs
