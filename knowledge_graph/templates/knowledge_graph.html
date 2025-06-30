@@ -15,11 +15,115 @@
   .kg-controls select:focus { border: 1.5px solid #ff9800;}
   .kg-controls button { padding: 6px 28px; background: linear-gradient(90deg, #ffb74d, #ff9800); border: none; color: #fff; border-radius: 6px; font-size: 17px; font-weight: 600; cursor: pointer; transition: background 0.2s, box-shadow 0.2s; box-shadow: 0 1px 4px #ffecb31a; letter-spacing: 2px;}
   .kg-controls button:hover { background: linear-gradient(90deg, #ff9800, #ffb74d); box-shadow: 0 2px 8px #ffecb366;}
-  #cy { width: 100%; height: 700px; border: 1.5px solid #f6e3b8; border-radius: 12px; background: #fafcff; margin-top: 2px; transition: box-shadow 0.2s; box-shadow: 0 2px 12px #f3e4c4;}
+  #cy, #cy3d { width: 100%; height: 700px; border: 1.5px solid #f6e3b8; border-radius: 12px; background: #fafcff; margin-top: 2px; transition: box-shadow 0.2s; box-shadow: 0 2px 12px #f3e4c4;}
+  #cy3d { display: none; }
   .kg-error { color: #d32f2f; font-size: 15px; margin: 30px 0 0 10px; font-weight: 500;}
+
+  /* 全新头部导航栏布局 */
+  .header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fffbe6;
+    padding: 0 40px;
+    height: 72px;
+    border-bottom: 2px solid #ffd24d;
+    position: relative;
+    z-index: 99;
+  }
+  .logo-box {
+    flex: 0 0 auto;
+  }
+  .logo-img {
+    height: 54px;
+    margin-top: 5px;
+  }
+  .nav-menu {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .nav-menu li a {
+    font-size: 18px;
+    color: #e1a100;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 20px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-menu li a.active,
+  .nav-menu li a:hover {
+    background: #ffe0b2;
+    color: #4e54c8;
+  }
+  .search-box {
+    flex: 0 0 260px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .search-box form {
+    display: flex;
+    align-items: center;
+    background: #fff9db;
+    border-radius: 10px;
+    padding: 2px 8px;
+    border: 1.5px solid #ffe082;
+  }
+  .keyword {
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    font-size: 16px;
+    outline: none;
+    width: 140px;
+    color: #c97a00;
+  }
+  .search-button {
+    background: #ffe082;
+    color: #c97a00;
+    border: none;
+    border-radius: 7px;
+    padding: 7px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    margin-left: 6px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .search-button:hover {
+    background: #ffd24d;
+    color: #4e54c8;
+  }
 </style>
 {% endblock %}
 {% block content %}
+<!-- 顶部导航栏 -->
+<div class="header-bar">
+  <div class="logo-box">
+    <a href="/"><img src="{% static 'image/logo2.png' %}" alt="logo" class="logo-img"></a>
+  </div>
+  <ul class="nav-menu">
+    <li><a href="/">主页</a></li>
+    <li><a href="{% url 'ranking' %}" target="_blank">歌曲排行榜</a></li>
+    <li><a href="{% url 'knowledge_graph' %}" class="active">知识图谱可视化</a></li>
+    <li><a href="{% url 'recommend:songs' %}" target="_blank">歌曲推荐</a></li>
+    <li><a href="{% url 'aiassistant:assistant_page' %}" target="_blank">AI音乐助手</a></li>
+    <li><a href="{% url 'home' 1 %}" target="_blank">用户</a></li>
+  </ul>
+  <div class="search-box">
+    <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
+      {% csrf_token %}
+      <input name="kword" type="text" class="keyword" maxlength="120" placeholder="音乐节" />
+      <input type="submit" class="search-button" value="搜 索" />
+    </form>
+  </div>
+</div>
+
 <div class="kg-section">
     <div class="kg-header">知识图谱可视化</div>
     <div class="kg-controls">
@@ -34,16 +138,21 @@
         <label for="kg-relation" id="kg-relation-label">请选择关系：</label>
         <select id="kg-relation"></select>
         <button type="button" onclick="loadGraph()">加载图谱</button>
+        <button type="button" onclick="toggle3D()" id="toggle-3d-btn">切换3D/2D</button>
     </div>
     <div id="cy"></div>
+    <div id="cy3d"></div>
     <div id="kg-error" class="kg-error" style="display:none;"></div>
 </div>
 <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdn.bootcdn.net/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.25.0/dist/cytoscape.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/cytoscape-qtip@2.7.0/cytoscape-qtip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/3d-force-graph@1.73.0/dist/3d-force-graph.min.js"></script>
 <script>
     let cy = null;
+    let Graph3D = null;
+    let use3DGraph = false;
     // 类型→对象label映射
     const typeToLabel = {
         "artist-song": "请选择歌手：",
@@ -81,6 +190,8 @@
         document.getElementById('kg-error').style.display = '';
         if (cy) cy.destroy();
         document.getElementById('cy').innerHTML = "";
+        if (Graph3D) Graph3D.graphData({nodes:[], links:[]});
+        document.getElementById('cy3d').style.display = use3DGraph ? '' : 'none';
     }
     function hideError() {
         document.getElementById('kg-error').style.display = 'none';
@@ -105,156 +216,211 @@
             showError("暂无可视化数据，请更换类型或刷新后重试。");
             return;
           }
-          const nodeIds = new Set(data.nodes.map(node => String(node.id)));
-          const elements = [];
-          data.nodes.forEach(node => {
-            elements.push({
-              data: {
-                id: String(node.id),
-                label: node.name ? node.name : String(node.id),
-                group: node.labels && node.labels.length > 0 ? node.labels[0] : '',
-                desc: node.desc || ''
-              }
-            });
-          });
-          data.edges.forEach(edge => {
-            if (nodeIds.has(String(edge.source)) && nodeIds.has(String(edge.target))) {
-              elements.push({
-                data: {
-                  id: String(edge.source) + '_' + String(edge.target) + '_' + edge.label,
-                  source: String(edge.source),
-                  target: String(edge.target),
-                  label: edge.label,
-                  desc: edge.desc || edge.label // 没有desc则用label
-                }
-              });
-            }
-          });
-
-          if (cy) cy.destroy();
-
-          cy = cytoscape({
-            container: document.getElementById('cy'),
-            elements: elements,
-            style: [
-              {
-                selector: 'node',
-                style: {
-                  'label': 'data(label)',
-                  'background-color': '#4e54c8',
-                  'shape': 'ellipse',
-                  'color': '#fff',
-                  'text-valign': 'center',
-                  'text-halign': 'center',
-                  'font-size': 12,
-                  'width': 'label',
-                  'height': 'label',
-                  'padding': '8px',
-                  'border-width': 2,
-                  'border-color': '#fff',
-                  'text-wrap': 'wrap'
-                }
-              },
-              { selector: 'node[group="Singer"]', style: {
-                  'background-color': '#ff9800',
-                  'border-color': '#fff3e0',
-                  'color': '#fff'
-              }},
-              { selector: 'node[group="Song"]', style: {
-                  'background-color': '#4e54c8',
-                  'border-color': '#d1d7fa',
-                  'color': '#fff'
-              }},
-              { selector: 'node[group="Album"]', style: {
-                  'background-color': '#00bcd4',
-                  'border-color': '#b2ebf2',
-                  'color': '#fff'
-              }},
-              { selector: 'node[group="Language"]', style: {
-                  'background-color': '#43a047',
-                  'border-color': '#c8e6c9',
-                  'color': '#fff'
-              }},
-              { selector: 'edge', style: {
-                  'label': 'data(label)',
-                  'font-size': 11,
-                  'text-rotation': 'autorotate',
-                  'text-margin-y': -10,
-                  'width': 1.8,
-                  'line-color': '#c4cfff',
-                  'target-arrow-shape': 'triangle',
-                  'target-arrow-color': '#c4cfff',
-                  'curve-style': 'bezier',
-                  'opacity': 0.7
-                }
-              }
-            ],
-            layout: {
-              name: 'cose',
-              fit: true,
-              animate: false,
-              nodeRepulsion: 2400,
-              idealEdgeLength: 120,
-              edgeElasticity: 120
-            }
-          });
-
-          // 悬停高亮
-          cy.on('mouseover', 'node', function(evt){
-            const node = evt.target;
-            node.addClass('hovered');
-            node.connectedEdges().addClass('hovered');
-          });
-          cy.on('mouseout', 'node', function(evt){
-            const node = evt.target;
-            node.removeClass('hovered');
-            node.connectedEdges().removeClass('hovered');
-          });
-          cy.style()
-            .selector('node.hovered')
-            .style({
-              'border-width': 5,
-              'border-color': '#ff9800',
-              'z-index': 999
-            })
-            .selector('edge.hovered')
-            .style({
-              'width': 4,
-              'line-color': '#ff9800',
-              'target-arrow-color': '#ff9800',
-              'opacity': 1
-            })
-            .update();
-
-          // 悬停显示描述
-          cy.nodes().forEach(function(ele){
-              if(ele.data('desc')){
-                  ele.qtip({
-                      content: ele.data('desc'),
-                      show: { event: 'mouseover' },
-                      hide: { event: 'mouseout unfocus' },
-                      position: { my: 'top center', at: 'bottom center' },
-                      style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } }
-                  });
-              }
-          });
-          cy.edges().forEach(function(ele){
-              if(ele.data('desc')){
-                  ele.qtip({
-                      content: ele.data('desc'),
-                      show: { event: 'mouseover' },
-                      hide: { event: 'mouseout unfocus' },
-                      position: { my: 'top center', at: 'bottom center' },
-                      style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } }
-                  });
-              }
-          });
+          if (use3DGraph) {
+            show3DGraph(data.nodes, data.edges);
+          } else {
+            show2DGraph(data.nodes, data.edges);
+          }
         })
         .catch(err => {
           showError("知识图谱数据加载失败：" + err);
           console.error("知识图谱数据加载失败：", err);
         });
     }
+
+    function show2DGraph(nodes, edges) {
+      document.getElementById('cy').style.display = '';
+      document.getElementById('cy3d').style.display = 'none';
+      if (cy) cy.destroy();
+
+      const nodeIds = new Set(nodes.map(node => String(node.id)));
+      const elements = [];
+      nodes.forEach(node => {
+        elements.push({
+          data: {
+            id: String(node.id),
+            label: node.name ? node.name : String(node.id),
+            group: node.labels && node.labels.length > 0 ? node.labels[0] : '',
+            desc: node.desc || ''
+          }
+        });
+      });
+      edges.forEach(edge => {
+        if (nodeIds.has(String(edge.source)) && nodeIds.has(String(edge.target))) {
+          elements.push({
+            data: {
+              id: String(edge.source) + '_' + String(edge.target) + '_' + edge.label,
+              source: String(edge.source),
+              target: String(edge.target),
+              label: edge.label,
+              desc: edge.desc || edge.label // 没有desc则用label
+            }
+          });
+        }
+      });
+
+      cy = cytoscape({
+        container: document.getElementById('cy'),
+        elements: elements,
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'label': 'data(label)',
+              'background-color': '#4e54c8',
+              'shape': 'ellipse',
+              'color': '#fff',
+              'text-valign': 'center',
+              'text-halign': 'center',
+              'font-size': 12,
+              'width': 'label',
+              'height': 'label',
+              'padding': '8px',
+              'border-width': 2,
+              'border-color': '#fff',
+              'text-wrap': 'wrap'
+            }
+          },
+          { selector: 'node[group="Singer"]', style: {
+              'background-color': '#ff9800',
+              'border-color': '#fff3e0',
+              'color': '#fff'
+          }},
+          { selector: 'node[group="Song"]', style: {
+              'background-color': '#4e54c8',
+              'border-color': '#d1d7fa',
+              'color': '#fff'
+          }},
+          { selector: 'node[group="Album"]', style: {
+              'background-color': '#00bcd4',
+              'border-color': '#b2ebf2',
+              'color': '#fff'
+          }},
+          { selector: 'node[group="Language"]', style: {
+              'background-color': '#43a047',
+              'border-color': '#c8e6c9',
+              'color': '#fff'
+          }},
+          { selector: 'edge', style: {
+              'label': 'data(label)',
+              'font-size': 11,
+              'text-rotation': 'autorotate',
+              'text-margin-y': -10,
+              'width': 1.8,
+              'line-color': '#c4cfff',
+              'target-arrow-shape': 'triangle',
+              'target-arrow-color': '#c4cfff',
+              'curve-style': 'bezier',
+              'opacity': 0.7
+            }
+          }
+        ],
+        layout: {
+          name: 'cose',
+          fit: true,
+          animate: false,
+          nodeRepulsion: 2400,
+          idealEdgeLength: 120,
+          edgeElasticity: 120
+        }
+      });
+
+      // 悬停高亮
+      cy.on('mouseover', 'node', function(evt){
+        const node = evt.target;
+        node.addClass('hovered');
+        node.connectedEdges().addClass('hovered');
+      });
+      cy.on('mouseout', 'node', function(evt){
+        const node = evt.target;
+        node.removeClass('hovered');
+        node.connectedEdges().removeClass('hovered');
+      });
+      cy.style()
+        .selector('node.hovered')
+        .style({
+          'border-width': 5,
+          'border-color': '#ff9800',
+          'z-index': 999
+        })
+        .selector('edge.hovered')
+        .style({
+          'width': 4,
+          'line-color': '#ff9800',
+          'target-arrow-color': '#ff9800',
+          'opacity': 1
+        })
+        .update();
+
+      // 悬停显示描述
+      cy.nodes().forEach(function(ele){
+          if(ele.data('desc')){
+              ele.qtip({
+                  content: ele.data('desc'),
+                  show: { event: 'mouseover' },
+                  hide: { event: 'mouseout unfocus' },
+                  position: { my: 'top center', at: 'bottom center' },
+                  style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } }
+              });
+          }
+      });
+      cy.edges().forEach(function(ele){
+          if(ele.data('desc')){
+              ele.qtip({
+                  content: ele.data('desc'),
+                  show: { event: 'mouseover' },
+                  hide: { event: 'mouseout unfocus' },
+                  position: { my: 'top center', at: 'bottom center' },
+                  style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } }
+              });
+          }
+      });
+    }
+
+    function show3DGraph(nodes, edges) {
+    document.getElementById('cy').style.display = 'none';
+    document.getElementById('cy3d').style.display = '';
+    document.getElementById('cy3d').style.height = '700px';
+
+    // 关键：每次切换清空3D容器，避免旧实例影响
+    document.getElementById('cy3d').innerHTML = '';
+
+    const data = {
+        nodes: nodes.map(n => ({
+            ...n,
+            id: String(n.id),
+            name: n.name || n.label || n.id,
+            group: n.labels && n.labels.length > 0 ? n.labels[0] : ''
+        })),
+        links: edges.map(e => ({
+            ...e,
+            source: String(e.source),
+            target: String(e.target),
+            label: e.label
+        }))
+    };
+    console.log('3D data:', data);
+
+    Graph3D = ForceGraph3D()(document.getElementById('cy3d'))
+        .graphData(data)
+        .nodeLabel(node => node.name || node.id)
+        .nodeAutoColorBy('group')
+        .linkLabel(link => link.label || '')
+        .backgroundColor('#fafcff')
+        .linkDirectionalParticles(2)
+        .linkDirectionalParticleWidth(2);
+
+    // 自适应窗口大小
+    window.addEventListener('resize', () => {
+        Graph3D.width(document.getElementById('cy3d').offsetWidth);
+        Graph3D.height(document.getElementById('cy3d').offsetHeight);
+    });
+}
+    function toggle3D() {
+    use3DGraph = !use3DGraph;
+    document.getElementById('toggle-3d-btn').innerText = use3DGraph ? '切换2D' : '切换3D';
+    loadGraph();
+}
 
     document.addEventListener('DOMContentLoaded', function() {
         loadOptions();
