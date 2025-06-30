@@ -30,6 +30,7 @@ class Song(models.Model):
     song_img_url = models.URLField('图片链接', max_length=500, blank=True, null=True)
     song_lyrics = models.FileField('歌词', upload_to='songLyric', max_length=255, default='暂无歌词')
     lyrics_text = models.TextField('歌词内容', blank=True, null=True)
+    emotion_label = models.CharField(max_length=20, choices=[('happy', '开心'), ('sad', '伤感'), ('neutral', '中性')], null=True, blank=True, help_text='歌词情感标签')
     song_file = models.FileField('歌曲文件', upload_to='songFile', max_length=255)
     label = models.ForeignKey(Label, on_delete=models.CASCADE)
 

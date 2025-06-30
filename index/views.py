@@ -6,7 +6,8 @@ import os
 from django.http import HttpResponse
 from django.conf import settings
 from django.db.models import Q
-
+from django.http import JsonResponse
+from py2neo import Graph
 # Create your views here.
 
 def indexview(request):
@@ -79,3 +80,4 @@ def page_error(request):
 # 404
 def page_not_found(request, exception):
     return render(request, 'error404.html', status=404)
+

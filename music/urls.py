@@ -32,7 +32,7 @@ urlpatterns = [
     path('search/', include('search.urls')),
     path('user/', include('user.urls')),
     path('aiassistant/', include('aiassistant.urls')),
-    # path('api/knowledge_graph/', views.graph_data, name='graph_data'),
+    path('knowledge_graph/', include('knowledge_graph.urls')),
 ]
 
 # 开发环境自动服务静态文件和媒体文件

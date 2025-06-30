@@ -1,14 +1,120 @@
+from django.shortcuts import render
 from django.http import JsonResponse
 from py2neo import Graph
 
+def graph_options(request):
+    kg_type = request.GET.get('type', 'artist-song')
+    graph = Graph("bolt://localhost:7687", auth=("neo4j", "2111601205"))
+
+    if kg_type == 'artist-song':
+        # 节点类型：Singer；关系：SUNG_BY
+        singers = graph.run("MATCH (si:Singer) RETURN si ORDER BY si.name").data()
+        relations = ["SUNG_BY"]
+        return JsonResponse({
+            "nodes": [{"id": str(s["si"].identity), "name": s["si"]["name"]} for s in singers],
+            "relations": relations
+        })
+    elif kg_type == 'song-album':
+        # 节点类型：Album；关系：IN_ALBUM
+        albums = graph.run("MATCH (al:Album) RETURN al ORDER BY al.name").data()
+        relations = ["IN_ALBUM"]
+        return JsonResponse({
+            "nodes": [{"id": str(a["al"].identity), "name": a["al"]["name"]} for a in albums],
+            "relations": relations
+        })
+    elif kg_type == 'song-language':
+        # 节点类型：Language；关系：IN_LANGUAGE
+        languages = graph.run("MATCH (l:Language) RETURN l ORDER BY l.name").data()
+        relations = ["IN_LANGUAGE"]
+        return JsonResponse({
+            "nodes": [{"id": str(l["l"].identity), "name": l["l"]["name"]} for l in languages],
+            "relations": relations
+        })
+    elif kg_type == 'song-type':
+        # 节点类型：Type；关系：BELONGS_TO
+        types = graph.run("MATCH (t:Type) RETURN t ORDER BY t.name").data()
+        relations = ["BELONGS_TO"]
+        return JsonResponse({
+            "nodes": [{"id": str(t["t"].identity), "name": t["t"]["name"]} for t in types],
+            "relations": relations
+        })
+    else:
+        return JsonResponse({"nodes": [], "relations": []})
+
 def graph_data(request):
-    # 连接Neo4j
-    graph = Graph("bolt://localhost:7687", auth=("neo4j", "your_password"))
-    # 查询节点
-    nodes = graph.run("MATCH (n) RETURN id(n) as id, labels(n) as labels, n.name as name LIMIT 100").data()
-    # 查询关系
-    edges = graph.run("MATCH (n)-[r]->(m) RETURN id(n) as source, id(m) as target, type(r) as label LIMIT 100").data()
+    kg_type = request.GET.get('type', 'artist-song')
+    node_id = request.GET.get('node_id')
+    relation = request.GET.get('relation')
+    graph = Graph("bolt://localhost:7687", auth=("neo4j", "2111601205"))
+
+    nodes = []
+    edges = []
+
+    if kg_type == 'artist-song' and node_id and relation == "SUNG_BY":
+        singer = graph.run("MATCH (si:Singer) WHERE id(si)=$sid RETURN si", sid=int(node_id)).evaluate()
+        if singer:
+            nodes.append({'id': str(singer.identity), 'labels': list(singer.labels), 'name': singer.get('name', '')})
+            # 查询该歌手的所有歌曲及SUNG_BY关系
+            songs = graph.run(
+                """
+                MATCH (song:Song)-[r:SUNG_BY]->(si:Singer)
+                WHERE id(si)=$sid
+                RETURN song, r
+                """, sid=int(node_id)
+            ).data()
+            for item in songs:
+                song = item['song']
+                r = item['r']
+                nodes.append({'id': str(song.identity), 'labels': list(song.labels), 'name': song.get('name', '')})
+                edges.append({'source': str(song.identity), 'target': str(singer.identity), 'label': 'SUNG_BY'})
+    elif kg_type == 'song-album' and node_id and relation == "IN_ALBUM":
+        album = graph.run("MATCH (al:Album) WHERE id(al)=$aid RETURN al", aid=int(node_id)).evaluate()
+        if album:
+            nodes.append({'id': str(album.identity), 'labels': list(album.labels), 'name': album.get('name', '')})
+            # 查询该专辑的所有歌曲及IN_ALBUM关系
+            songs = graph.run(
+                """
+                MATCH (song:Song)-[r:IN_ALBUM]->(al:Album)
+                WHERE id(al)=$aid
+                RETURN song, r
+                """, aid=int(node_id)
+            ).data()
+            for item in songs:
+                song = item['song']
+                r = item['r']
+                nodes.append({'id': str(song.identity), 'labels': list(song.labels), 'name': song.get('name', '')})
+                edges.append({'source': str(song.identity), 'target': str(album.identity), 'label': 'IN_ALBUM'})
+    elif kg_type == 'song-language' and node_id and relation == "IN_LANGUAGE":
+        language = graph.run("MATCH (l:Language) WHERE id(l)=$lid RETURN l", lid=int(node_id)).evaluate()
+        if language:
+            nodes.append({'id': str(language.identity), 'labels': list(language.labels), 'name': language.get('name', '')})
+            # 查询该语言的所有歌曲及IN_LANGUAGE关系
+            songs = graph.run(
+                """
+                MATCH (song:Song)-[r:IN_LANGUAGE]->(l:Language)
+                WHERE id(l)=$lid
+                RETURN song, r
+                """, lid=int(node_id)
+            ).data()
+            for item in songs:
+                song = item['song']
+                r = item['r']
+                nodes.append({'id': str(song.identity), 'labels': list(song.labels), 'name': song.get('name', '')})
+                edges.append({'source': str(song.identity), 'target': str(language.identity), 'label': 'IN_LANGUAGE'})
+
+    # 去重
+    seen = set()
+    unique_nodes = []
+    for n in nodes:
+        if n['id'] not in seen:
+            seen.add(n['id'])
+            unique_nodes.append(n)
+    nodes = unique_nodes
+
     return JsonResponse({
         "nodes": nodes,
         "edges": edges
     })
+
+def knowledge_graph(request):
+    return render(request, 'knowledge_graph.html')
