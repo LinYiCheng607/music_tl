@@ -1,52 +1,122 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>知识图谱可视化</title>
-  <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
-  <style>
-    #cy {
-      width: 100vw;
-      height: 90vh;
-      border: 1px solid #ccc;
+{% extends "title_base.html" %}
+{% load static %}
+{% block title %}
+<link type="image/x-icon" rel="shortcut icon" href="{% static "favicon.ico" %}">
+<link type="text/css" rel="stylesheet" href="{% static "css/common.css" %}">
+<link type="text/css" rel="stylesheet" href="{% static "css/index.css" %}">
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/qtip2/3.0.3/jquery.qtip.min.css">
+<style>
+  body { background: #fff7e6; }
+  .kg-section { width: 92%; margin: 40px auto 0 auto; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px #f0f1f2; padding: 30px 30px 20px 30px; min-height: 600px; }
+  .kg-header { font-size: 32px; font-weight: bold; letter-spacing: 2.5px; color: #363636; margin-bottom: 18px; margin-top: 10px; padding-left: 8px; border-left: 5px solid #4e54c8; line-height: 1.2;}
+  .kg-controls { margin-bottom: 18px; display: flex; align-items: center; gap: 20px;}
+  .kg-controls label { font-size: 16px; color: #444; margin-right: 7px;}
+  .kg-controls select { padding: 6px 22px 6px 12px; font-size: 15px; border-radius: 6px; border: 1px solid #fbbd23; outline: none; background: #fffbe6; color: #c97a00; margin-right: 16px; min-width: 130px; font-weight: 500; appearance: none; box-shadow: 0 1px 4px #f9dbac1a; transition: border 0.2s;}
+  .kg-controls select:focus { border: 1.5px solid #ff9800;}
+  .kg-controls button { padding: 6px 28px; background: linear-gradient(90deg, #ffb74d, #ff9800); border: none; color: #fff; border-radius: 6px; font-size: 17px; font-weight: 600; cursor: pointer; transition: background 0.2s, box-shadow 0.2s; box-shadow: 0 1px 4px #ffecb31a; letter-spacing: 2px;}
+  .kg-controls button:hover { background: linear-gradient(90deg, #ff9800, #ffb74d); box-shadow: 0 2px 8px #ffecb366;}
+  #cy { width: 100%; height: 700px; border: 1.5px solid #f6e3b8; border-radius: 12px; background: #fafcff; margin-top: 2px; transition: box-shadow 0.2s; box-shadow: 0 2px 12px #f3e4c4;}
+  .kg-error { color: #d32f2f; font-size: 15px; margin: 30px 0 0 10px; font-weight: 500;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="kg-section">
+    <div class="kg-header">知识图谱可视化</div>
+    <div class="kg-controls">
+        <label for="kg-type">请选择图谱类型：</label>
+        <select id="kg-type">
+            <option value="artist-song">歌手-歌曲</option>
+            <option value="song-album">歌曲-专辑</option>
+            <option value="song-language">歌曲-语言</option>
+        </select>
+        <label for="kg-node" id="kg-node-label">请选择歌手：</label>
+        <select id="kg-node"></select>
+        <label for="kg-relation" id="kg-relation-label">请选择关系：</label>
+        <select id="kg-relation"></select>
+        <button type="button" onclick="loadGraph()">加载图谱</button>
+    </div>
+    <div id="cy"></div>
+    <div id="kg-error" class="kg-error" style="display:none;"></div>
+</div>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.25.0/dist/cytoscape.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape-qtip@2.7.0/cytoscape-qtip.min.js"></script>
+<script>
+    let cy = null;
+    // 类型→对象label映射
+    const typeToLabel = {
+        "artist-song": "请选择歌手：",
+        "song-album": "请选择专辑：",
+        "song-language": "请选择语言："
+    };
+
+    function loadOptions() {
+        const kgType = document.getElementById('kg-type').value;
+        document.getElementById('kg-node-label').innerText = typeToLabel[kgType] || "请选择对象：";
+        fetch(`/knowledge_graph/api/graph_options/?type=${kgType}`)
+            .then(response => response.json())
+            .then(data => {
+                const nodeSelect = document.getElementById('kg-node');
+                nodeSelect.innerHTML = '';
+                data.nodes.forEach(node => {
+                    const opt = document.createElement('option');
+                    opt.value = node.id;
+                    opt.text = node.name;
+                    nodeSelect.appendChild(opt);
+                });
+                const relSelect = document.getElementById('kg-relation');
+                relSelect.innerHTML = '';
+                data.relations.forEach(rel => {
+                    const opt = document.createElement('option');
+                    opt.value = rel;
+                    opt.text = rel;
+                    relSelect.appendChild(opt);
+                });
+            });
     }
-    #controls {
-      margin-bottom: 10px;
+
+    function showError(msg) {
+        document.getElementById('kg-error').innerText = msg;
+        document.getElementById('kg-error').style.display = '';
+        if (cy) cy.destroy();
+        document.getElementById('cy').innerHTML = "";
     }
-  </style>
-</head>
-<body>
-  <h1>知识图谱可视化</h1>
-  <div id="controls">
-    <label for="kg-type">请选择图谱类型：</label>
-    <select id="kg-type">
-      <option value="artist-song">歌手-歌曲</option>
-      <option value="song-album">歌曲-专辑</option>
-      <option value="song-language">歌曲-语言</option>
-    </select>
-    <button type="button" onclick="loadGraph()">加载图谱</button>
-  </div>
-  <div id="cy"></div>
-  <script>
-    let cy = null; // 保存 Cytoscape 实例
+    function hideError() {
+        document.getElementById('kg-error').style.display = 'none';
+    }
 
     function loadGraph() {
+      hideError();
       const kgType = document.getElementById('kg-type').value;
-      fetch(`/knowledge_graph/api/graph/?type=${kgType}`)
-        .then(response => response.json())
+      const nodeId = document.getElementById('kg-node').value;
+      const relation = document.getElementById('kg-relation').value;
+      if (!nodeId || !relation) {
+        showError('请选择对象和关系类型');
+        return;
+      }
+      fetch(`/knowledge_graph/api/graph/?type=${kgType}&node_id=${nodeId}&relation=${relation}`)
+        .then(response => {
+          if (!response.ok) throw new Error("服务器返回错误状态 " + response.status);
+          return response.json();
+        })
         .then(data => {
+          if (!data.nodes || data.nodes.length === 0) {
+            showError("暂无可视化数据，请更换类型或刷新后重试。");
+            return;
+          }
           const nodeIds = new Set(data.nodes.map(node => String(node.id)));
           const elements = [];
-          // 添加节点
           data.nodes.forEach(node => {
             elements.push({
               data: {
                 id: String(node.id),
                 label: node.name ? node.name : String(node.id),
-                group: node.labels && node.labels.length > 0 ? node.labels[0] : ''
+                group: node.labels && node.labels.length > 0 ? node.labels[0] : '',
+                desc: node.desc || ''
               }
             });
           });
-          // 添加边，source/target 必须都在 nodeIds 里
           data.edges.forEach(edge => {
             if (nodeIds.has(String(edge.source)) && nodeIds.has(String(edge.target))) {
               elements.push({
@@ -54,61 +124,141 @@
                   id: String(edge.source) + '_' + String(edge.target) + '_' + edge.label,
                   source: String(edge.source),
                   target: String(edge.target),
-                  label: edge.label
+                  label: edge.label,
+                  desc: edge.desc || edge.label // 没有desc则用label
                 }
               });
             }
           });
 
-          // 销毁旧实例，避免重复渲染和内存泄漏
-          if (cy) {
-            cy.destroy();
-          }
+          if (cy) cy.destroy();
 
           cy = cytoscape({
             container: document.getElementById('cy'),
             elements: elements,
             style: [
-              { selector: 'node', style: { 
-                  'label': 'data(label)', 
-                  'background-color': '#29a', 
+              {
+                selector: 'node',
+                style: {
+                  'label': 'data(label)',
+                  'background-color': '#4e54c8',
                   'shape': 'ellipse',
                   'color': '#fff',
                   'text-valign': 'center',
-                  'font-size': 8,
-                  'width': 12,
-                  'height': 12,
+                  'text-halign': 'center',
+                  'font-size': 12,
+                  'width': 'label',
+                  'height': 'label',
+                  'padding': '8px',
+                  'border-width': 2,
+                  'border-color': '#fff',
                   'text-wrap': 'wrap'
-                } 
+                }
               },
-              { selector: 'edge', style: { 
-                  'label': '', // 只显示线，不显示关系名
-                  'width': 1, 
-                  'line-color': '#ccc', 
+              { selector: 'node[group="Singer"]', style: {
+                  'background-color': '#ff9800',
+                  'border-color': '#fff3e0',
+                  'color': '#fff'
+              }},
+              { selector: 'node[group="Song"]', style: {
+                  'background-color': '#4e54c8',
+                  'border-color': '#d1d7fa',
+                  'color': '#fff'
+              }},
+              { selector: 'node[group="Album"]', style: {
+                  'background-color': '#00bcd4',
+                  'border-color': '#b2ebf2',
+                  'color': '#fff'
+              }},
+              { selector: 'node[group="Language"]', style: {
+                  'background-color': '#43a047',
+                  'border-color': '#c8e6c9',
+                  'color': '#fff'
+              }},
+              { selector: 'edge', style: {
+                  'label': 'data(label)',
+                  'font-size': 11,
+                  'text-rotation': 'autorotate',
+                  'text-margin-y': -10,
+                  'width': 1.8,
+                  'line-color': '#c4cfff',
                   'target-arrow-shape': 'triangle',
-                  'target-arrow-color': '#ccc',
-                  'curve-style': 'bezier'
-                } 
+                  'target-arrow-color': '#c4cfff',
+                  'curve-style': 'bezier',
+                  'opacity': 0.7
+                }
               }
             ],
-            layout: { 
+            layout: {
               name: 'cose',
               fit: true,
               animate: false,
-              nodeRepulsion: 2048,
-              idealEdgeLength: 80,
-              edgeElasticity: 100
+              nodeRepulsion: 2400,
+              idealEdgeLength: 120,
+              edgeElasticity: 120
             }
+          });
+
+          // 悬停高亮
+          cy.on('mouseover', 'node', function(evt){
+            const node = evt.target;
+            node.addClass('hovered');
+            node.connectedEdges().addClass('hovered');
+          });
+          cy.on('mouseout', 'node', function(evt){
+            const node = evt.target;
+            node.removeClass('hovered');
+            node.connectedEdges().removeClass('hovered');
+          });
+          cy.style()
+            .selector('node.hovered')
+            .style({
+              'border-width': 5,
+              'border-color': '#ff9800',
+              'z-index': 999
+            })
+            .selector('edge.hovered')
+            .style({
+              'width': 4,
+              'line-color': '#ff9800',
+              'target-arrow-color': '#ff9800',
+              'opacity': 1
+            })
+            .update();
+
+          // 悬停显示描述
+          cy.nodes().forEach(function(ele){
+              if(ele.data('desc')){
+                  ele.qtip({
+                      content: ele.data('desc'),
+                      show: { event: 'mouseover' },
+                      hide: { event: 'mouseout unfocus' },
+                      position: { my: 'top center', at: 'bottom center' },
+                      style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } }
+                  });
+              }
+          });
+          cy.edges().forEach(function(ele){
+              if(ele.data('desc')){
+                  ele.qtip({
+                      content: ele.data('desc'),
+                      show: { event: 'mouseover' },
+                      hide: { event: 'mouseout unfocus' },
+                      position: { my: 'top center', at: 'bottom center' },
+                      style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } }
+                  });
+              }
           });
         })
         .catch(err => {
-          document.getElementById('cy').innerHTML = "<p style='color:red'>知识图谱数据加载失败：" + err + "</p>";
+          showError("知识图谱数据加载失败：" + err);
           console.error("知识图谱数据加载失败：", err);
         });
     }
 
-    // 页面加载时默认展示
-    loadGraph();
-  </script>
-</body>
-</html>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadOptions();
+        document.getElementById('kg-type').addEventListener('change', loadOptions);
+    });
+</script>
+{% endblock %}

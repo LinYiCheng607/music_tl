@@ -2,65 +2,105 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from py2neo import Graph
 
-def graph_data(request):
+def graph_options(request):
     kg_type = request.GET.get('type', 'artist-song')
     graph = Graph("bolt://localhost:7687", auth=("neo4j", "2111601205"))
 
     if kg_type == 'artist-song':
-        # 只选前20个歌手，每个歌手前10首歌
-        nodes = []
-        edges = []
-        singers = graph.run("MATCH (si:Singer) RETURN si LIMIT 20").data()
-        singer_ids = []
-        for s in singers:
-            si = s['si']
-            singer_ids.append(si.identity)
-            nodes.append({'id': str(si.identity), 'labels': list(si.labels), 'name': si.get('name', '')})
-            # 获取该歌手的前10首歌
-            songs = graph.run(
-                "MATCH (song:Song)-[r:SUNG_BY]->(si:Singer) WHERE id(si)=$sid RETURN song, r LIMIT 10",
-                sid=si.identity
-            ).data()
-            for item in songs:
-                song = item['song']
-                r = item['r']
-                nodes.append({'id': str(song.identity), 'labels': list(song.labels), 'name': song.get('name', '')})
-                edges.append({'source': str(song.identity), 'target': str(si.identity), 'label': r.__class__.__name__ if hasattr(r, '__class__') else 'SUNG_BY'})
+        # 节点类型：Singer；关系：SUNG_BY
+        singers = graph.run("MATCH (si:Singer) RETURN si ORDER BY si.name").data()
+        relations = ["SUNG_BY"]
+        return JsonResponse({
+            "nodes": [{"id": str(s["si"].identity), "name": s["si"]["name"]} for s in singers],
+            "relations": relations
+        })
     elif kg_type == 'song-album':
-        nodes = []
-        edges = []
-        albums = graph.run("MATCH (al:Album) RETURN al LIMIT 20").data()
-        for a in albums:
-            al = a['al']
-            nodes.append({'id': str(al.identity), 'labels': list(al.labels), 'name': al.get('name', '')})
-            songs = graph.run(
-                "MATCH (song:Song)-[r:IN_ALBUM]->(al:Album) WHERE id(al)=$aid RETURN song, r LIMIT 10",
-                aid=al.identity
-            ).data()
-            for item in songs:
-                song = item['song']
-                r = item['r']
-                nodes.append({'id': str(song.identity), 'labels': list(song.labels), 'name': song.get('name', '')})
-                edges.append({'source': str(song.identity), 'target': str(al.identity), 'label': r.__class__.__name__ if hasattr(r, '__class__') else 'IN_ALBUM'})
+        # 节点类型：Album；关系：IN_ALBUM
+        albums = graph.run("MATCH (al:Album) RETURN al ORDER BY al.name").data()
+        relations = ["IN_ALBUM"]
+        return JsonResponse({
+            "nodes": [{"id": str(a["al"].identity), "name": a["al"]["name"]} for a in albums],
+            "relations": relations
+        })
     elif kg_type == 'song-language':
-        nodes = []
-        edges = []
-        languages = graph.run("MATCH (l:Language) RETURN l LIMIT 10").data()
-        for litem in languages:
-            l = litem['l']
-            nodes.append({'id': str(l.identity), 'labels': list(l.labels), 'name': l.get('name', '')})
+        # 节点类型：Language；关系：IN_LANGUAGE
+        languages = graph.run("MATCH (l:Language) RETURN l ORDER BY l.name").data()
+        relations = ["IN_LANGUAGE"]
+        return JsonResponse({
+            "nodes": [{"id": str(l["l"].identity), "name": l["l"]["name"]} for l in languages],
+            "relations": relations
+        })
+    elif kg_type == 'song-type':
+        # 节点类型：Type；关系：BELONGS_TO
+        types = graph.run("MATCH (t:Type) RETURN t ORDER BY t.name").data()
+        relations = ["BELONGS_TO"]
+        return JsonResponse({
+            "nodes": [{"id": str(t["t"].identity), "name": t["t"]["name"]} for t in types],
+            "relations": relations
+        })
+    else:
+        return JsonResponse({"nodes": [], "relations": []})
+
+def graph_data(request):
+    kg_type = request.GET.get('type', 'artist-song')
+    node_id = request.GET.get('node_id')
+    relation = request.GET.get('relation')
+    graph = Graph("bolt://localhost:7687", auth=("neo4j", "2111601205"))
+
+    nodes = []
+    edges = []
+
+    if kg_type == 'artist-song' and node_id and relation == "SUNG_BY":
+        singer = graph.run("MATCH (si:Singer) WHERE id(si)=$sid RETURN si", sid=int(node_id)).evaluate()
+        if singer:
+            nodes.append({'id': str(singer.identity), 'labels': list(singer.labels), 'name': singer.get('name', '')})
+            # 查询该歌手的所有歌曲及SUNG_BY关系
             songs = graph.run(
-                "MATCH (song:Song)-[r:IN_LANGUAGE]->(l:Language) WHERE id(l)=$lid RETURN song, r LIMIT 10",
-                lid=l.identity
+                """
+                MATCH (song:Song)-[r:SUNG_BY]->(si:Singer)
+                WHERE id(si)=$sid
+                RETURN song, r
+                """, sid=int(node_id)
             ).data()
             for item in songs:
                 song = item['song']
                 r = item['r']
                 nodes.append({'id': str(song.identity), 'labels': list(song.labels), 'name': song.get('name', '')})
-                edges.append({'source': str(song.identity), 'target': str(l.identity), 'label': r.__class__.__name__ if hasattr(r, '__class__') else 'IN_LANGUAGE'})
-    else:
-        nodes = []
-        edges = []
+                edges.append({'source': str(song.identity), 'target': str(singer.identity), 'label': 'SUNG_BY'})
+    elif kg_type == 'song-album' and node_id and relation == "IN_ALBUM":
+        album = graph.run("MATCH (al:Album) WHERE id(al)=$aid RETURN al", aid=int(node_id)).evaluate()
+        if album:
+            nodes.append({'id': str(album.identity), 'labels': list(album.labels), 'name': album.get('name', '')})
+            # 查询该专辑的所有歌曲及IN_ALBUM关系
+            songs = graph.run(
+                """
+                MATCH (song:Song)-[r:IN_ALBUM]->(al:Album)
+                WHERE id(al)=$aid
+                RETURN song, r
+                """, aid=int(node_id)
+            ).data()
+            for item in songs:
+                song = item['song']
+                r = item['r']
+                nodes.append({'id': str(song.identity), 'labels': list(song.labels), 'name': song.get('name', '')})
+                edges.append({'source': str(song.identity), 'target': str(album.identity), 'label': 'IN_ALBUM'})
+    elif kg_type == 'song-language' and node_id and relation == "IN_LANGUAGE":
+        language = graph.run("MATCH (l:Language) WHERE id(l)=$lid RETURN l", lid=int(node_id)).evaluate()
+        if language:
+            nodes.append({'id': str(language.identity), 'labels': list(language.labels), 'name': language.get('name', '')})
+            # 查询该语言的所有歌曲及IN_LANGUAGE关系
+            songs = graph.run(
+                """
+                MATCH (song:Song)-[r:IN_LANGUAGE]->(l:Language)
+                WHERE id(l)=$lid
+                RETURN song, r
+                """, lid=int(node_id)
+            ).data()
+            for item in songs:
+                song = item['song']
+                r = item['r']
+                nodes.append({'id': str(song.identity), 'labels': list(song.labels), 'name': song.get('name', '')})
+                edges.append({'source': str(song.identity), 'target': str(language.identity), 'label': 'IN_LANGUAGE'})
 
     # 去重
     seen = set()
