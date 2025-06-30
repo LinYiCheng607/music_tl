@@ -1,0 +1,28 @@
+# Python缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django相关
+*.log
+*.pot
+*.pyc
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media
+
+# 如果您使用virtualenv，也可以忽略这些目录
+venv/
+env/
+ENV/
+
+# IDE相关文件
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db 
