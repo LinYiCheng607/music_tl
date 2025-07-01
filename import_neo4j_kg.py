@@ -77,6 +77,22 @@ def main():
             if lang_node:
                 graph.merge(Relationship(song_node, "IN_LANGUAGE", lang_node))
 
+    # 歌手-专辑（PUBLISH_ALBUM）关系
+    print("导入歌手-专辑关系...")
+    for singer in singers:
+        if singer:
+            singer_node = graph.nodes.match("Singer", name=singer).first()
+            if not singer_node:
+                continue
+            singer_albums = set(
+                Song.objects.filter(song_singer=singer).values_list('song_album', flat=True)
+            )
+            for album in singer_albums:
+                if album:
+                    album_node = graph.nodes.match("Album", name=album).first()
+                    if album_node:
+                        graph.merge(Relationship(singer_node, "PUBLISH_ALBUM", album_node))
+
     print("知识图谱导入流程结束！")
 
 if __name__ == "__main__":
