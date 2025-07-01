@@ -3,11 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Q
 from user.models import SongLog
 from .models import ItemSimilarity, ArtistSimilarity
-from index.models import Song
+from index.models import Dynamic, Song
 from comment.models import Comment
+from collections import Counter
 import numpy as np
 from collections import defaultdict
-import jieba
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -20,7 +20,7 @@ def recommend_songs(request):
     if not user_song_logs:
         # 默认热门歌曲推荐
         hot_songs = Song.objects.all().order_by('-dynamic__dynamic_plays')[:10]
-        nlp_recommendations = get_lyric_emotion_recommendations(user=request.user)
+        nlp_recommendations = asl_emotion_recommendations(user=request.user)
         return render(request, 'recommend/index.html', {
             'recommendations': hot_songs,
             'has_history': False,
@@ -30,20 +30,24 @@ def recommend_songs(request):
     # 提取用户听过的歌手
     song_ids = [log['song'] for log in user_song_logs]
     user_artists = set(Song.objects.filter(song_id__in=song_ids).values_list('song_singer', flat=True))
+    user_artists = set(artist for artist in user_artists if artist)
     if not user_artists:
         hot_songs = Song.objects.all().order_by('-dynamic__dynamic_plays')[:10]
         return render(request, 'recommend/index.html', {
             'recommendations': hot_songs,
             'has_history': False
         })
-    
+    # print(f'用户的听过的歌手：{user_artists}')
     # 查找相似歌手
+    artists_from_user = []
     similar_artists = defaultdict(float)
     for artist in user_artists:
         # 查询与当前歌手相似的其他歌手（双向匹配）
         similarities = ArtistSimilarity.objects.filter(
             Q(artist1=artist) | Q(artist2=artist)
         )
+        if artist not in artists_from_user:
+            artists_from_user.append(artist)
         for sim in similarities:
             similar_artist = sim.artist2 if sim.artist1 == artist else sim.artist1
             if similar_artist not in user_artists:
@@ -61,20 +65,22 @@ def recommend_songs(request):
         })
     
     # 获取相似歌手的歌曲
-    recommended_artist_names = [artist for artist, _ in sorted_artists[:5]]  # 取前5个相似歌手
+    recommended_artist_names = [artist for artist, _ in sorted_artists[:5] if artist]  # 取前5个相似歌手
+    # print(recommended_artist_names)
     recommended_songs = Song.objects.filter(
         song_singer__in=recommended_artist_names
     ).exclude(
         song_id__in=song_ids
     ).order_by('-dynamic__dynamic_plays')[:10]
     
-    nlp_recommendations = get_lyric_emotion_recommendations(user=request.user)
+    nlp_recommendations = asl_emotion_recommendations(user=request.user)
     # 获取推荐标题
     favorite_singers = get_favorite_singers(user=request.user)
-    singer_title = f"您最爱听的歌手有：{', '.join(favorite_singers)}" if favorite_singers else "为您推荐相似歌手的歌曲"
+    singer_title = f"与 {','.join(artists_from_user[:3])} 等的歌手类型相似的歌手有： {', '.join(recommended_artist_names[:3]) } 等" if favorite_singers else "为您推荐相似歌手的歌曲"
+
     
     favorite_features = get_favorite_features(user=request.user)
-    emotion_title = f"您最爱听的歌曲的特点都是：{', '.join(favorite_features)}" if favorite_features else "为您推荐相似情感的歌曲"
+    emotion_title = f"您最近认为您听过的歌曲的情感为：{', '.join(favorite_features)}" if favorite_features else "还未为歌曲评论，快去评论吧~"
     
     return render(request, 'recommend/index.html', {
         'recommendations': recommended_songs,
@@ -186,90 +192,136 @@ def get_favorite_features(user, limit=3):
     """获取用户评论中最常出现的歌曲特点"""
     if not user.is_authenticated:
         return []
-    # 假设Comment模型有tags字段关联到Tag模型，Tag模型有name字段
-    tag_counts = Comment.objects.filter(comment_user=user).exclude(tags=None).values('tags__name').annotate(tag_count=Count('tags')).order_by('-tag_count')[:limit]
-    return [item['tags__name'] for item in tag_counts]
+    
+    EMOTION_CHOICES = {
+        'happy': '开心',
+        'sad': '伤感',
+        'excited': '兴奋',
+        'relaxed': '放松',
+        'nostalgic': '怀旧',
+        'other': '其他'
+    }
+
+    comment_emotions = Comment.objects.filter(comment_user=user).values('emotion').annotate(count=Count('emotion'))[:limit]
+    comment_emotions = [EMOTION_CHOICES[item['emotion']] for item in comment_emotions]
+    return comment_emotions
 
 
-def get_lyric_emotion_recommendations(user=None, top_n=10):
-    """基于歌词情感分析的推荐"""
-    # 1. 分析所有歌曲的歌词情感，生成情感标签
-    song_emotions = {}
+
+def build_emotion_feature_matrix():
+    """构建用户情感特征矩阵和歌曲情感特征矩阵"""
+    # 定义所有可能的情感标签（合并评论和歌曲的情感类型）
+    EMOTION_LABELS = ['happy', 'sad', 'excited', 'relaxed', 'nostalgic']
+    
+    # 1. 构建用户情感特征矩阵 (用户ID -> 情感向量)
+    user_emotions = defaultdict(dict)
+    # 获取所有用户评论的情感数据
+    comment_emotions = Comment.objects.values('comment_user', 'emotion').annotate(count=Count('emotion'))
+    for item in comment_emotions:
+        username = item['comment_user']
+        emotion = item['emotion']
+        count = item['count']
+        if emotion not in user_emotions[username]:
+            user_emotions[username][emotion] = 0
+        user_emotions[username][emotion] += count
+    # print(f'用户评论的情感数据：\n{user_emotions}')
+    # 转换为标准化向量
+    user_matrix = {}
+    for username, emotions in user_emotions.items():
+        total = sum(emotions.values())
+        vector = [emotions.get(emotion, 0)/total for emotion in EMOTION_LABELS]
+        user_matrix[username] = np.array(vector)
+    # print(f'用户的标准化向量：\n{user_matrix}')
+    # 2. 构建歌曲情感特征矩阵 (歌曲ID -> 情感向量)
+    song_matrix = {}
     songs = Song.objects.all()
-    
-    # 情感分析函数
-    def analyze_emotion(text):
-        if not text or text.strip() == '暂无歌词':
-            return 'neutral'
-        try:
-            s = SnowNLP(text)
-            sentiment = s.sentiments
-            if sentiment > 0.6:
-                return 'happy'
-            elif sentiment < 0.4:
-                return 'sad'
-            else:
-                return 'neutral'
-        except:
-            return 'neutral'
-    
-    # 使用预计算的情感标签
     for song in songs:
-        song_emotions[song] = song.emotion_label or 'neutral'
+        # 初始化独热向量
+        vector = np.zeros(len(EMOTION_LABELS))
+        emotion = song.emotion_label
+        # 映射歌曲情感标签到向量
+        if emotion in EMOTION_LABELS:
+            idx = EMOTION_LABELS.index(emotion)
+            vector[idx] = 1
+        song_matrix[song.song_id] = vector
     
-    # 2. 获取用户评论中最常使用的标签
-    user_top_tags = []
-    if user:
-        # 获取用户所有评论的标签
-        user_tags = Comment.objects.filter(comment_user=user).values('tags__name').annotate(
-            count=Count('tags__name')
-        ).order_by('-count')
-        
-        # 提取前3个最常用标签
-        user_top_tags = [tag['tags__name'] for tag in user_tags[:3]]
+    return user_matrix, song_matrix, EMOTION_LABELS
+
+
+def asl_emotion_recommendations(user=None, top_n=10):
+    """基于ASL算法的情感特征矩阵推荐"""
+    if not user or not user.is_authenticated:
+        # 未登录用户返回热门歌曲
+        return Song.objects.all().order_by('-dynamic__dynamic_plays')[:top_n]
     
-    # 3. 匹配策略：优先匹配情感标签与用户评论标签
-    recommended_songs = []
+    # 获取情感特征矩阵
+    user_matrix, song_matrix, emotion_labels = build_emotion_feature_matrix()
+    username = user.username
     
-    if user_top_tags:
-        # 标签-情感映射关系
-        tag_emotion_map = {
-            '开心': 'happy',
-            '伤感': 'sad',
-            '兴奋': 'happy',
-            '放松': 'neutral',
-            '怀旧': 'neutral',
-            '其他': 'neutral'
-        }
-        
-        # 将用户标签转换为目标情感
-        target_emotions = set()
-        for tag in user_top_tags:
-            target_emotions.add(tag_emotion_map.get(tag, 'neutral'))
-        
-        # 筛选具有目标情感标签的歌曲
-        recommended_songs = [song for song, emotion in song_emotions.items() if emotion in target_emotions]
-    else:
-        # 若无用户标签，使用用户最常听的情感类型
-        if user:
-            user_heard_song_ids = SongLog.objects.filter(user=user).values_list('song_id', flat=True)
-            heard_songs_emotions = [song_emotions[song] for song in song_emotions if song.song_id in user_heard_song_ids]
-            
-            if heard_songs_emotions:
-                from collections import Counter
-                most_common_emotion = Counter(heard_songs_emotions).most_common(1)[0][0]
-                recommended_songs = [song for song, emotion in song_emotions.items() if emotion == most_common_emotion]
+    # 如果用户没有情感数据，使用基于听歌历史的情感推荐
+    if username not in user_matrix:
+        return get_history_based_emotion_recommendations(user, top_n)
     
-    # 4. 处理推荐结果
-    if not recommended_songs:
-        recommended_songs = Song.objects.all().order_by('-dynamic__dynamic_plays')[:top_n*2]
+    # 用户情感向量
+    user_vector = user_matrix[username]
     
-    # 排除用户已听过的歌曲
-    if user:
-        user_heard_song_ids = SongLog.objects.filter(user=user).values_list('song_id', flat=True)
-        recommended_songs = [song for song in recommended_songs if song.song_id not in user_heard_song_ids]
+    # 计算用户与所有歌曲的余弦相似度
+    similarities = {}
+    for song_id, song_vector in song_matrix.items():
+        # 避免除以零
+        if np.linalg.norm(user_vector) == 0 or np.linalg.norm(song_vector) == 0:
+            similarities[song_id] = 0
+        else:
+            similarities[song_id] = cosine_similarity([user_vector], [song_vector])[0][0]
     
-    # 返回Top N推荐
+    # 按相似度排序
+    sorted_song_ids = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
+    # print(sorted_song_ids)
+    # 排除已听过的歌曲
+    heard_song_ids = set(SongLog.objects.filter(user=user).values_list('song_id', flat=True))
+    recommended_song_ids = [sid for sid, _ in sorted_song_ids if sid not in heard_song_ids][:top_n*2]
+    
+    # 获取推荐歌曲并按相似度排序
+    recommended_songs = Song.objects.filter(song_id__in=recommended_song_ids)
+    
+    # 按相似度重新排序查询结果
+    song_id_to_song = {song.song_id: song for song in recommended_songs}
+    recommended_songs = [song_id_to_song[sid] for sid in recommended_song_ids if sid in song_id_to_song][:top_n]
+    
+    # 如果推荐结果不足，用热门歌曲补充
+    if len(recommended_songs) < top_n:
+        hot_songs = Song.objects.filter(
+            ~Q(song_id__in=heard_song_ids) & ~Q(song_id__in=recommended_song_ids)
+        ).order_by('-dynamic__dynamic_plays')[:top_n - len(recommended_songs)]
+        recommended_songs.extend(hot_songs)
+    
+    return recommended_songs[:top_n]
+
+
+def get_history_based_emotion_recommendations(user, top_n=10):
+    """基于用户听歌历史的情感推荐（回退策略）"""
+    user_heard_song_ids = SongLog.objects.filter(user=user).values_list('song_id', flat=True)
+    heard_songs = Song.objects.filter(song_id__in=user_heard_song_ids)
+    
+    # 统计听过歌曲的情感分布
+    emotion_counter = Counter()
+    for song in heard_songs:
+        if song.emotion_label:
+            emotion_counter[song.emotion_label] += 1
+    
+    if not emotion_counter:
+        return Song.objects.all().order_by('-dynamic__dynamic_plays')[:top_n]
+    
+    # 选择最常听的情感类型
+    most_common_emotion = emotion_counter.most_common(1)[0][0]
+    
+    # 推荐相同情感的歌曲
+    recommended_songs = Song.objects.filter(
+        emotion_label=most_common_emotion
+    ).exclude(
+        song_id__in=user_heard_song_ids
+    ).order_by('-dynamic__dynamic_plays')[:top_n*2]
+    
     return recommended_songs[:top_n]
 
 

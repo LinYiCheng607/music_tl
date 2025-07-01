@@ -85,10 +85,11 @@
     }
 </style>
 
+{% if has_history %}
 <!-- 基于评论的NLP推荐 -->
 <div class="section">
     <div class="recommend-header">
-    <h2>基于评论的推荐</h2>
+    <h2>基于ASL的推荐</h2>
     {% if emotion_title %}
     <p class="recommend-prompt">{{ emotion_title }}</p>
     {% endif %}
@@ -115,13 +116,12 @@
 </div>
     {% else %}
     <div class="no-history">
-        <p>暂无基于评论的推荐歌曲</p>
+        <p>暂无基于ASL的推荐歌曲</p>
     </div>
     {% endif %}
 </div>
-
+{% endif %}
 {% endblock %}
-
 <!-- 基于歌手的协同过滤推荐 -->
 {% block content %}
 <div class="section">
