@@ -123,22 +123,35 @@
         }
         var lineChart = echarts.init(document.getElementById('line_chart'));
         var lineOption = {
+            tooltip: {
+                trigger: 'axis',
+                formatter: function(params) {
+                    var d = params[0];
+                    return '日期: <b>' + d.axisValue + '</b><br/>听过的歌曲数量: <b>' + d.data + '</b>';
+                }
+            },
             xAxis: { type: 'category', data: lineLabels, name: '日期' },
             yAxis: { type: 'value', name: '听过的歌曲数量', min: 0, max: maxCount, interval: Math.ceil(maxCount / 5) },
-            series: [{ data: lineData, type: 'line', smooth: true }]
+            series: [{ data: lineData, type: 'line', smooth: true, label: { show: false } }]
         };
         lineChart.setOption(lineOption);
 
         // 饼图
         var pieChart = echarts.init(document.getElementById('pie_chart'));
         var pieOption = {
-            tooltip: { trigger: 'item' },
+            tooltip: {
+                trigger: 'item',
+                formatter: function(params) {
+                    return '类型: <b>' + params.name + '</b><br/>次数: <b>' + params.value + '</b> (' + params.percent + '%)';
+                }
+            },
             legend: { top: '5%', left: 'center' },
             series: [{
                 name: '类型分布',
                 type: 'pie',
                 radius: ['40%', '70%'],
                 avoidLabelOverlap: false,
+                label: { show: false },
                 data: pieData
             }]
         };
@@ -149,9 +162,16 @@
         var hourlyData = {{ hourly_data|safe }};
         var hourlyChart = echarts.init(document.getElementById('hourly_chart'));
         hourlyChart.setOption({
+            tooltip: {
+                trigger: 'axis',
+                formatter: function(params) {
+                    var d = params[0];
+                    return '时段: <b>' + d.axisValue + '</b><br/>听歌次数: <b>' + d.data + '</b>';
+                }
+            },
             xAxis: { type: 'category', data: hourlyLabels, name: '时段' },
             yAxis: { type: 'value', name: '听歌次数', min: 0 },
-            series: [{ data: hourlyData, type: 'bar', barWidth: '60%', itemStyle:{color:'#f9c449'} }]
+            series: [{ data: hourlyData, type: 'bar', barWidth: '60%', itemStyle:{color:'#f9c449'}, label: { show: false } }]
         });
 
         // 近4周听歌统计
@@ -159,9 +179,16 @@
         var weeklyData = {{ weekly_data|safe }};
         var weeklyChart = echarts.init(document.getElementById('weekly_chart'));
         weeklyChart.setOption({
+            tooltip: {
+                trigger: 'axis',
+                formatter: function(params) {
+                    var d = params[0];
+                    return '周: <b>' + d.axisValue + '</b><br/>听歌次数: <b>' + d.data + '</b>';
+                }
+            },
             xAxis: { type: 'category', data: weeklyLabels, name: '周' },
             yAxis: { type: 'value', name: '听歌次数', min: 0 },
-            series: [{ data: weeklyData, type: 'bar', barWidth: '60%', itemStyle:{color:'#f7a440'} }]
+            series: [{ data: weeklyData, type: 'bar', barWidth: '60%', itemStyle:{color:'#f7a440'}, label: { show: false } }]
         });
 
         // 最常听的歌手排行
@@ -169,9 +196,16 @@
         var artistData = {{ artist_data|safe }};
         var artistChart = echarts.init(document.getElementById('artist_chart'));
         artistChart.setOption({
+            tooltip: {
+                trigger: 'axis',
+                formatter: function(params) {
+                    var d = params[0];
+                    return '歌手: <b>' + d.name + '</b><br/>播放次数: <b>' + d.data + '</b>';
+                }
+            },
             xAxis: { type: 'value', name: '播放次数', min: 0 },
             yAxis: { type: 'category', data: artistLabels, name: '歌手', inverse: true },
-            series: [{ data: artistData, type: 'bar', barWidth: '60%', itemStyle:{color:'#6dbee7'} }]
+            series: [{ data: artistData, type: 'bar', barWidth: '60%', itemStyle:{color:'#6dbee7'}, label: { show: false } }]
         });
 
         // 最常听的专辑排行
@@ -179,9 +213,16 @@
         var albumData = {{ album_data|safe }};
         var albumChart = echarts.init(document.getElementById('album_chart'));
         albumChart.setOption({
+            tooltip: {
+                trigger: 'axis',
+                formatter: function(params) {
+                    var d = params[0];
+                    return '专辑: <b>' + d.name + '</b><br/>播放次数: <b>' + d.data + '</b>';
+                }
+            },
             xAxis: { type: 'value', name: '播放次数', min: 0 },
             yAxis: { type: 'category', data: albumLabels, name: '专辑', inverse: true },
-            series: [{ data: albumData, type: 'bar', barWidth: '60%', itemStyle:{color:'#b4d99f'} }]
+            series: [{ data: albumData, type: 'bar', barWidth: '60%', itemStyle:{color:'#b4d99f'}, label: { show: false } }]
         });
 
         // 多标签词云
@@ -194,7 +235,17 @@
         var wordcloudChart = echarts.init(document.getElementById('wordcloud_chart'));
         function setWordcloud(typeKey) {
             wordcloudChart.setOption({
-                tooltip: {},
+                tooltip: {
+                    formatter: function(params) {
+                        var labelMap = {
+                            "type": "类型",
+                            "artist": "歌手",
+                            "album": "专辑",
+                            "name": "歌曲名称"
+                        };
+                        return labelMap[typeKey] + ": <b>" + params.name + "</b><br/>次数: <b>" + params.value + "</b>";
+                    }
+                },
                 series: [{
                     type: 'wordCloud',
                     gridSize: 8,
@@ -206,6 +257,7 @@
                             color: function() { return '#' + Math.floor(Math.random() * 0xffffff).toString(16); }
                         }
                     },
+                    label: { show: false },
                     data: wordcloudData[typeKey]
                 }]
             });
