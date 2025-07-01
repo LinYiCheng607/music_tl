@@ -275,7 +275,7 @@
       input.value = '';
       hideError();
       document.getElementById('qa-desc').innerText = '';
-      fetch('/knowledge_graph2/api/qa/', {
+      fetch('/knowledge_graph/api/qa/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -326,7 +326,7 @@
     function loadOptions() {
         const kgType = document.getElementById('kg-type').value;
         document.getElementById('kg-node-label').innerText = typeToLabel[kgType] || "请选择对象：";
-        fetch(`/knowledge_graph2/api/graph_options/?type=${kgType}`)
+        fetch(`/knowledge_graph/api/graph_options/?type=${kgType}`)
             .then(response => response.json())
             .then(data => {
                 const nodeSelect = document.getElementById('kg-node');
@@ -375,7 +375,7 @@
         showError('请选择对象和关系类型');
         return;
       }
-      fetch(`/knowledge_graph2/api/graph/?type=${kgType}&node_id=${nodeId}&relation=${relation}`)
+      fetch(`/knowledge_graph/api/graph/?type=${kgType}&node_id=${nodeId}&relation=${relation}`)
         .then(response => {
           if (!response.ok) throw new Error("服务器返回错误状态 " + response.status);
           return response.json();

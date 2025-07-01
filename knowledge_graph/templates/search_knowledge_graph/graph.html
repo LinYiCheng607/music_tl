@@ -491,7 +491,7 @@
             params.types = selectedTypes.join(',');
 
             const queryParams = new URLSearchParams(params).toString();
-            const url = '/knowledge_graph/api/graph/';
+            const url = '/knowledge_graph/search_kg/data/?' + queryParams;
 
             return fetch(url)
                 .then(response => response.json())
