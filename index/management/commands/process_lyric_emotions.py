@@ -12,15 +12,19 @@ def analyze_emotion(text):
     try:
         s = SnowNLP(text)
         sentiment = s.sentiments
-        if sentiment > 0.6:
+        if sentiment > 0.8:
+            return 'excited'
+        elif 0.6 < sentiment < 0.8:
             return 'happy'
-        elif sentiment < 0.4:
-            return 'sad'
+        elif 0.4 < sentiment < 0.6:
+            return 'relaxed'
+        elif 0.3 < sentiment < 0.4:
+            return 'nostalgic'
         else:
-            return 'neutral'
+            return 'sad'
     except Exception as e:
         logger.error(f"情感分析失败: {str(e)}")
-        return 'neutral'
+        return 'relax'
 
 class Command(BaseCommand):
     help = '批量处理所有歌曲的歌词情感标签并保存到数据库'

@@ -1,0 +1,8 @@
+1. 进行数据迁移: python manage.py makemigrations、python manage.py migrate 创建必要的数据库
+2. 运行 python manage.py process_lyric_emotions 来使用NLP读取处理歌词，为歌曲赋值情感标签
+3. 运行 python manage.py preprocess_data 来处理没有歌曲图片的数据
+
+新用户只会推荐热门歌曲，一旦有了一首歌的历史数据，就会有两个推荐算法为其推荐：
+基于ASL的推荐（若没有历史评论数据只会为其推荐该用户曾经听过的歌曲的类型情感的歌）
+基于协同过滤的推荐（只要有一首歌就可以为其推荐听过歌手的类似歌手的歌曲）
+
