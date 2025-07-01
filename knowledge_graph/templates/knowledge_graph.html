@@ -91,13 +91,11 @@
   }
   .color-input::-webkit-color-swatch{ border-radius: 6px; border: none;}
   .color-input::-moz-color-swatch{ border-radius: 6px; border: none;}
-
   .graph-area { position: relative; width: 100%; height: 700px; }
   #cy, #cy3d { width: 100%; height: 100%; position: absolute; left: 0; top: 0; background: #fff !important;}
   #cy { z-index: 2; }
   #cy3d { z-index: 1; }
   .kg-error { color: #d32f2f; font-size: 15px; margin: 30px 0 0 10px; font-weight: 500;}
-
   .header-bar {
     display: flex;
     align-items: center;
@@ -109,13 +107,8 @@
     position: relative;
     z-index: 99;
   }
-  .logo-box {
-    flex: 0 0 auto;
-  }
-  .logo-img {
-    height: 54px;
-    margin-top: 5px;
-  }
+  .logo-box { flex: 0 0 auto; }
+  .logo-img { height: 54px; margin-top: 5px; }
   .nav-menu {
     flex: 1 1 auto;
     display: flex;
@@ -139,7 +132,22 @@
     background: #ffe0b2;
     color: #4e54c8;
   }
-  /* 搜索按钮样式可共用，不用删除 */
+  .kg-chatbot-panel {
+    background: #fffbe6;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    padding: 20px 24px;
+  }
+  .kg-chat-history {
+    max-height: 290px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+  }
+  .kg-chat-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
 </style>
 {% endblock %}
 {% block content %}
@@ -151,18 +159,23 @@
   <ul class="nav-menu">
     <li><a href="/">主页</a></li>
     <li><a href="{% url 'ranking' %}" target="_blank">歌曲排行榜</a></li>
-    <li><a href="{% url 'knowledge_graph' %}" class="active">知识图谱可视化</a></li>
+    <li><a href="{% url 'knowledge_graph2' %}" class="active">知识图谱可视化</a></li>
     <li><a href="{% url 'recommend:songs' %}" target="_blank">歌曲推荐</a></li>
     <li><a href="{% url 'aiassistant:assistant_page' %}" target="_blank">AI音乐助手</a></li>
     <li><a href="{% url 'home' 1 %}" target="_blank">用户</a></li>
   </ul>
-  <!-- 搜索框已删除 -->
 </div>
-
 <div class="kg-section">
   <div class="kg-header">知识图谱可视化</div>
-  
-  <!-- 选项区域 -->
+  <!-- 智能问答机器人区 -->
+  <div class="kg-chatbot-panel">
+    <div class="kg-chat-history" id="kg-chat-history"></div>
+    <div class="kg-chat-input-row">
+      <input type="text" id="kg-chat-input" placeholder="和知识图谱助手对话，如：林俊杰有哪些歌曲？" style="flex:1; padding:7px 14px; border-radius:6px; border:1.5px solid #fbbd23; font-size:15px;">
+      <button type="button" onclick="chatbotSend()" style="padding:7px 26px; border-radius:6px; background:linear-gradient(90deg,#ffb74d,#ff9800); color:#fff; border:none; font-weight:600;">发送</button>
+    </div>
+  </div>
+  <!-- 手动选择功能区 -->
   <div class="kg-options-panel">
     <div class="kg-options-row">
       <div class="kg-control-group">
@@ -199,13 +212,12 @@
       </div>
     </div>
   </div>
-  
   <!-- 图谱展示区 -->
   <div class="graph-area">
     <div id="cy"></div>
     <div id="cy3d"></div>
   </div>
-  
+  <div id="qa-desc" style="margin:22px 0 12px 0; font-size:16px; color:#4e54c8;"></div>
   <div id="kg-error" class="kg-error" style="display:none;"></div>
 </div>
 <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
@@ -217,7 +229,6 @@
     let cy = null;
     let Graph3D = null;
     let use3DGraph = false;
-    // 默认颜色
     let nodeColors = {
       "Singer": "#ff9800",
       "Song": "#4e54c8",
@@ -230,7 +241,76 @@
         "song-language": "请选择语言："
     };
 
-    // 监听颜色选择器变化，实时更新 nodeColors
+    // ---- Chatbot Q&A ----
+    let kgChatHistory = [];
+    function renderChatHistory() {
+      const chatDiv = document.getElementById('kg-chat-history');
+      chatDiv.innerHTML = '';
+      kgChatHistory.forEach(item => {
+        if (item.role === 'user') {
+          chatDiv.innerHTML += `<div style="text-align:right;margin:6px 0;"><span style="display:inline-block;background:#ffe0b2;color:#c97a00;border-radius:8px;padding:7px 12px;max-width:75%;word-break:break-all;">${item.text}</span></div>`;
+        } else if (item.role === 'bot') {
+          chatDiv.innerHTML += `<div style="text-align:left;margin:6px 0;"><span style="display:inline-block;background:#e3f2fd;color:#1976d2;border-radius:8px;padding:7px 12px;max-width:75%;word-break:break-all;">${item.text}</span></div>`;
+          // 如果有图谱数据，渲染图谱和文本描述
+          if (item.graph && item.graph.nodes && item.graph.edges) {
+            if (use3DGraph) {
+              show3DGraph(item.graph.nodes, item.graph.edges);
+            } else {
+              show2DGraph(item.graph.nodes, item.graph.edges);
+            }
+            if (item.graph.description) {
+              document.getElementById('qa-desc').innerText = item.graph.description;
+            }
+          }
+        }
+      });
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    }
+    function chatbotSend() {
+      const input = document.getElementById('kg-chat-input');
+      const question = input.value.trim();
+      if (!question) return;
+      kgChatHistory.push({role: 'user', text: question});
+      renderChatHistory();
+      input.value = '';
+      hideError();
+      document.getElementById('qa-desc').innerText = '';
+      fetch('/knowledge_graph2/api/qa/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value || ''
+        },
+        body: JSON.stringify({
+          question: question,
+          history: kgChatHistory.filter(x => x.role === 'user' || x.role === 'bot')
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          kgChatHistory.push({role: 'bot', text: data.error});
+          renderChatHistory();
+          showError(data.error);
+          return;
+        }
+        let botMsg = data.description || '已为您生成知识图谱';
+        kgChatHistory.push({role: 'bot', text: botMsg, graph: {nodes: data.nodes, edges: data.edges, description: data.description}});
+        renderChatHistory();
+      })
+      .catch(err => {
+        kgChatHistory.push({role: 'bot', text:'智能检索失败：'+err});
+        renderChatHistory();
+        showError('智能检索失败：' + err);
+      });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('kg-chat-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') chatbotSend();
+      });
+    });
+
+    // ---- Manual Graph Functions ----
     function setupColorPickers() {
       ["Singer", "Song", "Album", "Language"].forEach(type => {
         const input = document.getElementById("color-" + type);
@@ -243,11 +323,10 @@
         }
       });
     }
-
     function loadOptions() {
         const kgType = document.getElementById('kg-type').value;
         document.getElementById('kg-node-label').innerText = typeToLabel[kgType] || "请选择对象：";
-        fetch(`/knowledge_graph/api/graph_options/?type=${kgType}`)
+        fetch(`/knowledge_graph2/api/graph_options/?type=${kgType}`)
             .then(response => response.json())
             .then(data => {
                 const nodeSelect = document.getElementById('kg-node');
@@ -266,15 +345,17 @@
                     opt.text = rel;
                     relSelect.appendChild(opt);
                 });
+                // 自动加载一次图谱（如果有内容）
+                if (data.nodes.length && data.relations.length) {
+                    loadGraph();
+                }
             });
     }
-
     function showError(msg) {
         document.getElementById('kg-error').innerText = msg;
         document.getElementById('kg-error').style.display = '';
         if (cy) cy.destroy();
         document.getElementById('cy').innerHTML = "";
-        // 销毁3D
         if (Graph3D) {
           const cy3dDiv = document.getElementById('cy3d');
           cy3dDiv.innerHTML = '';
@@ -284,9 +365,9 @@
     function hideError() {
         document.getElementById('kg-error').style.display = 'none';
     }
-
     function loadGraph() {
       hideError();
+      document.getElementById('qa-desc').innerText = '';
       const kgType = document.getElementById('kg-type').value;
       const nodeId = document.getElementById('kg-node').value;
       const relation = document.getElementById('kg-relation').value;
@@ -294,7 +375,7 @@
         showError('请选择对象和关系类型');
         return;
       }
-      fetch(`/knowledge_graph/api/graph/?type=${kgType}&node_id=${nodeId}&relation=${relation}`)
+      fetch(`/knowledge_graph2/api/graph/?type=${kgType}&node_id=${nodeId}&relation=${relation}`)
         .then(response => {
           if (!response.ok) throw new Error("服务器返回错误状态 " + response.status);
           return response.json();
@@ -315,18 +396,15 @@
           console.error("知识图谱数据加载失败：", err);
         });
     }
-
     function show2DGraph(nodes, edges) {
       document.getElementById('cy').style.zIndex = 2;
       document.getElementById('cy3d').style.zIndex = 1;
-      // 销毁3D ForceGraph 实例及canvas
       if (Graph3D) {
         const cy3dDiv = document.getElementById('cy3d');
         cy3dDiv.innerHTML = '';
         Graph3D = null;
       }
       if (cy) cy.destroy();
-
       const nodeIds = new Set(nodes.map(node => String(node.id)));
       const elements = [];
       nodes.forEach(node => {
@@ -354,7 +432,6 @@
           });
         }
       });
-
       cy = cytoscape({
         container: document.getElementById('cy'),
         elements: elements,
@@ -383,9 +460,9 @@
               'text-rotation': 'autorotate',
               'text-margin-y': -10,
               'width': 1.8,
-              'line-color': '#000', /* 只改这行为黑色 */
+              'line-color': '#000',
               'target-arrow-shape': 'triangle',
-              'target-arrow-color': '#000', /* 只改这行为黑色 */
+              'target-arrow-color': '#000',
               'curve-style': 'bezier',
               'opacity': 0.7
             }
@@ -400,8 +477,6 @@
           edgeElasticity: 120
         }
       });
-
-      // 悬停高亮
       cy.on('mouseover', 'node', function(evt){
         const node = evt.target;
         node.addClass('hovered');
@@ -427,8 +502,6 @@
           'opacity': 1
         })
         .update();
-
-      // 悬停显示描述
       cy.nodes().forEach(function(ele){
           if(ele.data('desc')){
               ele.qtip({
@@ -452,18 +525,14 @@
           }
       });
     }
-
     function show3DGraph(nodes, edges) {
       document.getElementById('cy').style.zIndex = 1;
       document.getElementById('cy3d').style.zIndex = 2;
-
-      // 如已存在则销毁3D
       if (Graph3D) {
         const cy3dDiv = document.getElementById('cy3d');
         cy3dDiv.innerHTML = '';
         Graph3D = null;
       }
-
       let data3d = {
         nodes: nodes.map(n => {
           const group = n.labels && n.labels.length > 0 ? n.labels[0] : '';
@@ -483,39 +552,35 @@
           label: e.label
         }))
       };
-
       Graph3D = ForceGraph3D()(document.getElementById('cy3d'))
         .nodeLabel(node => {
-          // 只显示名称，黑色字体
           return `<div style="color:#000;font-size:14px;"><b>${node.name||node.id}</b></div>`;
         })
-        .nodeVal(10) // 统一节点大小为10
-        .nodeAutoColorBy(null) // 关闭自动分组上色
+        .nodeVal(10)
+        .nodeAutoColorBy(null)
         .nodeColor(node => node.color)
         .linkLabel(link => link.label || '')
         .backgroundColor('#fafcff')
         .linkDirectionalParticles(2)
         .linkDirectionalParticleWidth(2)
-        .linkColor(() => "#000"); // 3D边为黑色
-
+        .linkColor(() => "#000");
       window.addEventListener('resize', () => {
         Graph3D.width(document.getElementById('cy3d').offsetWidth);
         Graph3D.height(document.getElementById('cy3d').offsetHeight);
       });
-
       Graph3D.graphData(data3d);
     }
-
     function toggle3D() {
       use3DGraph = !use3DGraph;
       document.getElementById('toggle-3d-btn').innerText = use3DGraph ? '切换2D' : '切换3D';
       loadGraph();
     }
-
     document.addEventListener('DOMContentLoaded', function() {
         loadOptions();
         setupColorPickers();
         document.getElementById('kg-type').addEventListener('change', loadOptions);
+        document.getElementById('kg-node').addEventListener('change', loadGraph);
+        document.getElementById('kg-relation').addEventListener('change', loadGraph);
     });
 </script>
 {% endblock %}

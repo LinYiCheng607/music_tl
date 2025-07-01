@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐知识图谱</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #fff9e0, #fff2b0, #ffe86e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 2.8rem;
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(90deg, #FFD700, #FF8C00, #FF4500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #ff4500;
+            max-width: 700px;
+            margin: 0 auto 25px;
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .control-panel {
+            background: rgba(25, 25, 55, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title i {
+            margin-right: 12px;
+            color: #FFD700;
+            font-size: 1.4rem;
+        }
+
+        .panel-title h2 {
+            font-size: 1.6rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .filter-group {
+            margin-bottom: 25px;
+        }
+
+        .filter-group h3 {
+            font-size: 1.1rem;
+            color: #FFD700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-group h3 i {
+            margin-right: 10px;
+        }
+
+        .type-filters {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .type-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .type-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .type-option.active {
+            background: rgba(255, 215, 0, 0.15);
+            border-color: #FFD700;
+        }
+
+        .type-option i {
+            font-size: 1.4rem;
+            margin-right: 10px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .type-option .label {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .view-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn i {
+            margin-right: 8px;
+        }
+
+        .view-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .view-btn.active {
+            background: linear-gradient(90deg, #FF8C00, #FF4500);
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
+        }
+
+        .graph-container {
+            background: rgba(25, 25, 55, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: 700px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .graph-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .graph-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #FFD700;
+        }
+
+        .graph-info {
+            background: rgba(255, 215, 0, 0.15);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        #graph {
+            width: 100%;
+            height: calc(100% - 70px);
+        }
+
+        .legend-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1rem;
+        }
+
+        .legend-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .legend-song { background: linear-gradient(135deg, #FF416C, #FF4B2B); }
+        .legend-singer { background: linear-gradient(135deg, #00B4DB, #0083B0); }
+        .legend-album { background: linear-gradient(135deg, #7F00FF, #E100FF); }
+        .legend-language { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .legend-release { background: linear-gradient(135deg, #f46b45, #eea849); }
+
+        .instructions {
+            max-width: 900px;
+            margin: 30px auto 0;
+            padding: 25px;
+            background: rgba(25, 25, 55, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .instructions h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .instructions h3 i {
+            margin-right: 10px;
+        }
+
+        .instructions ul {
+            padding-left: 25px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1100px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .control-panel {
+                order: 2;
+            }
+
+            .graph-container {
+                order: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .type-filters {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .graph-container {
+                height: 500px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .view-toggle {
+                flex-direction: column;
+            }
+
+            .legend-container {
+                gap: 15px;
+            }
+
+            .instructions {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-music"></i>
+            </div>
+            <h1>音乐知识图谱</h1>
+            <p class="subtitle">探索音乐世界的复杂关系网络 - 可视化歌手、歌曲、专辑之间的关联</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="control-panel">
+                <div class="panel-title">
+                    <i class="fas fa-sliders-h"></i>
+                    <h2>控制面板</h2>
+                </div>
+
+<!--                <div class="filter-group">-->
+<!--                    <h3><i class="fas fa-filter"></i> 节点类型筛选</h3>-->
+<!--                    <div class="type-filters">-->
+<!--                        <div class="type-option active" data-type="song">-->
+<!--                            <i class="fas fa-music"></i>-->
+<!--                            <div class="label">歌曲</div>-->
+<!--                        </div>-->
+<!--                        <div class="type-option active" data-type="singer">-->
+<!--                            <i class="fas fa-user"></i>-->
+<!--                            <div class="label">歌手</div>-->
+<!--                        </div>-->
+<!--                        <div class="type-option active" data-type="album">-->
+<!--                            <i class="fas fa-compact-disc"></i>-->
+<!--                            <div class="label">专辑</div>-->
+<!--                        </div>-->
+<!--                        <div class="type-option active" data-type="language">-->
+<!--                            <i class="fas fa-globe"></i>-->
+<!--                            <div class="label">语种</div>-->
+<!--                        </div>-->
+<!--                        <div class="type-option active" data-type="release_time">-->
+<!--                            <i class="fas fa-calendar"></i>-->
+<!--                            <div class="label">发行时间</div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+                <div class="filter-group">
+                    <h3><i class="fas fa-search"></i> 高级筛选</h3>
+                    <form id="filter-form" class="filter-form">
+                        <div class="filter-group">
+                            <input type="text" id="song-name" name="song_name" placeholder="输入歌名">
+                        </div>
+                        <div class="filter-group">
+                            <input type="text" id="singer" name="singer" placeholder="输入歌手">
+                        </div>
+                        <div class="filter-group">
+                            <input type="text" id="album" name="album" placeholder="输入专辑">
+                        </div>
+                        <div class="filter-group">
+                            <input type="text" id="release" name="release" placeholder="发行时间 (如: 2023)">
+                        </div>
+                        <div class="filter-actions">
+                            <button type="submit" class="view-btn">
+                                <i class="fas fa-filter"></i> 应用筛选
+                            </button>
+                            <button type="button" class="view-btn reset" id="reset-btn">
+                                <i class="fas fa-redo"></i> 重置
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="view-toggle">
+                    <button class="view-btn active" id="view-2d">
+                        <i class="fas fa-project-diagram"></i> 2D视图
+                    </button>
+                    <button class="view-btn" id="view-3d">
+                        <i class="fas fa-cube"></i> 3D视图
+                    </button>
+                </div>
+            </div>
+
+            <div class="graph-container">
+                <div class="graph-header">
+                    <div class="graph-title">
+                        <span id="graph-title">音乐知识图谱 - 2D视图</span>
+                    </div>
+                    <div class="graph-info">
+                        已加载 <span id="node-count">0</span> 个节点, <span id="link-count">0</span> 条关系
+                    </div>
+                </div>
+                <div id="graph"></div>
+            </div>
+        </div>
+
+        <div class="legend-container">
+            <div class="legend-item">
+                <div class="legend-icon legend-song">
+                    <i class="fas fa-music"></i>
+                </div>
+                <div style="color: #ff4500">歌曲节点</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon legend-singer">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div style="color: #ff4500">歌手节点</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon legend-album">
+                    <i class="fas fa-compact-disc"></i>
+                </div>
+                <div style="color: #ff4500">专辑节点</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon legend-language">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div style="color: #ff4500">语种节点</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon legend-release">
+                    <i class="fas fa-calendar"></i>
+                </div>
+                <div style="color: #ff4500">发行时间节点</div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+            <ul>
+                <li><strong>视图切换：</strong>使用2D/3D按钮切换不同的可视化视图模式</li>
+                <li><strong>3D操作：</strong>在3D视图中，使用鼠标拖动可旋转视角，滚轮缩放，按住Shift拖动可平移</li>
+                <li><strong>节点交互：</strong>点击节点可查看详细信息，在2D视图中拖动节点可调整布局</li>
+                <li><strong>关系探索：</strong>悬停在连线上可查看关系类型，点击关系可高亮显示相关节点</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 初始化图表
+        const chartDom = document.getElementById('graph');
+        const chart = echarts.init(chartDom);
+
+        // 当前视图模式
+        let currentViewMode = '2d';
+
+        // 当前选中的节点类型
+        let selectedTypes = ['song', 'singer', 'album', 'language', 'release_time'];
+
+        // 节点类型颜色映射
+        const typeColors = {
+            song: '#FF416C',
+            singer: '#00B4DB',
+            album: '#7F00FF',
+            language: '#11998e',
+            release_time: '#f46b45'
+        };
+
+        // 获取图谱数据
+        function fetchGraphData(params = {}) {
+            // 添加选中的节点类型到参数
+            params.types = selectedTypes.join(',');
+
+            const queryParams = new URLSearchParams(params).toString();
+            const url = '/knowledge_graph/api/graph/';
+
+            return fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // 更新节点和关系计数
+                    document.getElementById('node-count').textContent = data.nodes.length;
+                    document.getElementById('link-count').textContent = data.links.length;
+
+                    return data;
+                })
+                .catch(error => {
+                    console.error('Error loading graph data:', error);
+                    return null;
+                });
+        }
+
+        // 渲染2D图谱
+        function render2DGraph(data) {
+            if (!data) return;
+
+            const option = {
+                title: {
+                    text: '音乐知识图谱',
+                    subtext: '2D关系网络',
+                    textStyle: {
+                        color: '#FFD700',
+                        fontSize: 20
+                    },
+                    left: 'center',
+                    top: 10
+                },
+                tooltip: {
+                    formatter: function(params) {
+                        if (params.dataType === 'node') {
+                            return `<b>${params.data.name}</b><br/>类型: ${data.categories[params.data.category]?.name || '未知'}`;
+                        } else {
+                            return `<b>关系</b>: ${params.data.value}`;
+                        }
+                    }
+                },
+                legend: {
+                    data: data.categories.map(cat => cat.name),
+                    orient: 'vertical',
+                    right: 10,
+                    top: 'center',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                series: [{
+                    type: 'graph',
+                    layout: 'force',
+                    data: data.nodes.map(node => ({
+                        ...node,
+                        itemStyle: {
+                            color: typeColors[node.category] || '#5470c6'
+                        },
+                        label: {
+                            show: true,
+                            position: 'right',
+                            formatter: '{b}',
+                            color: '#fff',
+                            fontSize: 12
+                        }
+                    })),
+                    links: data.links,
+                    categories: data.categories,
+                    roam: true,
+                    lineStyle: {
+                        color: 'source',
+                        curveness: 0.2,
+                        opacity: 0.7
+                    },
+                    emphasis: {
+                        focus: 'adjacency',
+                        lineStyle: {
+                            width: 3
+                        }
+                    },
+                    force: {
+                        repulsion: 500,
+                        gravity: 0.1,
+                        edgeLength: 100
+                    }
+                }]
+            };
+
+            chart.setOption(option);
+        }
+
+        // 渲染3D图谱 - 修复地球(globe)错误
+        function render3DGraph(data) {
+            if (!data) return;
+
+            // 为节点添加随机3D坐标
+            const nodesWithZ = data.nodes.map(node => ({
+                ...node,
+                x: Math.random() * 100 - 50,
+                y: Math.random() * 100 - 50,
+                z: Math.random() * 100 - 50,
+            }));
+
+            // 创建节点映射表
+            const nodeIdMap = {};
+            nodesWithZ.forEach(node => {
+                nodeIdMap[node.id] = node;
+            });
+
+            // 准备3D连线数据
+            const links3D = data.links.map(link => {
+                const sourceNode = nodeIdMap[link.source];
+                const targetNode = nodeIdMap[link.target];
+
+                if (!sourceNode || !targetNode) return null;
+
+                return {
+                    coords: [
+                        [sourceNode.x, sourceNode.y, sourceNode.z],
+                        [targetNode.x, targetNode.y, targetNode.z]
+                    ],
+                    lineStyle: {
+                        width: 1,
+                        color: 'rgba(200, 200, 200, 0.6)',
+                        opacity: 0.6
+                    },
+                    sourceName: sourceNode.name,
+                    targetName: targetNode.name,
+                    value: link.value
+                };
+            }).filter(link => link !== null);
+
+            const option = {
+                title: {
+                    text: '音乐知识图谱',
+                    subtext: '3D关系网络',
+                    textStyle: {
+                        color: '#FFD700',
+                        fontSize: 20
+                    },
+                    left: 'center',
+                    top: 10
+                },
+                tooltip: {
+                    formatter: function(params) {
+                        if (params.dataType === 'node') {
+                            return `<b>${params.data.name}</b><br/>类型: ${data.categories[params.data.category]?.name || '未知'}`;
+                        } else if (params.data) {
+                            return `<b>关系</b>: ${params.data.value}`;
+                        }
+                        return '';
+                    }
+                },
+                // 修复：移除不必要的globe配置
+                grid3D: {
+                    viewControl: {
+                        autoRotate: true,
+                        autoRotateSpeed: 1,
+                        distance: 200,
+                        alpha: 40,
+                        beta: 30,
+                        rotateSensitivity: 1,
+                        zoomSensitivity: 1,
+                        panSensitivity: 1
+                    },
+                    light: {
+                        main: {
+                            intensity: 1.2,
+                            shadow: true
+                        },
+                        ambient: {
+                            intensity: 0.3
+                        }
+                    }
+                },
+                xAxis3D: {
+                    type: 'value',
+                    show: false
+                },
+                yAxis3D: {
+                    type: 'value',
+                    show: false
+                },
+                zAxis3D: {
+                    type: 'value',
+                    show: false
+                },
+                series: [
+                    // 节点系列
+                    {
+                        type: 'scatter3D',
+                        coordinateSystem: 'cartesian3D',
+                        data: nodesWithZ.map(node => ({
+                            value: [node.x, node.y, node.z],
+                            name: node.name,
+                            category: node.category,
+                            symbolSize: node.symbolSize || 20,
+                            itemStyle: {
+                                color: typeColors[node.category] || '#5470c6'
+                            }
+                        })),
+                        symbol: 'circle',
+                        emphasis: {
+                            itemStyle: {
+                                color: '#FFD700'
+                            }
+                        }
+                    },
+                    // 连线系列
+                    {
+                        type: 'lines3D',
+                        coordinateSystem: 'cartesian3D',
+                        data: links3D,
+                        lineStyle: {
+                            width: 1,
+                            opacity: 0.6
+                        },
+                        effect: {
+                            show: true,
+                            trailWidth: 1,
+                            trailLength: 0.2
+                        }
+                    }
+                ]
+            };
+
+            chart.setOption(option);
+        }
+
+        // 更新图表数据
+        function updateChartData() {
+            // 获取筛选参数
+            const songName = document.getElementById('song-name').value;
+            const singer = document.getElementById('singer').value;
+            const album = document.getElementById('album').value;
+            const release = document.getElementById('release').value;
+
+            const params = {
+                song_name: songName || '',
+                singer: singer || '',
+                album: album || '',
+                release: release || ''
+            };
+
+            fetchGraphData(params).then(data => {
+                if (!data) return;
+
+                if (currentViewMode === '2d') {
+                    render2DGraph(data);
+                } else {
+                    render3DGraph(data);
+                }
+            });
+        }
+
+        // 初始化事件监听器
+        function initEventListeners() {
+            // 节点类型选择
+            document.querySelectorAll('.type-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const type = this.getAttribute('data-type');
+                    this.classList.toggle('active');
+
+                    if (this.classList.contains('active')) {
+                        if (!selectedTypes.includes(type)) {
+                            selectedTypes.push(type);
+                        }
+                    } else {
+                        selectedTypes = selectedTypes.filter(t => t !== type);
+                    }
+
+                    updateChartData();
+                });
+            });
+
+            // 视图切换
+            document.getElementById('view-2d').addEventListener('click', function() {
+                if (currentViewMode !== '2d') {
+                    currentViewMode = '2d';
+                    this.classList.add('active');
+                    document.getElementById('view-3d').classList.remove('active');
+                    document.getElementById('graph-title').textContent = '音乐知识图谱 - 2D视图';
+                    updateChartData();
+                }
+            });
+
+            document.getElementById('view-3d').addEventListener('click', function() {
+                if (currentViewMode !== '3d') {
+                    currentViewMode = '3d';
+                    this.classList.add('active');
+                    document.getElementById('view-2d').classList.remove('active');
+                    document.getElementById('graph-title').textContent = '音乐知识图谱 - 3D视图';
+                    updateChartData();
+                }
+            });
+
+            // 表单提交
+            document.getElementById('filter-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateChartData();
+            });
+
+            // 重置按钮
+            document.getElementById('reset-btn').addEventListener('click', function() {
+                document.getElementById('song-name').value = '';
+                document.getElementById('singer').value = '';
+                document.getElementById('album').value = '';
+                document.getElementById('release').value = '';
+
+                // 重置所有类型为选中
+                document.querySelectorAll('.type-option').forEach(option => {
+                    option.classList.add('active');
+                });
+                selectedTypes = ['song', 'singer', 'album', 'language', 'release_time'];
+
+                updateChartData();
+            });
+        }
+
+        // 初始化应用
+        function initApp() {
+            initEventListeners();
+            updateChartData();
+
+            // 响应窗口大小变化
+            window.addEventListener('resize', function() {
+                chart.resize();
+            });
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('load', initApp);
+    </script>
+</body>
+</html>
