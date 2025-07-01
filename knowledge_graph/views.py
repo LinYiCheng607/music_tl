@@ -196,7 +196,10 @@ def intent_match(intent, expected):
         return False
     if isinstance(expected, str):
         expected = [expected]
-    return any(e in intent for e in expected) or intent in expected
+    for e in expected:
+        if e in intent or intent in e:
+            return True
+    return False
 
 @csrf_exempt
 def knowledge_graph_qa(request):
@@ -220,46 +223,13 @@ def knowledge_graph_qa(request):
         language = info.get("language")
         song_type = info.get("type")
 
+        print("LLM返回：", info)
+        print("intent:", intent, "singer:", singer, "song:", song, "album:", album)
+
         graph = Graph("bolt://localhost:7687", auth=("neo4j", "2111601205"))
 
-        # 1. 某歌手有哪些歌曲 (Neo4j)
-        if (singer and (("歌手" in (intent or "") and "歌曲" in (intent or "")) or intent_match(intent, ["query_songs_by_artist"]))):
-            singer_node = graph.nodes.match("Singer", name=singer).first()
-            if not singer_node:
-                return JsonResponse({'error': f'未找到歌手：{singer}'}, status=404)
-            nodes = [{
-                'id': str(singer_node.identity),
-                'name': singer,
-                'labels': list(singer_node.labels),
-                'desc': f'歌手：{singer}'
-            }]
-            edges = []
-            songs = graph.run(
-                """
-                MATCH (song:Song)-[:SUNG_BY]->(si:Singer)
-                WHERE id(si)=$sid
-                RETURN song
-                """, sid=singer_node.identity
-            ).data()
-            for item in songs:
-                song_obj = item['song']
-                nodes.append({
-                    'id': str(song_obj.identity),
-                    'name': song_obj.get('name', ''),
-                    'labels': list(song_obj.labels),
-                    'desc': f'歌曲：{song_obj.get("name", "")}'
-                })
-                edges.append({
-                    'source': str(song_obj.identity),
-                    'target': str(singer_node.identity),
-                    'label': 'SUNG_BY',
-                    'desc': f'{singer}演唱'
-                })
-            desc = f"{singer}共收录{len(songs)}首歌曲：" + "、".join([item['song']['name'] for item in songs[:10]]) + ("..." if len(songs) > 10 else "")
-            return JsonResponse({'nodes': nodes, 'edges': edges, 'description': desc})
-
-        # 2. 某歌手有哪些专辑 (Neo4j)
-        if (singer and (("歌手" in (intent or "") and "专辑" in (intent or "")) or intent_match(intent, ["query_albums_by_artist"]))):
+        # 1. 某歌手有哪些专辑 —— 放宽 intent 匹配，兼容各种 LLM 输出
+        if singer and (intent_match(intent, ["query_albums_by_artist", "query_albums", "artist_album", "albums"] ) or "album" in (intent or "")):
             singer_node = graph.nodes.match("Singer", name=singer).first()
             if not singer_node:
                 return JsonResponse({'error': f'未找到歌手：{singer}'}, status=404)
@@ -296,8 +266,44 @@ def knowledge_graph_qa(request):
             desc = f"{singer}共发行{len(albums)}张专辑：" + "、".join([item['al']['name'] for item in albums[:10]]) + ("..." if len(albums) > 10 else "")
             return JsonResponse({'nodes': nodes, 'edges': edges, 'description': desc})
 
-        # 3. 某歌曲属于哪个专辑 (Neo4j)
-        if (song and (("歌曲" in (intent or "") and "专辑" in (intent or "")) or intent_match(intent, ["query_album_by_song"]))):
+        # 2. 某歌手有哪些歌曲
+        if singer and (intent_match(intent, ["query_songs_by_artist", "songs", "artist_song"]) or "song" in (intent or "")):
+            singer_node = graph.nodes.match("Singer", name=singer).first()
+            if not singer_node:
+                return JsonResponse({'error': f'未找到歌手：{singer}'}, status=404)
+            nodes = [{
+                'id': str(singer_node.identity),
+                'name': singer,
+                'labels': list(singer_node.labels),
+                'desc': f'歌手：{singer}'
+            }]
+            edges = []
+            songs = graph.run(
+                """
+                MATCH (song:Song)-[:SUNG_BY]->(si:Singer)
+                WHERE id(si)=$sid
+                RETURN song
+                """, sid=singer_node.identity
+            ).data()
+            for item in songs:
+                song_obj = item['song']
+                nodes.append({
+                    'id': str(song_obj.identity),
+                    'name': song_obj.get('name', ''),
+                    'labels': list(song_obj.labels),
+                    'desc': f'歌曲：{song_obj.get("name", "")}'
+                })
+                edges.append({
+                    'source': str(song_obj.identity),
+                    'target': str(singer_node.identity),
+                    'label': 'SUNG_BY',
+                    'desc': f'{singer}演唱'
+                })
+            desc = f"{singer}共收录{len(songs)}首歌曲：" + "、".join([item['song']['name'] for item in songs[:10]]) + ("..." if len(songs) > 10 else "")
+            return JsonResponse({'nodes': nodes, 'edges': edges, 'description': desc})
+
+        # 3. 某歌曲属于哪个专辑
+        if song and (intent_match(intent, ["query_album_by_song", "song_album"]) or ("专辑" in (intent or "") and "歌曲" in (intent or ""))):
             song_node = graph.nodes.match("Song", name=song).first()
             if not song_node:
                 return JsonResponse({'error': f'未找到歌曲：{song}'}, status=404)
@@ -320,8 +326,8 @@ def knowledge_graph_qa(request):
                 desc = f"未找到《{song}》的专辑信息"
             return JsonResponse({'nodes': nodes, 'edges': edges, 'description': desc})
 
-        # 4. 某专辑有哪些歌曲 (Neo4j)
-        if (album and (("专辑" in (intent or "") and "歌曲" in (intent or "")) or intent_match(intent, ["query_songs_by_album"]))):
+        # 4. 某专辑有哪些歌曲
+        if album and (intent_match(intent, ["query_songs_by_album", "album_songs"]) or ("专辑" in (intent or "") and "歌曲" in (intent or ""))):
             album_node = graph.nodes.match("Album", name=album).first()
             if not album_node:
                 return JsonResponse({'error': f'未找到专辑：{album}'}, status=404)
@@ -356,8 +362,8 @@ def knowledge_graph_qa(request):
             desc = f"专辑《{album}》收录{len(songs)}首歌曲：" + "、".join([item['song']['name'] for item in songs[:10]]) + ("..." if len(songs) > 10 else "")
             return JsonResponse({'nodes': nodes, 'edges': edges, 'description': desc})
 
-        # 5. 某歌曲的语种 (Neo4j)
-        if (song and (("歌曲" in (intent or "") and "语种" in (intent or "")) or intent_match(intent, ["query_language_by_song"]))):
+        # 5. 某歌曲的语种
+        if song and (intent_match(intent, ["query_language_by_song", "song_language"]) or ("歌曲" in (intent or "") and "语种" in (intent or ""))):
             song_node = graph.nodes.match("Song", name=song).first()
             if not song_node:
                 return JsonResponse({'error': f'未找到歌曲：{song}'}, status=404)
@@ -380,8 +386,8 @@ def knowledge_graph_qa(request):
                 desc = f"未找到《{song}》的语种信息"
             return JsonResponse({'nodes': nodes, 'edges': edges, 'description': desc})
 
-        # 6. 某类型有哪些歌曲 (Neo4j)
-        if (song_type and (("类型" in (intent or "") and "歌曲" in (intent or "")) or intent_match(intent, ["query_songs_by_type"]))):
+        # 6. 某类型有哪些歌曲
+        if song_type and (intent_match(intent, ["query_songs_by_type", "type_songs"]) or ("类型" in (intent or "") and "歌曲" in (intent or ""))):
             type_node = graph.nodes.match("Type", name=song_type).first()
             if not type_node:
                 return JsonResponse({'error': f'未找到类型：{song_type}'}, status=404)
@@ -416,8 +422,8 @@ def knowledge_graph_qa(request):
             desc = f"{song_type}类型共收录{len(songs)}首歌曲：" + "、".join([item['song']['name'] for item in songs[:10]]) + ("..." if len(songs) > 10 else "")
             return JsonResponse({'nodes': nodes, 'edges': edges, 'description': desc})
 
-        # 7. 这首歌是谁唱的 (Neo4j)
-        if (song and (("歌曲" in (intent or "") and "歌手" in (intent or "")) or intent_match(intent, ["query_artist_by_song"]))):
+        # 7. 这首歌是谁唱的
+        if song and (intent_match(intent, ["query_artist_by_song", "song_artist"]) or ("歌曲" in (intent or "") and "歌手" in (intent or ""))):
             song_node = graph.nodes.match("Song", name=song).first()
             if not song_node:
                 return JsonResponse({'error': f'未找到歌曲：{song}'}, status=404)
@@ -440,8 +446,8 @@ def knowledge_graph_qa(request):
                 desc = f"未找到《{song}》的歌手信息"
             return JsonResponse({'nodes': nodes, 'edges': edges, 'description': desc})
 
-        # 8. 这首歌是什么类型 (Neo4j)
-        if (song and (("歌曲" in (intent or "") and "类型" in (intent or "")) or intent_match(intent, ["query_type_by_song"]))):
+        # 8. 这首歌是什么类型
+        if song and (intent_match(intent, ["query_type_by_song", "song_type"]) or ("歌曲" in (intent or "") and "类型" in (intent or ""))):
             song_node = graph.nodes.match("Song", name=song).first()
             if not song_node:
                 return JsonResponse({'error': f'未找到歌曲：{song}'}, status=404)
