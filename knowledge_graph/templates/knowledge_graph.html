@@ -184,11 +184,19 @@
           <option value="artist-song">歌手-歌曲</option>
           <option value="song-album">歌曲-专辑</option>
           <option value="song-language">歌曲-语言</option>
+          <option value="artist-album">歌手-专辑</option>
         </select>
       </div>
       <div class="kg-control-group">
         <label for="kg-node" id="kg-node-label">请选择对象：</label>
         <select id="kg-node"></select>
+      </div>
+      <!-- 专辑选择 -->
+      <div class="kg-control-group" id="kg-album-group" style="display:none;">
+        <label for="kg-album" id="kg-album-label">请选择专辑：</label>
+        <select id="kg-album">
+          <option value="">全部专辑</option>
+        </select>
       </div>
       <div class="kg-control-group">
         <label for="kg-relation" id="kg-relation-label">关系：</label>
@@ -226,361 +234,384 @@
 <script src="https://cdn.jsdelivr.net/npm/cytoscape-qtip@2.7.0/cytoscape-qtip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/3d-force-graph@1.73.0/dist/3d-force-graph.min.js"></script>
 <script>
-    let cy = null;
-    let Graph3D = null;
-    let use3DGraph = false;
-    let nodeColors = {
-      "Singer": "#ff9800",
-      "Song": "#4e54c8",
-      "Album": "#00bcd4",
-      "Language": "#43a047"
-    };
-    const typeToLabel = {
-        "artist-song": "请选择歌手：",
-        "song-album": "请选择专辑：",
-        "song-language": "请选择语言："
-    };
+let cy = null;
+let Graph3D = null;
+let use3DGraph = false;
+let nodeColors = {
+  "Singer": "#ff9800",
+  "Song": "#4e54c8",
+  "Album": "#00bcd4",
+  "Language": "#43a047"
+};
+const typeToLabel = {
+  "artist-song": "请选择歌手：",
+  "song-album": "请选择专辑：",
+  "song-language": "请选择语言：",
+  "artist-album": "请选择歌手："
+};
 
-    // ---- Chatbot Q&A ----
-    let kgChatHistory = [];
-    function renderChatHistory() {
-      const chatDiv = document.getElementById('kg-chat-history');
-      chatDiv.innerHTML = '';
-      kgChatHistory.forEach(item => {
-        if (item.role === 'user') {
-          chatDiv.innerHTML += `<div style="text-align:right;margin:6px 0;"><span style="display:inline-block;background:#ffe0b2;color:#c97a00;border-radius:8px;padding:7px 12px;max-width:75%;word-break:break-all;">${item.text}</span></div>`;
-        } else if (item.role === 'bot') {
-          chatDiv.innerHTML += `<div style="text-align:left;margin:6px 0;"><span style="display:inline-block;background:#e3f2fd;color:#1976d2;border-radius:8px;padding:7px 12px;max-width:75%;word-break:break-all;">${item.text}</span></div>`;
-          // 如果有图谱数据，渲染图谱和文本描述
-          if (item.graph && item.graph.nodes && item.graph.edges) {
-            if (use3DGraph) {
-              show3DGraph(item.graph.nodes, item.graph.edges);
-            } else {
-              show2DGraph(item.graph.nodes, item.graph.edges);
-            }
-            if (item.graph.description) {
-              document.getElementById('qa-desc').innerText = item.graph.description;
-            }
-          }
+let kgChatHistory = [];
+function renderChatHistory() {
+  const chatDiv = document.getElementById('kg-chat-history');
+  chatDiv.innerHTML = '';
+  kgChatHistory.forEach(item => {
+    if (item.role === 'user') {
+      chatDiv.innerHTML += `<div style="text-align:right;margin:6px 0;"><span style="display:inline-block;background:#ffe0b2;color:#c97a00;border-radius:8px;padding:7px 12px;max-width:75%;word-break:break-all;">${item.text}</span></div>`;
+    } else if (item.role === 'bot') {
+      chatDiv.innerHTML += `<div style="text-align:left;margin:6px 0;"><span style="display:inline-block;background:#e3f2fd;color:#1976d2;border-radius:8px;padding:7px 12px;max-width:75%;word-break:break-all;">${item.text}</span></div>`;
+      if (item.graph && item.graph.nodes && item.graph.edges) {
+        if (use3DGraph) {
+          show3DGraph(item.graph.nodes, item.graph.edges);
+        } else {
+          show2DGraph(item.graph.nodes, item.graph.edges);
         }
-      });
-      chatDiv.scrollTop = chatDiv.scrollHeight;
+        if (item.graph.description) {
+          document.getElementById('qa-desc').innerText = item.graph.description;
+        }
+      }
     }
-    function chatbotSend() {
-      const input = document.getElementById('kg-chat-input');
-      const question = input.value.trim();
-      if (!question) return;
-      kgChatHistory.push({role: 'user', text: question});
+  });
+  chatDiv.scrollTop = chatDiv.scrollHeight;
+}
+function chatbotSend() {
+  const input = document.getElementById('kg-chat-input');
+  const question = input.value.trim();
+  if (!question) return;
+  kgChatHistory.push({role: 'user', text: question});
+  renderChatHistory();
+  input.value = '';
+  hideError();
+  document.getElementById('qa-desc').innerText = '';
+  fetch('/knowledge_graph/api/qa/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value || ''
+    },
+    body: JSON.stringify({
+      question: question,
+      history: kgChatHistory.filter(x => x.role === 'user' || x.role === 'bot')
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.error) {
+      kgChatHistory.push({role: 'bot', text: data.error});
       renderChatHistory();
-      input.value = '';
-      hideError();
-      document.getElementById('qa-desc').innerText = '';
-      fetch('/knowledge_graph/api/qa/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': (document.querySelector('[name=csrfmiddlewaretoken]') || {}).value || ''
-        },
-        body: JSON.stringify({
-          question: question,
-          history: kgChatHistory.filter(x => x.role === 'user' || x.role === 'bot')
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) {
-          kgChatHistory.push({role: 'bot', text: data.error});
-          renderChatHistory();
-          showError(data.error);
-          return;
-        }
-        let botMsg = data.description || '已为您生成知识图谱';
-        kgChatHistory.push({role: 'bot', text: botMsg, graph: {nodes: data.nodes, edges: data.edges, description: data.description}});
-        renderChatHistory();
-      })
-      .catch(err => {
-        kgChatHistory.push({role: 'bot', text:'智能检索失败：'+err});
-        renderChatHistory();
-        showError('智能检索失败：' + err);
-      });
+      showError(data.error);
+      return;
     }
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('kg-chat-input').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') chatbotSend();
-      });
-    });
+    let botMsg = data.description || '已为您生成知识图谱';
+    kgChatHistory.push({role: 'bot', text: botMsg, graph: {nodes: data.nodes, edges: data.edges, description: data.description}});
+    renderChatHistory();
+  })
+  .catch(err => {
+    kgChatHistory.push({role: 'bot', text:'智能检索失败：'+err});
+    renderChatHistory();
+    showError('智能检索失败：' + err);
+  });
+}
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('kg-chat-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') chatbotSend();
+  });
+});
 
-    // ---- Manual Graph Functions ----
-    function setupColorPickers() {
-      ["Singer", "Song", "Album", "Language"].forEach(type => {
-        const input = document.getElementById("color-" + type);
-        if(input) {
-          input.addEventListener("input", function() {
-            nodeColors[type] = input.value;
-            if (cy && !use3DGraph) { loadGraph(); }
-            if (Graph3D && use3DGraph) { loadGraph(); }
-          });
-        }
+// 颜色选择器
+function setupColorPickers() {
+  ["Singer", "Song", "Album", "Language"].forEach(type => {
+    const input = document.getElementById("color-" + type);
+    if(input) {
+      input.addEventListener("input", function() {
+        nodeColors[type] = input.value;
+        if (cy && !use3DGraph) { loadGraph(); }
+        if (Graph3D && use3DGraph) { loadGraph(); }
       });
     }
-    function loadOptions() {
-        const kgType = document.getElementById('kg-type').value;
-        document.getElementById('kg-node-label').innerText = typeToLabel[kgType] || "请选择对象：";
-        fetch(`/knowledge_graph/api/graph_options/?type=${kgType}`)
-            .then(response => response.json())
-            .then(data => {
-                const nodeSelect = document.getElementById('kg-node');
-                nodeSelect.innerHTML = '';
-                data.nodes.forEach(node => {
-                    const opt = document.createElement('option');
-                    opt.value = node.id;
-                    opt.text = node.name;
-                    nodeSelect.appendChild(opt);
-                });
-                const relSelect = document.getElementById('kg-relation');
-                relSelect.innerHTML = '';
-                data.relations.forEach(rel => {
-                    const opt = document.createElement('option');
-                    opt.value = rel;
-                    opt.text = rel;
-                    relSelect.appendChild(opt);
-                });
-                // 自动加载一次图谱（如果有内容）
-                if (data.nodes.length && data.relations.length) {
-                    loadGraph();
-                }
-            });
-    }
-    function showError(msg) {
-        document.getElementById('kg-error').innerText = msg;
-        document.getElementById('kg-error').style.display = '';
-        if (cy) cy.destroy();
-        document.getElementById('cy').innerHTML = "";
-        if (Graph3D) {
-          const cy3dDiv = document.getElementById('cy3d');
-          cy3dDiv.innerHTML = '';
-          Graph3D = null;
-        }
-    }
-    function hideError() {
-        document.getElementById('kg-error').style.display = 'none';
-    }
-    function loadGraph() {
-      hideError();
-      document.getElementById('qa-desc').innerText = '';
-      const kgType = document.getElementById('kg-type').value;
-      const nodeId = document.getElementById('kg-node').value;
-      const relation = document.getElementById('kg-relation').value;
-      if (!nodeId || !relation) {
-        showError('请选择对象和关系类型');
+  });
+}
+function loadOptions() {
+  const kgType = document.getElementById('kg-type').value;
+  document.getElementById('kg-node-label').innerText = typeToLabel[kgType] || "请选择对象：";
+  fetch(`/knowledge_graph/api/graph_options/?type=${kgType}`)
+    .then(response => response.json())
+    .then(data => {
+      const nodeSelect = document.getElementById('kg-node');
+      nodeSelect.innerHTML = '';
+      data.nodes.forEach(node => {
+        const opt = document.createElement('option');
+        opt.value = node.id;
+        opt.text = node.name;
+        nodeSelect.appendChild(opt);
+      });
+      const relSelect = document.getElementById('kg-relation');
+      relSelect.innerHTML = '';
+      data.relations.forEach(rel => {
+        const opt = document.createElement('option');
+        opt.value = rel;
+        opt.text = rel;
+        relSelect.appendChild(opt);
+      });
+      // 歌手-专辑类型时显示专辑下拉，否则隐藏
+      const albumGroup = document.getElementById('kg-album-group');
+      if (kgType === "artist-album") {
+        albumGroup.style.display = '';
+        const albumSelect = document.getElementById('kg-album');
+        albumSelect.innerHTML = '<option value="">全部专辑</option>';
+        (data.albums || []).forEach(album => {
+          const opt = document.createElement('option');
+          opt.value = album.id;
+          opt.text = album.name;
+          albumSelect.appendChild(opt);
+        });
+      } else {
+        albumGroup.style.display = 'none';
+      }
+      if (data.nodes.length && data.relations.length) {
+        loadGraph();
+      }
+    });
+}
+function showError(msg) {
+  document.getElementById('kg-error').innerText = msg;
+  document.getElementById('kg-error').style.display = '';
+  if (cy) cy.destroy();
+  document.getElementById('cy').innerHTML = "";
+  if (Graph3D) {
+    const cy3dDiv = document.getElementById('cy3d');
+    cy3dDiv.innerHTML = '';
+    Graph3D = null;
+  }
+}
+function hideError() {
+  document.getElementById('kg-error').style.display = 'none';
+}
+function loadGraph() {
+  hideError();
+  document.getElementById('qa-desc').innerText = '';
+  const kgType = document.getElementById('kg-type').value;
+  const nodeId = document.getElementById('kg-node').value;
+  const relation = document.getElementById('kg-relation').value;
+  let url = `/knowledge_graph/api/graph/?type=${kgType}&node_id=${nodeId}&relation=${relation}`;
+  if (kgType === "artist-album") {
+    const albumId = document.getElementById('kg-album').value;
+    if (albumId) url += `&album_id=${albumId}`;
+  }
+  if (!nodeId || !relation) {
+    showError('请选择对象和关系类型');
+    return;
+  }
+  fetch(url)
+    .then(response => {
+      if (!response.ok) throw new Error("服务器返回错误状态 " + response.status);
+      return response.json();
+    })
+    .then(data => {
+      if (!data.nodes || data.nodes.length === 0) {
+        showError("暂无可视化数据，请更换类型或刷新后重试。");
         return;
       }
-      fetch(`/knowledge_graph/api/graph/?type=${kgType}&node_id=${nodeId}&relation=${relation}`)
-        .then(response => {
-          if (!response.ok) throw new Error("服务器返回错误状态 " + response.status);
-          return response.json();
-        })
-        .then(data => {
-          if (!data.nodes || data.nodes.length === 0) {
-            showError("暂无可视化数据，请更换类型或刷新后重试。");
-            return;
-          }
-          if (use3DGraph) {
-            show3DGraph(data.nodes, data.edges);
-          } else {
-            show2DGraph(data.nodes, data.edges);
-          }
-        })
-        .catch(err => {
-          showError("知识图谱数据加载失败：" + err);
-          console.error("知识图谱数据加载失败：", err);
-        });
-    }
-    function show2DGraph(nodes, edges) {
-      document.getElementById('cy').style.zIndex = 2;
-      document.getElementById('cy3d').style.zIndex = 1;
-      if (Graph3D) {
-        const cy3dDiv = document.getElementById('cy3d');
-        cy3dDiv.innerHTML = '';
-        Graph3D = null;
+      if (use3DGraph) {
+        show3DGraph(data.nodes, data.edges);
+      } else {
+        show2DGraph(data.nodes, data.edges);
       }
-      if (cy) cy.destroy();
-      const nodeIds = new Set(nodes.map(node => String(node.id)));
-      const elements = [];
-      nodes.forEach(node => {
-        const group = node.labels && node.labels.length > 0 ? node.labels[0] : '';
-        elements.push({
-          data: {
-            id: String(node.id),
-            label: node.name ? node.name : String(node.id),
-            group: group,
-            desc: node.desc || ''
-          }
-        });
+    })
+    .catch(err => {
+      showError("知识图谱数据加载失败：" + err);
+      console.error("知识图谱数据加载失败：", err);
+    });
+}
+function show2DGraph(nodes, edges) {
+  document.getElementById('cy').style.zIndex = 2;
+  document.getElementById('cy3d').style.zIndex = 1;
+  if (Graph3D) {
+    const cy3dDiv = document.getElementById('cy3d');
+    cy3dDiv.innerHTML = '';
+    Graph3D = null;
+  }
+  if (cy) cy.destroy();
+  const nodeIds = new Set(nodes.map(node => String(node.id)));
+  const elements = [];
+  nodes.forEach(node => {
+    const group = node.labels && node.labels.length > 0 ? node.labels[0] : '';
+    elements.push({
+      data: {
+        id: String(node.id),
+        label: node.name ? node.name : String(node.id),
+        group: group,
+        desc: node.desc || ''
+      }
+    });
+  });
+  edges.forEach(edge => {
+    if (nodeIds.has(String(edge.source)) && nodeIds.has(String(edge.target))) {
+      elements.push({
+        data: {
+          id: (edge.source.id ? String(edge.source.id) : String(edge.source)) + '_' +
+              (edge.target.id ? String(edge.target.id) : String(edge.target)) + '_' + edge.label,
+          source: edge.source.id ? String(edge.source.id) : String(edge.source),
+          target: edge.target.id ? String(edge.target.id) : String(edge.target),
+          label: edge.label,
+          desc: edge.desc || edge.label
+        }
       });
-      edges.forEach(edge => {
-        if (nodeIds.has(String(edge.source)) && nodeIds.has(String(edge.target))) {
-          elements.push({
-            data: {
-              id: (edge.source.id ? String(edge.source.id) : String(edge.source)) + '_' +
-                  (edge.target.id ? String(edge.target.id) : String(edge.target)) + '_' + edge.label,
-              source: edge.source.id ? String(edge.source.id) : String(edge.source),
-              target: edge.target.id ? String(edge.target.id) : String(edge.target),
-              label: edge.label,
-              desc: edge.desc || edge.label
-            }
+    }
+  });
+  cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: elements,
+    style: [
+      {
+        selector: 'node',
+        style: {
+          'label': 'data(label)',
+          'background-color': function(ele){ return nodeColors[ele.data('group')] || '#888'; },
+          'shape': 'ellipse',
+          'color': '#fff',
+          'text-valign': 'center',
+          'text-halign': 'center',
+          'font-size': 12,
+          'width': 'label',
+          'height': 'label',
+          'padding': '8px',
+          'border-width': 2,
+          'border-color': '#fff',
+          'text-wrap': 'wrap'
+        }
+      },
+      { selector: 'edge', style: {
+          'label': 'data(label)',
+          'font-size': 11,
+          'text-rotation': 'autorotate',
+          'text-margin-y': -10,
+          'width': 1.8,
+          'line-color': '#000',
+          'target-arrow-shape': 'triangle',
+          'target-arrow-color': '#000',
+          'curve-style': 'bezier',
+          'opacity': 0.7
+        }
+      }
+    ],
+    layout: {
+      name: 'cose',
+      fit: true,
+      animate: false,
+      nodeRepulsion: 2400,
+      idealEdgeLength: 120,
+      edgeElasticity: 120
+    }
+  });
+  cy.on('mouseover', 'node', function(evt){
+    const node = evt.target;
+    node.addClass('hovered');
+    node.connectedEdges().addClass('hovered');
+  });
+  cy.on('mouseout', 'node', function(evt){
+    const node = evt.target;
+    node.removeClass('hovered');
+    node.connectedEdges().removeClass('hovered');
+  });
+  cy.style()
+    .selector('node.hovered')
+    .style({
+      'border-width': 5,
+      'border-color': '#ff9800',
+      'z-index': 999
+    })
+    .selector('edge.hovered')
+    .style({
+      'width': 4,
+      'line-color': '#ff9800',
+      'target-arrow-color': '#ff9800',
+      'opacity': 1
+    })
+    .update();
+  cy.nodes().forEach(function(ele){
+      if(ele.data('desc')){
+          ele.qtip({
+              content: ele.data('desc'),
+              show: { event: 'mouseover' },
+              hide: { event: 'mouseout unfocus' },
+              position: { my: 'top center', at: 'bottom center' },
+              style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } }
           });
-        }
-      });
-      cy = cytoscape({
-        container: document.getElementById('cy'),
-        elements: elements,
-        style: [
-          {
-            selector: 'node',
-            style: {
-              'label': 'data(label)',
-              'background-color': function(ele){ return nodeColors[ele.data('group')] || '#888'; },
-              'shape': 'ellipse',
-              'color': '#fff',
-              'text-valign': 'center',
-              'text-halign': 'center',
-              'font-size': 12,
-              'width': 'label',
-              'height': 'label',
-              'padding': '8px',
-              'border-width': 2,
-              'border-color': '#fff',
-              'text-wrap': 'wrap'
-            }
-          },
-          { selector: 'edge', style: {
-              'label': 'data(label)',
-              'font-size': 11,
-              'text-rotation': 'autorotate',
-              'text-margin-y': -10,
-              'width': 1.8,
-              'line-color': '#000',
-              'target-arrow-shape': 'triangle',
-              'target-arrow-color': '#000',
-              'curve-style': 'bezier',
-              'opacity': 0.7
-            }
-          }
-        ],
-        layout: {
-          name: 'cose',
-          fit: true,
-          animate: false,
-          nodeRepulsion: 2400,
-          idealEdgeLength: 120,
-          edgeElasticity: 120
-        }
-      });
-      cy.on('mouseover', 'node', function(evt){
-        const node = evt.target;
-        node.addClass('hovered');
-        node.connectedEdges().addClass('hovered');
-      });
-      cy.on('mouseout', 'node', function(evt){
-        const node = evt.target;
-        node.removeClass('hovered');
-        node.connectedEdges().removeClass('hovered');
-      });
-      cy.style()
-        .selector('node.hovered')
-        .style({
-          'border-width': 5,
-          'border-color': '#ff9800',
-          'z-index': 999
-        })
-        .selector('edge.hovered')
-        .style({
-          'width': 4,
-          'line-color': '#ff9800',
-          'target-arrow-color': '#ff9800',
-          'opacity': 1
-        })
-        .update();
-      cy.nodes().forEach(function(ele){
-          if(ele.data('desc')){
-              ele.qtip({
-                  content: ele.data('desc'),
-                  show: { event: 'mouseover' },
-                  hide: { event: 'mouseout unfocus' },
-                  position: { my: 'top center', at: 'bottom center' },
-                  style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } }
-              });
-          }
-      });
-      cy.edges().forEach(function(ele){
-          if(ele.data('desc')){
-              ele.qtip({
-                  content: ele.data('desc'),
-                  show: { event: 'mouseover' },
-                  hide: { event: 'mouseout unfocus' },
-                  position: { my: 'top center', at: 'bottom center' },
-                  style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } }
-              });
-          }
-      });
-    }
-    function show3DGraph(nodes, edges) {
-      document.getElementById('cy').style.zIndex = 1;
-      document.getElementById('cy3d').style.zIndex = 2;
-      if (Graph3D) {
-        const cy3dDiv = document.getElementById('cy3d');
-        cy3dDiv.innerHTML = '';
-        Graph3D = null;
       }
-      let data3d = {
-        nodes: nodes.map(n => {
-          const group = n.labels && n.labels.length > 0 ? n.labels[0] : '';
-          return {
-            ...n,
-            id: String(n.id),
-            name: n.name || n.label || n.id,
-            group: group,
-            color: nodeColors[group] || '#888',
-            desc: n.desc || ''
-          };
-        }),
-        links: edges.map(e => ({
-          ...e,
-          source: e.source.id ? String(e.source.id) : String(e.source),
-          target: e.target.id ? String(e.target.id) : String(e.target),
-          label: e.label
-        }))
+  });
+  cy.edges().forEach(function(ele){
+      if(ele.data('desc')){
+          ele.qtip({
+              content: ele.data('desc'),
+              show: { event: 'mouseover' },
+              hide: { event: 'mouseout unfocus' },
+              position: { my: 'top center', at: 'bottom center' },
+              style: { classes: 'qtip-bootstrap', tip: { width: 16, height: 8 } }
+          });
+      }
+  });
+}
+function show3DGraph(nodes, edges) {
+  document.getElementById('cy').style.zIndex = 1;
+  document.getElementById('cy3d').style.zIndex = 2;
+  if (Graph3D) {
+    const cy3dDiv = document.getElementById('cy3d');
+    cy3dDiv.innerHTML = '';
+    Graph3D = null;
+  }
+  let data3d = {
+    nodes: nodes.map(n => {
+      const group = n.labels && n.labels.length > 0 ? n.labels[0] : '';
+      return {
+        ...n,
+        id: String(n.id),
+        name: n.name || n.label || n.id,
+        group: group,
+        color: nodeColors[group] || '#888',
+        desc: n.desc || ''
       };
-      Graph3D = ForceGraph3D()(document.getElementById('cy3d'))
-        .nodeLabel(node => {
-          return `<div style="color:#000;font-size:14px;"><b>${node.name||node.id}</b></div>`;
-        })
-        .nodeVal(10)
-        .nodeAutoColorBy(null)
-        .nodeColor(node => node.color)
-        .linkLabel(link => link.label || '')
-        .backgroundColor('#fafcff')
-        .linkDirectionalParticles(2)
-        .linkDirectionalParticleWidth(2)
-        .linkColor(() => "#000");
-      window.addEventListener('resize', () => {
-        Graph3D.width(document.getElementById('cy3d').offsetWidth);
-        Graph3D.height(document.getElementById('cy3d').offsetHeight);
-      });
-      Graph3D.graphData(data3d);
-    }
-    function toggle3D() {
-      use3DGraph = !use3DGraph;
-      document.getElementById('toggle-3d-btn').innerText = use3DGraph ? '切换2D' : '切换3D';
+    }),
+    links: edges.map(e => ({
+      ...e,
+      source: e.source.id ? String(e.source.id) : String(e.source),
+      target: e.target.id ? String(e.target.id) : String(e.target),
+      label: e.label
+    }))
+  };
+  Graph3D = ForceGraph3D()(document.getElementById('cy3d'))
+    .nodeLabel(node => {
+      return `<div style="color:#000;font-size:14px;"><b>${node.name||node.id}</b></div>`;
+    })
+    .nodeVal(10)
+    .nodeAutoColorBy(null)
+    .nodeColor(node => node.color)
+    .linkLabel(link => link.label || '')
+    .backgroundColor('#fafcff')
+    .linkDirectionalParticles(2)
+    .linkDirectionalParticleWidth(2)
+    .linkColor(() => "#000");
+  window.addEventListener('resize', () => {
+    Graph3D.width(document.getElementById('cy3d').offsetWidth);
+    Graph3D.height(document.getElementById('cy3d').offsetHeight);
+  });
+  Graph3D.graphData(data3d);
+}
+function toggle3D() {
+  use3DGraph = !use3DGraph;
+  document.getElementById('toggle-3d-btn').innerText = use3DGraph ? '切换2D' : '切换3D';
+  loadGraph();
+}
+document.addEventListener('DOMContentLoaded', function() {
+  loadOptions();
+  setupColorPickers();
+  document.getElementById('kg-type').addEventListener('change', loadOptions);
+  document.getElementById('kg-node').addEventListener('change', loadGraph);
+  document.getElementById('kg-relation').addEventListener('change', loadGraph);
+  document.getElementById('kg-album').addEventListener('change', function() {
+    if (document.getElementById('kg-type').value === "artist-album") {
       loadGraph();
     }
-    document.addEventListener('DOMContentLoaded', function() {
-        loadOptions();
-        setupColorPickers();
-        document.getElementById('kg-type').addEventListener('change', loadOptions);
-        document.getElementById('kg-node').addEventListener('change', loadGraph);
-        document.getElementById('kg-relation').addEventListener('change', loadGraph);
-    });
+  });
+});
 </script>
 {% endblock %}
