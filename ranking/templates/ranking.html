@@ -1,14 +1,14 @@
 {% extends "title_base.html" %}
 {% block title %}
 {% load static %}
-<link type="image/x-icon" rel="shortcut icon" href="{% static " favicon.ico" %}">
-<link type="text/css" rel="stylesheet" href="{% static " css/common.css" %}">
-<link type="text/css" rel="stylesheet" href="{% static " css/ranking.css" %}">
+<link type="image/x-icon" rel="shortcut icon" href="{% static 'favicon.ico' %}">
+<link type="text/css" rel="stylesheet" href="{% static 'css/common.css' %}">
+<link type="text/css" rel="stylesheet" href="{% static 'css/ranking.css' %}">
 </head>
 
 <body>
     <div class="header">
-        <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static " image/logo2.png" %}"></a>
+        <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static 'image/logo2.png' %}"></a>
         <div class="search-box">
             <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
                 {% csrf_token %}
@@ -81,7 +81,7 @@
                                 {% if item.song.song_img_url %}
                                 <img src="{{ item.song.song_img_url }}" width="80" height="80">
                                 {% else %}
-                                <img src="{% static " songImg/" %}{{ item.song.song_img }}" width="80" height="80">
+                                <img src="{% static 'songImg/' %}{{ item.song.song_img }}" width="80" height="80">
                                 {% endif %}
                             </a>
                         </td>
@@ -120,5 +120,5 @@
             </div>
         </div>
     </div>
-    <script data-main="{% static " js/ranking.js" %}" src="{% static " js/require.js" %}"></script>
+    <script data-main="{% static 'js/ranking.js' %}" src="{% static 'js/require.js' %}"></script>
     {% endblock %}

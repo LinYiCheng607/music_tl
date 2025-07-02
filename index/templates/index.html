@@ -239,7 +239,7 @@
                             <img src="{{ dynamic.song.song_img.url }}">
                             {% endif %}
                         </a>
-                        <h3><a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a></h3>
+                        <h3><a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name}}</a></h3>
                         <div class="singer"><span>{{ dynamic.song.song_singer }}</span></div>
                         <div class="times">搜索次数：<span>{{ dynamic.dynamic_search }}</span></div>
                     </li>
@@ -270,7 +270,8 @@
             {% if hot_search_pages.paginator.num_pages > 1 %}
             <div class="pagination" id="hot-search-pagination">
                 {% for i in hot_search_pages.paginator.page_range %}
-                <button onclick="changePage(0, {{ i }})" {% if i == hot_search_pages.number %}class="active"{% endif %}>
+                <button onclick="changePage(0, {{ i }})" {% if i == hot_search_pages.number %}class="active" {% endif %}
+                     >
                     {{ i }}
                 </button>
                 {% endfor %}
@@ -279,7 +280,8 @@
             {% if hot_download_pages.paginator.num_pages > 1 %}
             <div class="pagination" id="hot-download-pagination" style="display:none;">
                 {% for i in hot_download_pages.paginator.page_range %}
-                <button onclick="changePage(1, {{ i }})" {% if i == hot_download_pages.number %}class="active"{% endif %}>
+                <button onclick="changePage(1, {{ i }})" {% if i == hot_download_pages.number %}class="active" {% endif %}
+                    >
                     {{ i }}
                 </button>
                 {% endfor %}
