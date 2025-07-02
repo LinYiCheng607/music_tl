@@ -153,6 +153,7 @@ STATICFILES_DIRS = [
 # 消除模型自动主键警告
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'user.MyUser'
+LOGIN_URL = '/user/login.html'
 
 # 爬取数据保存路径
 MEDIA_URL = '/media/'

@@ -17,7 +17,7 @@ import os
 
 @login_required
 def recommend_songs(request):
-    """基于歌手的协同过滤推荐视图"""
+    """获取推荐歌曲视图"""
     # 获取用户听歌记录中的歌手
     user_song_logs = SongLog.objects.filter(user=request.user).values('song').distinct()
     
@@ -80,6 +80,7 @@ def recommend_songs(request):
         song_id__in=song_ids
     ).order_by('-dynamic__dynamic_plays')[:10]
     
+    # 获取基于内容推荐的结果
     nlp_recommendations = asl_emotion_recommendations(user=request.user)
     # 获取ALS推荐结果
     als_recommendations_result = als_recommendations(user=request.user)
@@ -269,6 +270,7 @@ def als_recommendations(user, top_n=10):
         
         # 检查用户是否在训练数据中
         if user.id not in user_id_map:
+            print(f"用户ID {user.id} 不在 user_id_map 中")
             return Song.objects.all().order_by('-dynamic__dynamic_plays')[:top_n]
         
         user_idx = user_id_map[user.id]
