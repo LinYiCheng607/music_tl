@@ -1,5 +1,5 @@
 body {
-    background-color: #FFDF35 !important; /* 明亮黄色背景 */
+    background-color: #FFF9E0 !important; /* 明亮黄色背景 */
     font: 12px/1.5 arial;
     font-family: 'Comic Sans MS', 'Microsoft YaHei', Arial, sans-serif !important;
 }
@@ -37,6 +37,7 @@ input::-ms-clear {
     background: url(../image/icos.png) no-repeat;
 }
 .header {
+    width: auto;
     height: 56px;
     padding: 30px 0;
     background: #FFDF35 !important;
