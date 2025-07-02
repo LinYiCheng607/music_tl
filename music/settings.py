@@ -102,7 +102,11 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'music_db',
         'USER': 'root',
+<<<<<<< Updated upstream
         'PASSWORD': '123456',
+=======
+        'PASSWORD': '2003ccw',
+>>>>>>> Stashed changes
         'HOST': 'localhost',
         'PORT': '3306',
     }
