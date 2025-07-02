@@ -138,6 +138,7 @@
                 <li><a href="{% url 'aiassistant:assistant_page' %}" target="_blank">AI音乐助手</a></li>
                 <li><a href="{% url 'home' 1 %}" target="_blank">用户</a></li>
             </ul>
+            <!-- 分类导航（保留注释） -->
             <!--            <div class="category-nav">-->
             <!--                <div class="category-nav-header">-->
             <!--                    <strong><a href="javascript:;" title="">歌曲分类</a></strong>-->
@@ -255,8 +256,7 @@
                             <img src="{{ dynamic.song.song_img.url }}">
                             {% endif %}
                         </a>
-                        <h3><a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name
-                                }}</a></h3>
+                        <h3><a target="play" href="{% url 'play' dynamic.song.song_id %}">{{ dynamic.song.song_name }}</a></h3>
                         <div class="singer"><span>{{ dynamic.song.song_singer }}</span></div>
                         <div class="times">下载次数：<span>{{ dynamic.dynamic_down }}</span></div>
                     </li>
@@ -330,4 +330,4 @@
             window.location.search = urlParams.toString();
         }
     </script>
-    {% endblock %}
+{% endblock %}
