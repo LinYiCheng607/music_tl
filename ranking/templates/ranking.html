@@ -1,35 +1,37 @@
-{% extends "title_base.html"  %}
-{% block title  %}
+{% extends "title_base.html" %}
+{% block title %}
 {% load static %}
-<link type="image/x-icon" rel="shortcut icon" href="{% static "favicon.ico" %}">
-<link type="text/css" rel="stylesheet" href="{% static "css/common.css" %}">
-<link type="text/css" rel="stylesheet" href="{% static "css/ranking.css" %}">
+<link type="image/x-icon" rel="shortcut icon" href="{% static " favicon.ico" %}">
+<link type="text/css" rel="stylesheet" href="{% static " css/common.css" %}">
+<link type="text/css" rel="stylesheet" href="{% static " css/ranking.css" %}">
 </head>
+
 <body>
     <div class="header">
-        <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static "image/logo5.png" %}"></a>
+        <a href="/" class="logo" title="首页"><img alt="我的音乐" src="{% static " image/logo2.png" %}"></a>
         <div class="search-box">
             <form id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
-            {% csrf_token %}
+                {% csrf_token %}
                 <div class="search-keyword">
-                    <input name="kword" type="text" class="keyword" maxlength="120"  placeholder="音乐节"  />
+                    <input name="kword" type="text" class="keyword" maxlength="120" placeholder="音乐节" />
                 </div>
                 <input id="subSerch" type="submit" class="search-button" value="搜 索" />
             </form>
             <div id="suggest" class="search-suggest"></div>
             <div class="search-hot-words">
-                {% for song in search_song  %}
-                <a target="play" href="{% url 'play' song.song.song_id %}" >{{ song.song.song_name }}</a>
-                {% endfor  %}
+                {% for song in search_song %}
+                <a target="play" href="{% url 'play' song.song.song_id %}">{{ song.song.song_name }}</a>
+                {% endfor %}
             </div>
         </div>
     </div><!--end header-->
     <div class="nav-box">
         <div class="nav-box-inner">
             <ul class="nav clearfix">
-                <li><a href="/">首页</a></li>
-                <li><a href="{% url 'ranking' %}">歌曲排行</a></li>
-                <li><a href="{% url 'home' 1 %}" target="_blank">用户中心</a></li>
+                <li><a href="{% url 'search_knowledge_graph' %}" target="_blank">知识图谱</a></li>
+                <li><a href="#" target="_blank">歌曲推荐</a></li>
+                <li><a href="{% url 'aiassistant:assistant_page' %}" target="_blank">AI音乐助手</a></li>
+                <li><a href="{% url 'home' 1 %}" target="_blank">用户</a></li>
             </ul>
         </div>
     </div><!--end nav-box-->
@@ -53,7 +55,9 @@
         </div>
         <div class="main">
             <div class="main-head-box clearfix">
-                <div class="main-head"><h1>{{ song_type }}歌曲排行榜</h1></div>
+                <div class="main-head">
+                    <h1>{{ song_type }}歌曲排行榜</h1>
+                </div>
             </div>
             <table class="rank-list-table">
                 <tr>
@@ -64,28 +68,28 @@
                     <th class="cell-5">下载量</th>
                     <th class="cell-6">播放量</th>
                 </tr>
-                {% for item in song_info  %}
-                    <tr>
-                        {% with rank_number=song_info.start_index|add:forloop.counter0 %}
-                            {% if rank_number < 4  %}
-                                <td><span class="n1">{{rank_number}}</span></td>
-                            {% else %}
-                                <td><span class="n2">{{rank_number}}</span></td>
-                            {% endif %}
+                {% for item in song_info %}
+                <tr>
+                    {% with rank_number=song_info.start_index|add:forloop.counter0 %}
+                    {% if rank_number < 4 %} <td><span class="n1">{{rank_number}}</span></td>
+                        {% else %}
+                        <td><span class="n2">{{rank_number}}</span></td>
+                        {% endif %}
                         {% endwith %}
                         <td>
-                            <a href="{% url 'play' item.song.song_id %}"  class="pic" target="play">
+                            <a href="{% url 'play' item.song.song_id %}" class="pic" target="play">
                                 {% if item.song.song_img_url %}
-                                    <img src="{{ item.song.song_img_url }}" width="80" height="80">
+                                <img src="{{ item.song.song_img_url }}" width="80" height="80">
                                 {% else %}
-                                    <img src="{% static "songImg/" %}{{ item.song.song_img }}" width="80" height="80">
+                                <img src="{% static " songImg/" %}{{ item.song.song_img }}" width="80" height="80">
                                 {% endif %}
                             </a>
                         </td>
                         <td class="name-cell">
-                            <h2.5><a href="{% url 'play' item.song.song_id %}" target="play" >{{item.song.song_name}}</a></h2.5>
+                            <h2.5><a href="{% url 'play' item.song.song_id %}" target="play">{{item.song.song_name}}</a>
+                            </h2.5>
                             <div class="desc">
-                                <a href="javascript:;" target="_blank" class="type" >{{item.song.song_singer}}</a>
+                                <a href="javascript:;" target="_blank" class="type">{{item.song.song_singer}}</a>
                             </div>
                         </td>
                         <td>
@@ -95,25 +99,26 @@
                             <div style="text-align:center;">{{item.dynamic_down}}</div>
                         </td>
                         <td class="num-cell">{{item.dynamic_plays}}</td>
-                    </tr>
-                {% endfor  %}
+                </tr>
+                {% endfor %}
             </table>
             <div class="pagination-container">
                 <div class="pagination">
                     {% if song_info.has_previous %}
-                        <a href="?type={{ song_type }}&page=1" class="first-page">首页</a>
-                        <a href="?type={{ song_type }}&page={{ song_info.previous_page_number }}" class="prev-page">上一页</a>
+                    <a href="?type={{ song_type }}&page=1" class="first-page">首页</a>
+                    <a href="?type={{ song_type }}&page={{ song_info.previous_page_number }}" class="prev-page">上一页</a>
                     {% endif %}
 
-                    <span class="current-page">第 {{ song_info.number }} 页（共 {{ song_info.paginator.num_pages }} 页）</span>
+                    <span class="current-page">第 {{ song_info.number }} 页（共 {{ song_info.paginator.num_pages }}
+                        页）</span>
 
                     {% if song_info.has_next %}
-                        <a href="?type={{ song_type }}&page={{ song_info.next_page_number }}" class="next-page">下一页</a>
-                        <a href="?type={{ song_type }}&page={{ song_info.paginator.num_pages }}" class="last-page">尾页</a>
+                    <a href="?type={{ song_type }}&page={{ song_info.next_page_number }}" class="next-page">下一页</a>
+                    <a href="?type={{ song_type }}&page={{ song_info.paginator.num_pages }}" class="last-page">尾页</a>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
-    <script data-main="{% static "js/ranking.js" %}" src="{% static "js/require.js" %}"></script>
-{% endblock  %}
+    <script data-main="{% static " js/ranking.js" %}" src="{% static " js/require.js" %}"></script>
+    {% endblock %}
