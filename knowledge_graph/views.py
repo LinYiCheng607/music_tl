@@ -11,7 +11,7 @@ MOONSHOT_API_KEY = "sk-8AuZH3edVbJxU0l5zXhcCCU8BJX4fhLELtNkyE0XQzI1ptgF"
 
 def graph_options(request):
     kg_type = request.GET.get('type', 'artist-song')
-    graph = Graph("bolt://36.248.247.251:7687", auth=("neo4j", "2111601205"))
+    graph = Graph("bolt://206.237.119.211:7687", auth=("neo4j", "2111601205"))
 
     if kg_type == 'artist-song':
         singers = graph.run("MATCH (si:Singer) RETURN si ORDER BY si.name").data()
@@ -59,7 +59,7 @@ def graph_data(request):
     node_id = request.GET.get('node_id')
     relation = request.GET.get('relation')
     album_id = request.GET.get('album_id', '')
-    graph = Graph("bolt://36.248.247.251:7687", auth=("neo4j", "2111601205"))
+    graph = Graph("bolt://206.237.119.211:7687", auth=("neo4j", "2111601205"))
 
     nodes = []
     edges = []
@@ -226,7 +226,7 @@ def knowledge_graph_qa(request):
         print("LLM返回：", info)
         print("intent:", intent, "singer:", singer, "song:", song, "album:", album)
 
-        graph = Graph("bolt://36.248.247.251:7687", auth=("neo4j", "2111601205"))
+        graph = Graph("bolt://206.237.119.211:7687", auth=("neo4j", "2111601205"))
 
         # 1. 某歌手有哪些专辑
         if singer and (
