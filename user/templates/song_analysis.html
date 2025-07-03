@@ -100,6 +100,51 @@
                   <option value="name">歌曲名称</option>
                 </select>
                 <div id="wordcloud_chart" style="width:100%; height:350px"></div>
+                <h2 style="margin-top:40px;">最近12个月听歌趋势</h2>
+                <div id="month_chart" style="width:100%; height:350px"></div>
+
+                <!-- 听歌最活跃的5天 -->
+                <h2 style="margin-top:40px;">听歌最活跃的5天</h2>
+                <table class="table table-bordered table-striped" style="width:100%;margin-bottom:40px;table-layout: fixed;">
+                    <thead>
+                        <tr>
+                            <th style="width:50%;">日期</th>
+                            <th style="width:50%;">听歌次数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for day in top_active_days %}
+                        <tr>
+                            <td>{{ day.date|date:"Y年n月j日" }}</td>
+                            <td>{{ day.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- 最常听的歌曲语种TOP5 -->
+                <h2 style="margin-top:40px;">最常听的歌曲语种TOP5</h2>
+                <table class="table table-bordered table-striped" style="width:100%;margin-bottom:40px;table-layout: fixed;">
+                    <thead>
+                        <tr>
+                            <th style="width:50%;">语种</th>
+                            <th style="width:50%;">听歌次数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lang in top_langs %}
+                        <tr>
+                            <td>{% if lang.language == "nan" or not lang.language %}未知{% else %}{{ lang.language }}{% endif %}</td>
+                            <td>{{ lang.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- 听歌总榜 TOP10 柱状图 -->
+                <h2 style="margin-top:40px;">听歌总榜 TOP10（柱状图）</h2>
+                <div id="top_song_chart" style="width:100%; height:400px; margin-bottom:40px;"></div>
+
                 <h2 style="margin-top:40px;">听歌习惯总结</h2>
                 <div style="background: #fffbe8; border-radius: 8px; padding: 18px 24px; margin-top: 12px; color:#6d4e2b; font-size: 16px;">
                     {{ summary_text }}
@@ -266,6 +311,41 @@
         document.getElementById('wordcloud_select').addEventListener('change', function(e) {
             setWordcloud(e.target.value);
         });
+
+        // 月度趋势折线图
+        var monthLabels = {{ month_labels|safe }};
+        var monthCounts = {{ month_counts|safe }};
+        var monthChart = echarts.init(document.getElementById('month_chart'));
+        monthChart.setOption({
+            tooltip: {
+                trigger: 'axis',
+                formatter: function(params) {
+                    var d = params[0];
+                    return '月份: <b>' + d.axisValue + '</b><br/>听歌次数: <b>' + d.data + '</b>';
+                }
+            },
+            xAxis: { type: 'category', data: monthLabels, name: '月份' },
+            yAxis: { type: 'value', name: '听歌次数', min: 0 },
+            series: [{ data: monthCounts, type: 'line', smooth: true, label: { show: false } }]
+        });
+
+        // 听歌总榜TOP10柱状图
+        var topSongLabels = {{ top_song_labels|safe }};
+        var topSongCounts = {{ top_song_counts|safe }};
+        var topSongChart = echarts.init(document.getElementById('top_song_chart'));
+        var topSongOption = {
+            tooltip: {
+                trigger: 'axis',
+                formatter: function(params) {
+                    var d = params[0];
+                    return '歌曲: <b>' + d.name + '</b><br/>播放次数: <b>' + d.data + '</b>';
+                }
+            },
+            xAxis: { type: 'value', name: '播放次数', min: 0 },
+            yAxis: { type: 'category', data: topSongLabels, name: '歌曲', inverse: true },
+            series: [{ data: topSongCounts, type: 'bar', barWidth: '60%', itemStyle:{color:'#f78da7'}, label: { show: true, position: 'right' } }]
+        };
+        topSongChart.setOption(topSongOption);
     </script>
 </body>
 {% endblock %}

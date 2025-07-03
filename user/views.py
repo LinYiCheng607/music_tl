@@ -10,21 +10,15 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import timedelta
-from django.db.models import Count
-from django.db.models import Sum
+from django.db.models import Count, Sum, Min
 from django.http import JsonResponse
 from collections import Counter
 import pytz
-# Create your views here.
-
+from django.db.models.functions import TruncDate
 
 def loginview(request):
-    # 表单对象
     user = MyUserCreationForm()
-    # 表单提交
     if request.method == 'POST':
-        # 判断表单提交时用户登录还是用户注册
-        # 用户登录
         if request.POST.get('loginUser', ''):
             loginUser = request.POST.get('loginUser', '')
             password = request.POST.get('password', '')
@@ -38,9 +32,7 @@ def loginview(request):
             else:
                 tips = '用户不存在'
         else:
-            # 用户注册
             user = MyUserCreationForm(request.POST)
-            # print(user)
             if user.is_valid():
                 user.save()
                 tips = '注册成功'
@@ -51,11 +43,9 @@ def loginview(request):
                     tips = user.errors.get('mobile', '注册失败2')
     return render(request, 'login.html', locals())
 
-
 def logoutview(request):
     logout(request)
     return redirect('/')
-
 
 @login_required(login_url='/user/login.html')
 def homeview(request, page):
@@ -99,13 +89,14 @@ def homeview(request, page):
         'search_song': search_song,
     })
 
-
-
 @login_required
 def song_analysis(request):
     user = request.user
 
-    # 1. 最近7天每天听歌数量（折线图）
+    # 热门搜索
+    search_song = Dynamic.objects.select_related('song').order_by('-dynamic_search').all()[:6]
+
+    # 最近7天每天听歌数量
     today = timezone.now().date()
     days = 7
     line_labels = []
@@ -116,12 +107,12 @@ def song_analysis(request):
         cnt = SongLog.objects.filter(user=user, listen_time__date=day).count()
         line_data.append(cnt)
 
-    # 2. 不同类型的听歌次数（饼图）
+    # 不同类型的听歌次数
     pie_qs = (
         SongLog.objects
         .filter(user=user)
         .values('song__song_type')
-        .annotate(value=Count('id'))
+        .annotate(value=Sum('listen_count'))
         .order_by('-value')
     )
     pie_data = []
@@ -131,7 +122,7 @@ def song_analysis(request):
             'value': item['value']
         })
 
-    # 3. 每天听歌时段分布（柱状图）
+    # 每天听歌时段分布
     logs = SongLog.objects.filter(user=user)
     tz = pytz.timezone('Asia/Shanghai')
     hour_counts = [0] * 12
@@ -142,7 +133,7 @@ def song_analysis(request):
         index = h // 2
         hour_counts[index] += 1
 
-    # 4. 近4周活跃度（柱状图）
+    # 近4周活跃度
     now = timezone.now()
     weekly_labels = []
     weekly_counts = []
@@ -153,7 +144,7 @@ def song_analysis(request):
         weekly_labels.insert(0, f'第{4-i}周')
         weekly_counts.insert(0, count)
 
-    # 5. 最常听的歌手TOP5（条形图）
+    # 最常听的歌手TOP5
     artist_counter = Counter()
     for log in logs.select_related("song"):
         artist = getattr(log.song, "song_singer", None)
@@ -163,7 +154,7 @@ def song_analysis(request):
     artist_labels = [a[0] for a in top_artists]
     artist_data = [a[1] for a in top_artists]
 
-    # 6. 最常听的专辑TOP5（条形图）
+    # 最常听的专辑TOP5
     album_counter = Counter()
     for log in logs.select_related("song"):
         album = getattr(log.song, "song_album", None)
@@ -173,16 +164,11 @@ def song_analysis(request):
     album_labels = [a[0] for a in top_albums]
     album_data = [a[1] for a in top_albums]
 
-    # 7. 词云数据统计
-    # 词云数据统计（以歌曲类型为例）
+    # 词云数据
     logs = SongLog.objects.filter(user=user).select_related("song")
-    # 歌曲类型词云
     type_counter = Counter()
-    # 歌手词云
     artist_counter = Counter()
-    # 专辑词云
     album_counter = Counter()
-    # 歌曲名词云
     name_counter = Counter()
     for log in logs:
         if hasattr(log.song, "song_type") and log.song.song_type:
@@ -194,25 +180,64 @@ def song_analysis(request):
         if hasattr(log.song, "song_name") and log.song.song_name:
             name_counter[log.song.song_name] += 1
 
-    # wordcloud_data = [{"name": k, "value": v} for k, v in genre_counter.items()]
     wordcloud_type = [{"name": k, "value": v} for k, v in type_counter.items()]
     wordcloud_artist = [{"name": k, "value": v} for k, v in artist_counter.items()]
     wordcloud_album = [{"name": k, "value": v} for k, v in album_counter.items()]
     wordcloud_name = [{"name": k, "value": v} for k, v in name_counter.items()]
 
+    # 听歌总榜TOP10（用于柱状图）
+    top_songs = (
+        SongLog.objects
+        .filter(user=user)
+        .values('song__song_name', 'song__song_singer', 'song__song_album', 'song__song_type')
+        .annotate(listen_count=Sum('listen_count'))
+        .order_by('-listen_count')[:10]
+    )
+    # 提取歌曲名和播放次数用于柱状图
+    top_song_labels = [f"{item['song__song_name']}" for item in top_songs]
+    top_song_counts = [item['listen_count'] for item in top_songs]
 
-    # 8. 听歌习惯总结
+    # 月度听歌趋势（过去12个月）
+    month_labels = []
+    month_counts = []
+    for i in range(12):
+        month = (today.replace(day=1) - timedelta(days=i*30)).replace(day=1)
+        month_str = month.strftime('%Y-%m')
+        next_month = (month + timedelta(days=32)).replace(day=1)
+        count = SongLog.objects.filter(user=user, listen_time__gte=month, listen_time__lt=next_month).count()
+        month_labels.insert(0, month_str)
+        month_counts.insert(0, count)
+
+    # 听歌活跃日（听歌次数最多的日Top5）
+    top_active_days = (
+        SongLog.objects
+        .filter(user=user)
+        .annotate(date=TruncDate('listen_time'))
+        .values('date')
+        .annotate(count=Sum('listen_count'))
+        .order_by('-count')[:5]
+    )
+
+    # 最常听的语种TOP5
+    top_langs = (
+        SongLog.objects
+        .filter(user=user)
+        .values('song__song_languages')
+        .annotate(count=Sum('listen_count'))
+        .order_by('-count')[:5]
+    )
+    top_langs = [{'language': item['song__song_languages'] or '未知', 'count': item['count']} for item in top_langs]
+
+    # 听歌习惯总结
     fav_hour = hour_labels[hour_counts.index(max(hour_counts))] if any(hour_counts) else ""
     fav_artist = artist_labels[0] if artist_labels else ""
     trend = ("上升" if weekly_counts and weekly_counts[-1] > weekly_counts[0] else "下降") if weekly_counts else ""
     summary_text = f"你最常在{fav_hour}听歌，最近四周你的听歌频率有所{trend}，最常听的歌手是{fav_artist}……"
 
     context = {
-        # 原有
         'line_labels': json.dumps(line_labels, ensure_ascii=False),
         'line_data': json.dumps(line_data, ensure_ascii=False),
         'pie_data': json.dumps(pie_data, ensure_ascii=False),
-        # 新增
         'hourly_labels': json.dumps(hour_labels, ensure_ascii=False),
         'hourly_data': json.dumps(hour_counts),
         'weekly_labels': json.dumps(weekly_labels, ensure_ascii=False),
@@ -220,15 +245,20 @@ def song_analysis(request):
         'artist_labels': json.dumps(artist_labels, ensure_ascii=False),
         'artist_data': json.dumps(artist_data),
         'album_labels': json.dumps(album_labels, ensure_ascii=False),
-        # 'wordcloud_data': json.dumps(wordcloud_data, ensure_ascii=False),
+        'album_data': json.dumps(album_data),
         'wordcloud_type': json.dumps(wordcloud_type, ensure_ascii=False),
         'wordcloud_artist': json.dumps(wordcloud_artist, ensure_ascii=False),
         'wordcloud_album': json.dumps(wordcloud_album, ensure_ascii=False),
         'wordcloud_name': json.dumps(wordcloud_name, ensure_ascii=False),
-        'album_data': json.dumps(album_data),
         'summary_text': summary_text,
-        # 你可以补充热门搜索/推荐等
-        'search_song': [],
+        'search_song': search_song,
+        'top_songs': top_songs,  # 如模板需要表格显示可保留
+        'top_song_labels': json.dumps(top_song_labels, ensure_ascii=False),
+        'top_song_counts': json.dumps(top_song_counts),
+        'month_labels': json.dumps(month_labels, ensure_ascii=False),
+        'month_counts': json.dumps(month_counts),
+        'top_active_days': top_active_days,
+        'top_langs': top_langs,
     }
     return render(request, 'song_analysis.html', context)
 
