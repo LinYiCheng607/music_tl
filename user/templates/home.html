@@ -13,7 +13,7 @@
         <div class="search-bar-wrapper">
             <form class="search-form" id="searchForm" action="{% url 'search' 1 %}" method="post" target="_blank">
                 {% csrf_token %}
-                <input id="kword" name="kword" type="text" class="search-input" maxlength="120" placeholder="音乐节"/>
+                <input id="kword" name="kword" type="text" class="search-input" maxlength="120" />
                 <input id="subSerch" type="submit" class="search-btn" value="搜索" />
             </form>
             <div class="search-hot-words">
