@@ -14,6 +14,13 @@ import implicit
 from scipy.sparse import csr_matrix
 import joblib
 import os
+from datetime import datetime
+from django.db.models import Count, Max
+from scipy.sparse import dok_matrix
+from django.conf import settings
+from implicit.als import AlternatingLeastSquares
+import logging
+logger = logging.getLogger(__name__)
 
 @login_required
 def recommend_songs(request):
@@ -130,7 +137,7 @@ def update_similarity_scores():
         for song2 in all_song_ids:
             if song1 == song2:
                 continue
-            # 获取听过两首歌曲的用户集合
+            # 获取听过的两首歌曲的用户集合
             users1 = song_user_matrix.get(song1, set())
             users2 = song_user_matrix.get(song2, set())
             # 计算余弦相似度
@@ -200,117 +207,147 @@ def get_favorite_singers(user, limit=3):
 
 
 def build_user_item_matrix():
-    """构建用户-物品交互矩阵"""
+    from datetime import datetime
     from user.models import SongLog
-    from collections import defaultdict
-    # 获取所有用户和歌曲ID
-    interactions = defaultdict(int)
-    for log in SongLog.objects.all():
-        user_id = log.user.id
-        song_id = log.song_id
-        interactions[(user_id, song_id)] += 1  # 以播放次数作为交互权重
-    # print(interactions)
-    # 转换为稀疏矩阵
-    user_ids = list({uid for uid, _ in interactions.keys()})
-    song_ids = list({sid for _, sid in interactions.keys()})
-    user_id_map = {uid: i for i, uid in enumerate(user_ids)}
-    song_id_map = {sid: i for i, sid in enumerate(song_ids)}
     
-    row_ind, col_ind, values = [], [], []
-    for (user_id, song_id), count in interactions.items():
-        row_ind.append(user_id_map[user_id])
-        col_ind.append(song_id_map[song_id])
-        values.append(count)
-    
-    return csr_matrix((values, (row_ind, col_ind))), user_id_map, song_id_map, user_ids, song_ids
+    play_logs = SongLog.objects.values('user_id', 'song_id')\
+        .annotate(
+            play_count=Count('id'),
+            last_played=Max('listen_time')
+        )
+
+    user_ids = {u['user_id']: i for i, u in enumerate(play_logs.values('user_id').distinct())}
+    song_ids = {s['song_id']: j for j, s in enumerate(play_logs.values('song_id').distinct())}
+
+    max_date = datetime.now().date()
+    interactions = {}
+    for log in play_logs:
+        days_old = (max_date - log['last_played'].date()).days
+        decay = 0.9 ** (days_old // 7)
+        
+        user_idx = user_ids[log['user_id']]
+        song_idx = song_ids[log['song_id']]
+        interactions[(user_idx, song_idx)] = log['play_count'] * decay
+
+    matrix = dok_matrix((len(user_ids), len(song_ids)), dtype=np.float32)
+    for (u, s), weight in interactions.items():
+        matrix[u, s] = weight
+
+    user_id_map = {uid: idx for idx, uid in enumerate(user_ids)}
+    song_id_map = {sid: idx for idx, sid in enumerate(song_ids)}
+    return matrix, user_id_map, song_id_map, user_ids, song_ids
 
 def train_als_model():
-    """训练ALS模型并保存"""
-    matrix, user_id_map, song_id_map, user_ids, song_ids = build_user_item_matrix()
-    
-    # 确保模型目录存在
-    model_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
-    os.makedirs(model_dir, exist_ok=True)
-    model_path = os.path.join(model_dir, 'als_model.pkl')
-    
-    # 初始化并训练模型
-    model = implicit.als.AlternatingLeastSquares(
-        factors=100, regularization=0.01, iterations=20, random_state=42
-    )
-    model.fit(matrix.T.tocsr())  # ALS要求物品-用户矩阵
-    
-    # 保存模型和映射
-    joblib.dump({
-        'model': model,
-        'user_id_map': user_id_map,
-        'song_id_map': song_id_map,
-        'user_ids': user_ids,
-        'song_ids': song_ids
-    }, model_path)
-    
-    return model
-
-def als_recommendations(user, top_n=10):
-    """基于ALS模型生成推荐"""
-    if not user.is_authenticated:
-        return Song.objects.all().order_by('-dynamic__dynamic_plays')[:top_n]
+    model_path = os.path.join(settings.BASE_DIR, 'recommend/models/als_model.pkl')
     
     try:
-        # 加载模型
-        model_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
-        model_path = os.path.join(model_dir, 'als_model.pkl')
-        if not os.path.exists(model_path):
-            train_als_model()
-        
+        # 加载模型时恢复完整元数据
         data = joblib.load(model_path)
         model = data['model']
-        user_id_map = data['user_id_map']
-        song_id_map = data['song_id_map']
-        song_ids = data['song_ids']
+        train_song_ids = data['song_ids']
+        train_song_count = data['song_count']
         
-        # 检查用户是否在训练数据中
-        if user.id not in user_id_map:
-            print(f"用户ID {user.id} 不在 user_id_map 中")
-            return Song.objects.all().order_by('-dynamic__dynamic_plays')[:top_n]
+        # 检查歌曲库变动
+        current_song_count = Song.objects.count()
+        if abs(current_song_count - train_song_count)/train_song_count > 0.05:
+            logger.info(f"歌曲库变动超过5%({train_song_count}→{current_song_count})，触发重新训练")
+            model = None
+    
+    except (FileNotFoundError, KeyError):
+        model = None
+
+    if not model:
+        # 重新训练时生成完整元数据
+        # 重新训练时生成完整元数据
+        matrix, user_id_map, song_id_map, user_ids, song_ids = build_user_item_matrix()
+        model = AlternatingLeastSquares(factors=100, regularization=0.01, iterations=20, random_state=42)
+        model.fit(matrix)
         
-        user_idx = user_id_map[user.id]
-        
-        # 构建用户交互向量（使用模型训练时的映射）
-        from collections import defaultdict
-        user_song_logs = SongLog.objects.filter(user=user)
-        user_interactions = defaultdict(int)
-        for log in user_song_logs:
-            user_interactions[log.song_id] += 1  # 播放次数作为权重
-        
-        # 构建用户稀疏向量
-        row_ind, col_ind, values = [], [], []
-        for song_id, count in user_interactions.items():
-            if song_id in song_id_map:
-                col_ind.append(song_id_map[song_id])
-                row_ind.append(0)  # 单个用户行索引固定为0
-                values.append(count)
-        
-        user_vector = csr_matrix((values, (row_ind, col_ind)), shape=(1, len(song_id_map)))
-        
-        # 获取推荐
-        recommended_indices, _ = model.recommend(
-            user_idx, user_vector, N=top_n*2, filter_already_liked_items=True
+        # 保存完整训练快照
+        os.makedirs(os.path.dirname(model_path), exist_ok=True)
+        joblib.dump({
+            'model': model,
+            'song_ids': song_ids,
+            'song_id_map': song_id_map,
+            'user_id_map': user_id_map,  # 新增用户映射保存
+            'song_count': len(song_ids),
+            'train_time': datetime.now()
+        }, model_path)
+
+    return model
+
+
+def als_recommendations(user, top_n=10):
+    model = train_als_model()
+    
+    # 加载训练时保存的元数据
+    model_path = os.path.join(settings.BASE_DIR, 'recommend/models/als_model.pkl')
+    data = joblib.load(model_path)
+    train_song_ids = data['song_ids']
+    # print(train_song_ids)
+    song_id_map = data['song_id_map']
+    user_id_map = data['user_id_map']  # 新增用户ID映射加载
+
+    # 使用训练时的song_id_map转换索引
+    user_interactions = SongLog.objects.filter(user=user).values('song_id').annotate(count=Count('song_id'))
+    valid_song_ids = [log['song_id'] for log in user_interactions if log['song_id'] in song_id_map]
+
+    # 构建用户向量（基于训练时的映射）
+    from scipy.sparse import csr_matrix
+    song_indices = [song_id_map[sid] for sid in valid_song_ids]
+    interaction_counts = [log['count'] for log in user_interactions if log['song_id'] in song_id_map]
+    
+    try:
+        user_vector = csr_matrix(
+            (interaction_counts, ([0]*len(song_indices), song_indices)),
+            shape=(1, len(train_song_ids))
         )
-        
-        # 转换回歌曲ID
-        recommended_song_ids = [song_ids[idx] for idx in recommended_indices]
-        
-        # 获取并返回推荐歌曲
-        recommended_songs = Song.objects.filter(song_id__in=recommended_song_ids)[:top_n]
-        
-        # 按推荐顺序排序
-        song_id_to_song = {song.song_id: song for song in recommended_songs}
-        ordered_recommendations = [song_id_to_song[sid] for sid in recommended_song_ids if sid in song_id_to_song][:top_n]
-        
-        return ordered_recommendations
+        logger.debug(f'用户向量构建成功，非零元素数量：{user_vector.nnz}')
     except Exception as e:
-        print(f"ALS recommendation error: {e}")
-        return Song.objects.all().order_by('-dynamic__dynamic_plays')[:top_n]
+        logger.error(f'用户向量构建失败：{str(e)}')
+        return Song.objects.none()
+
+    # 获取推荐时使用训练时的song_ids验证
+    max_index = len(train_song_ids) - 1
+    user_idx = user_id_map[user.id]
+    # 获取推荐结果
+    recommendations = model.recommend(
+        userid=user_idx,
+        user_items=user_vector,
+        N=top_n*2,
+        filter_already_liked_items=True
+    )
+    # print(recommendations)
+    
+    # 解构推荐结果元组
+    recommended_indices, scores = recommendations
+    
+    # 转换推荐索引为Python列表
+    recommended_indices = recommended_indices.tolist()
+    
+    # 将推荐索引转换为歌曲ID
+    # recommended_song_ids = train_song_ids[recommended_indices]
+    recommended_song_ids = []
+    for idx in recommended_indices:
+        for key, value in train_song_ids.items():
+            if value == idx:
+                recommended_song_ids.append(key)
+                break
+
+    
+    # 批量查询歌曲对象并保持推荐顺序
+    recommended_songs = Song.objects.filter(song_id__in=recommended_song_ids)
+    song_id_to_obj = {song.song_id: song for song in recommended_songs}
+    # 保持推荐顺序
+    ordered_songs = [song_id_to_obj[sid] for sid in recommended_song_ids if sid in song_id_to_obj]
+    
+    # 添加异常处理
+    if not ordered_songs:
+        logger.warning('No valid songs found for recommendations')
+        return []
+    
+    return ordered_songs[:top_n]
+
 
 def get_favorite_features(user, limit=3):
     """获取用户评论中最常出现的歌曲特点"""
@@ -411,7 +448,7 @@ def asl_emotion_recommendations(user=None, top_n=10):
     # 按相似度重新排序查询结果
     song_id_to_song = {song.song_id: song for song in recommended_songs}
     recommended_songs = [song_id_to_song[sid] for sid in recommended_song_ids if sid in song_id_to_song][:top_n]
-    
+
     # 如果推荐结果不足，用热门歌曲补充
     if len(recommended_songs) < top_n:
         hot_songs = Song.objects.filter(
@@ -427,7 +464,7 @@ def get_history_based_emotion_recommendations(user, top_n=10):
     user_heard_song_ids = SongLog.objects.filter(user=user).values_list('song_id', flat=True)
     heard_songs = Song.objects.filter(song_id__in=user_heard_song_ids)
     
-    # 统计听过歌曲的情感分布
+    # 统计听完歌曲的情感分布
     emotion_counter = Counter()
     for song in heard_songs:
         if song.emotion_label:
@@ -447,6 +484,7 @@ def get_history_based_emotion_recommendations(user, top_n=10):
     ).order_by('-dynamic__dynamic_plays')[:top_n*2]
     
     return recommended_songs[:top_n]
-
-
-
+    
+    # 检查推荐结果是否为空
+    if not recommended_song_ids:
+        logger.warning('No valid recommendations found')
