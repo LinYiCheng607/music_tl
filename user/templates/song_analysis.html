@@ -105,18 +105,18 @@
 
                 <!-- 听歌最活跃的5天 -->
                 <h2 style="margin-top:40px;">听歌最活跃的5天</h2>
-                <table class="table table-bordered table-striped" style="width:100%;margin-bottom:40px;table-layout: fixed;">
+                <table class="table table-bordered table-striped" style="width:100%;margin-bottom:40px;">
                     <thead>
                         <tr>
-                            <th style="width:50%;">日期</th>
-                            <th style="width:50%;">听歌次数</th>
+                            <th style="width:60%;text-align:left;">日期</th>
+                            <th style="width:40%;text-align:left;">听歌次数</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for day in top_active_days %}
                         <tr>
-                            <td>{{ day.date|date:"Y年n月j日" }}</td>
-                            <td>{{ day.count }}</td>
+                            <td style="text-align:left;">{{ day.date|date:"Y年n月j日" }}</td>
+                            <td style="text-align:left;">{{ day.count }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -124,18 +124,18 @@
 
                 <!-- 最常听的歌曲语种TOP5 -->
                 <h2 style="margin-top:40px;">最常听的歌曲语种TOP5</h2>
-                <table class="table table-bordered table-striped" style="width:100%;margin-bottom:40px;table-layout: fixed;">
+                <table class="table table-bordered table-striped" style="width:100%;margin-bottom:40px;">
                     <thead>
                         <tr>
-                            <th style="width:50%;">语种</th>
-                            <th style="width:50%;">听歌次数</th>
+                            <th style="width:60%;text-align:left;">语种</th>
+                            <th style="width:40%;text-align:left;">听歌次数</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for lang in top_langs %}
                         <tr>
-                            <td>{% if lang.language == "nan" or not lang.language %}未知{% else %}{{ lang.language }}{% endif %}</td>
-                            <td>{{ lang.count }}</td>
+                            <td style="text-align:left;">{% if lang.language == "nan" or not lang.language %}未知{% else %}{{ lang.language }}{% endif %}</td>
+                            <td style="text-align:left;">{{ lang.count }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
